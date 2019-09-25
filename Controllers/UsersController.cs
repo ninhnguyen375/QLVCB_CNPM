@@ -133,19 +133,5 @@ namespace BE.Controllers {
 
             return Ok (new { success = true });
         }
-        // Login
-        [HttpDelete ("{id}")]
-        public async Task<IActionResult> Login (long id) {
-            var user = await _context.Users.FindAsync (id);
-
-            if (user == null) {
-                return NotFound ();
-            }
-
-            _context.Users.Remove (user);
-            await _context.SaveChangesAsync ();
-
-            return Ok (new { success = true });
-        }
     }
 }
