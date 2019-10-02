@@ -91,7 +91,6 @@ namespace BE.Controllers {
             ).Count();
 
             user.password = BCrypt.Net.BCrypt.HashPassword(user.password);
-            var verify = BCrypt.Net.BCrypt.Verify("12345678", user.password);
 
             if (isDuplicateEmail > 0) {
                 return BadRequest (new { success = false, message = "Email is unique" });
@@ -101,7 +100,7 @@ namespace BE.Controllers {
 
             await _context.SaveChangesAsync ();
             // return Created("/api/users", user);
-            return Ok (new { success = true, user = user, verify });
+            return Ok (new { success = true, user = user });
         }
 
         // PUT: api/users/5

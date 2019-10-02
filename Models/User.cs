@@ -44,4 +44,9 @@ namespace BE.Models {
         public DateTime createdAt { get; set; }
         public DateTime deletedAt { get; set; }
     }
+
+    public class LoginData {
+        public string email;
+        public string password;
+    }
 }
