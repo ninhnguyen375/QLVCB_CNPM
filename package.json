@@ -1,0 +1,10 @@
+{
+  "name": "qlvcb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "cd webapi && dotnet watch run",
+    "resetdb": "cd webapi.infrastructure && rm -rf Migrations App.db && dotnet ef migrations add Init && dotnet ef database update"
+  }
+}
