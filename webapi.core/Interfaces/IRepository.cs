@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 
 namespace webapi.core.Interfaces {
     public interface IRepository<T> where T : IAggregateRoot {
+        T GetBy (string id);
         T GetBy (int id);
         IEnumerable<T> GetAll ();
         IEnumerable<T> Find (Expression<Func<T, bool>> predicate);
