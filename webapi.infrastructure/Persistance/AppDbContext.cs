@@ -8,5 +8,6 @@ namespace webapi.infrastructure.Persistance {
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Airport> Airports { get; set; }
     }
 }

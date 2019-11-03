@@ -28,10 +28,12 @@ namespace webapi.infrastructure.Persistance.Repositories {
       return Context.Set<T> ().ToList ();
     }
 
+    public T GetBy (string id) {
+      return Context.Set<T> ().Find (id);
+    }
     public T GetBy (int id) {
       return Context.Set<T> ().Find (id);
     }
-
     public void Remove (T entity) {
       Context.Set<T> ().Remove (entity);
     }
