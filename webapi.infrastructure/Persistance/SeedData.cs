@@ -139,6 +139,30 @@ namespace webapi.infrastructure.Persistance {
         }
       );
       context.SaveChanges();
+
+      if (context.Airlines.Any()) {
+        return;
+      }
+
+      context.Airlines.AddRange(
+        new Airline {
+          Id = "VN",
+          Name = "Vietnam Airlines"
+        },
+        new Airline {
+          Id = "QH",
+          Name = "Bamboo Airways"
+        },
+        new Airline {
+          Id = "BL",
+          Name = "Jetstar Paciffic"
+        },
+        new Airline {
+          Id = "VJ",
+          Name = "Vietjet Air"
+        }
+      );
+      context.SaveChanges();
     }
   }
 }
