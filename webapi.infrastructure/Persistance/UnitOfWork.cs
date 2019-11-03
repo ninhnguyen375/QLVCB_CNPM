@@ -8,11 +8,13 @@ namespace webapi.infrastructure.Persistance {
         public UnitOfWork (AppDbContext context) {
             Users = new UserRepository (context);
             Airports = new AirportRepository(context);
+            Airlines = new AirlineRepository(context);
             _context = context;
         }
 
         public IUserRepository Users { get; private set; }
         public IAirportRepository Airports { get; private set; }
+        public IAirlineRepository Airlines { get; private set; }
 
         public int Complete () {
             return _context.SaveChanges ();
