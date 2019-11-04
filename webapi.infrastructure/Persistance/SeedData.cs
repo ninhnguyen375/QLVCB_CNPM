@@ -163,6 +163,38 @@ namespace webapi.infrastructure.Persistance {
         }
       );
       context.SaveChanges();
+
+      if (context.Luggages.Any()) {
+        return;
+      }
+
+      context.Luggages.AddRange(
+        new Luggage {
+          LuggageWeight = 15,
+          Price = 200000
+        },
+        new Luggage {
+          LuggageWeight = 20,
+          Price = 220000
+        },
+        new Luggage {
+          LuggageWeight = 25,
+          Price = 310000
+        },
+        new Luggage {
+          LuggageWeight = 30,
+          Price = 440000
+        },
+        new Luggage {
+          LuggageWeight = 35,
+          Price = 505000
+        },
+        new Luggage {
+          LuggageWeight = 40,
+          Price = 570000
+        }
+      );
+      context.SaveChanges();
     }
   }
 }
