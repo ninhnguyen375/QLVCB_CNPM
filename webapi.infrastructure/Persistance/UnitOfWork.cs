@@ -10,6 +10,7 @@ namespace webapi.infrastructure.Persistance {
             Airports = new AirportRepository(context);
             Airlines = new AirlineRepository(context);
             Luggages = new LuggageRepository(context);
+            Customers = new CustomerRepository(context);
             _context = context;
         }
 
@@ -17,7 +18,7 @@ namespace webapi.infrastructure.Persistance {
         public IAirportRepository Airports { get; private set; }
         public IAirlineRepository Airlines { get; private set; }
         public ILuggageRepository Luggages { get; private set; }
-
+        public ICustomerRepository Customers { get; private set; } 
         public int Complete () {
             return _context.SaveChanges ();
         }
