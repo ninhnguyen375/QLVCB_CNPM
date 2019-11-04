@@ -13,5 +13,7 @@ namespace webapi.core.Domain.Entities
 
         [Required]
         public string Phone { get; set; }
+
+        public int BookingCount { get; set; } = 1;
     }
 }

@@ -8,7 +8,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191104122449_Init")]
+    [Migration("20191104143804_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace webapi.infrastructure.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("BookingCount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FullName")
                         .IsRequired()

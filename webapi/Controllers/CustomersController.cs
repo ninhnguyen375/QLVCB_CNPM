@@ -64,10 +64,11 @@ namespace webapi.Controllers
           var customerTemp = _unitOfWork.Customers.GetBy(customer.Id);
 
           if (customerTemp != null) {
-            return BadRequest (new { success = false, message = "Id already exists" });
+            customerTemp.BookingCount++; // Tăng số lần đặt hàng nếu trùng Id
+          } else {
+            _unitOfWork.Customers.Add(customer);
           }
-
-          _unitOfWork.Customers.Add(customer);
+          
           _unitOfWork.Complete();
 
           return Ok (new { success = true, message = "Add Successfully" });

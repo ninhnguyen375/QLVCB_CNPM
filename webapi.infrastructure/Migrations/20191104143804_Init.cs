@@ -25,7 +25,8 @@ namespace webapi.infrastructure.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     FullName = table.Column<string>(nullable: false),
-                    Phone = table.Column<string>(nullable: false)
+                    Phone = table.Column<string>(nullable: false),
+                    BookingCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
