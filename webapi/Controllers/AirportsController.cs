@@ -40,15 +40,15 @@ namespace webapi.Controllers
 
         // PUT: api/airports/id
         [HttpPut ("{id}")]
-        public ActionResult PutAirport (string id, string name, string location) {
+        public ActionResult PutAirport (string id, EditAirport values) {
           var airport = _unitOfWork.Airports.GetBy(id);
 
           if (airport == null) {
             return NotFound(new { success = false, message = "Invalid airport" });
           }
 
-          airport.Name = name;
-          airport.Location = location;
+          airport.Name = values.Name;
+          airport.Location = values.Location;
 
           _unitOfWork.Complete();
 
@@ -68,7 +68,7 @@ namespace webapi.Controllers
           _unitOfWork.Airports.Add(airport);
           _unitOfWork.Complete();
 
-          return Ok (new {  success = true, data = isValidId });
+          return Ok (new {  success = true, message = "Add Successfully" });
         }
 
         // DELETE: api/airports/id
@@ -83,7 +83,7 @@ namespace webapi.Controllers
           _unitOfWork.Airports.Remove(airport);
           _unitOfWork.Complete();
 
-          return Ok (new {  success = true });
+          return Ok (new {  success = true, message = "Delete Successfully" });
         }
     }
 }
