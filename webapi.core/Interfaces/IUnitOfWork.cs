@@ -7,6 +7,7 @@ namespace webapi.core.Interfaces {
         IAirlineRepository Airlines { get; }
         ILuggageRepository Luggages { get; }
         ICustomerRepository Customers { get; }
+        IOrderRepository Orders { get; }
         int Complete ();
     }
 }

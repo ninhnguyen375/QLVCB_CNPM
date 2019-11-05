@@ -12,5 +12,6 @@ namespace webapi.infrastructure.Persistance {
         public DbSet<Airline> Airlines { get; set; }
         public DbSet<Luggage> Luggages { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Order> Orders { get; set; }
     }
 }
