@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
@@ -21,7 +22,7 @@ namespace webapi.Controllers
           var customers = _unitOfWork.Customers.GetAll();
           var totalCount = customers.Count<Customer> ();
 
-          return Ok (new { success = true, data = customers });
+          return Ok (new { success = true, data = customers, totalCount = totalCount });
         }
 
         // GET: api/customers/id
@@ -56,37 +57,6 @@ namespace webapi.Controllers
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = customer });
-        }
-
-        // POST: api/customers
-        [HttpPost]
-        public ActionResult PostCustomer(Customer customer) {
-          var customerTemp = _unitOfWork.Customers.GetBy(customer.Id);
-
-          if (customerTemp != null) {
-            customerTemp.BookingCount++; // Tăng số lần đặt hàng nếu trùng Id
-          } else {
-            _unitOfWork.Customers.Add(customer);
-          }
-          
-          _unitOfWork.Complete();
-
-          return Ok (new { success = true, message = "Add Successfully" });
-        }
-
-        // DELETE: api/customers/id
-        [HttpDelete ("{id}")]
-        public ActionResult DeleteCustomer(string id) {
-          var customer = _unitOfWork.Customers.GetBy(id);
-
-          if (customer == null) {
-            return NotFound (new { success = false, message = "Invalid Customer" });
-          }
-
-          _unitOfWork.Customers.Remove(customer);
-          _unitOfWork.Complete();
-
-          return Ok (new { success = true, message = "Delete Successfully" });
         }
     }
 }
