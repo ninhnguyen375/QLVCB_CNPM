@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
@@ -22,7 +23,7 @@ namespace webapi.Controllers
           var orders = _unitOfWork.Orders.GetAll();
           var totalCount = orders.Count<Order> ();
 
-          return Ok (new { success = true, data = orders });
+          return Ok (new { success = true, data = orders, totalCount = totalCount });
         }
 
         // GET: api/orders/id
@@ -54,14 +55,80 @@ namespace webapi.Controllers
 
         // POST: api/orders
         [HttpPost]
-        public ActionResult PostOrder(Order order) {
-          var orderTemp = _unitOfWork.Orders.GetBy(order.Id);
+        public ActionResult PostOrder(AddOrder values) {
+          // Check Customer existence
+          var customer = _unitOfWork.Customers.GetBy(values.CustomerId);
 
-          if (orderTemp != null) {
-            return BadRequest (new { success = false, message = "Id already exists" });
+          if (customer != null) {
+            customer.BookingCount++; // Tăng số lần đặt vé nếu tồn tại ID
+          } else {
+            // Add Customer
+            customer = new Customer {
+              Id = values.CustomerId,
+              FullName = values.FullName,
+              Phone = values.Phone,
+              BookingCount = 1
+            };
+
+            _unitOfWork.Customers.Add(customer);
           }
 
+          // Add Order
+          Order order = new Order{
+            Id = this.autoOrderId(),
+            TicketCount = values.TicketCount,
+            TotalPrice = values.TotalPrice,
+            CreateAt = DateTime.Now, // Lấy thời điểm đặt vé
+            Status = 0,
+            CustomerId = values.CustomerId
+          };
+
+          _unitOfWork.Orders.Add(order);
+          _unitOfWork.Complete();
+
           return Ok (new { success = true, message = "Add Successfully" });
+        }
+
+        // Hàm phát sinh:
+        // 0. Kiểm tra có bao nhiêu chữ số
+        private int totalDigits(int number) {
+          int sum = 0;
+
+          while (number != 0) {
+            sum++;
+            number = number / 10;
+          }
+
+          return sum;
+        }
+
+        // 1. Tự động sinh OrderId
+        private string autoOrderId() {
+          string orderId = "";
+          var orders = _unitOfWork.Orders.GetAll();
+
+          if (orders.Any()) {
+            int orderIdNum = Int32.Parse(orders.Last().Id) + 1; // Lấy mã đơn hàng cũ chuyển qua kiểu int và + 1
+            int totalDigits = this.totalDigits(orderIdNum); // Tính tổng chữ số của mã mới lấy được
+            switch(totalDigits) {
+              case 1:
+                orderId = "000" + orderIdNum;
+                break;
+              case 2:
+                orderId = "00" + orderIdNum;
+                break;
+              case 3:
+                orderId = "0" + orderIdNum;
+                break;
+              default:
+                orderId += orderIdNum;
+                break;
+            }
+          } else {
+            orderId = "0001";
+          }
+
+          return orderId;
         }
     }
 }
