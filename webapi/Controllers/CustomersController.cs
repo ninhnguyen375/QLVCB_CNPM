@@ -22,7 +22,7 @@ namespace webapi.Controllers
           var customers = _unitOfWork.Customers.GetAll();
           var totalCount = customers.Count<Customer> ();
 
-          return Ok (new { success = true, data = customers, auto = this.autoOrderId() });
+          return Ok (new { success = true, data = customers });
         }
 
         // GET: api/customers/id
