@@ -16,7 +16,15 @@ namespace webapi.infrastructure.Persistance {
             FullName = "admin",
             Identifier = "00000000",
             Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
-            Role = 1,
+            Role = "ADMIN",
+            Status = 1
+        },
+        new User {
+          Email = "ninh@ninh.com",
+            FullName = "ninh",
+            Identifier = "99999999",
+            Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
+            Role = "NINHROOT",
             Status = 1
         }
       );

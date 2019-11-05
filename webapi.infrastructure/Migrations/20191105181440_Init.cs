@@ -71,7 +71,7 @@ namespace webapi.infrastructure.Migrations
                     Phone = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    Role = table.Column<int>(nullable: false),
+                    Role = table.Column<string>(nullable: false),
                     Password = table.Column<string>(nullable: false)
                 },
                 constraints: table =>

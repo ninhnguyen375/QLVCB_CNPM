@@ -9,7 +9,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191105115257_Init")]
+    [Migration("20191105181440_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -140,8 +140,9 @@ namespace webapi.infrastructure.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");

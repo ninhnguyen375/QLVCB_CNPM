@@ -21,11 +21,11 @@ namespace webapi.core.Domain.Entities {
 
         // 1: active, 2: banned, 3: deleted
         [Required]
-        public int Status { get; set; }
+        public int Status { get; set; } = 1;
 
         // 1: ADMIN, 2: STAFF
         [Required]
-        public int Role { get; set; } = 1;
+        public string Role { get; set; } = "STAFF";
 
         [Required]
         public string Password { get; set; }
