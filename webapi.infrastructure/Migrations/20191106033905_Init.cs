@@ -203,6 +203,48 @@ namespace webapi.infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Tickets",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Price = table.Column<decimal>(nullable: false),
+                    PassengerName = table.Column<string>(nullable: false),
+                    PassengerGender = table.Column<int>(nullable: false),
+                    LuggageId = table.Column<int>(nullable: false),
+                    FlightId = table.Column<string>(nullable: true),
+                    OrderId = table.Column<string>(nullable: true),
+                    TicketCategoryId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Flights_FlightId",
+                        column: x => x.FlightId,
+                        principalTable: "Flights",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Luggages_LuggageId",
+                        column: x => x.LuggageId,
+                        principalTable: "Luggages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Tickets_TicketCatogories_TicketCategoryId",
+                        column: x => x.TicketCategoryId,
+                        principalTable: "TicketCatogories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_DateFlights_FlightId",
                 table: "DateFlights",
@@ -217,6 +259,26 @@ namespace webapi.infrastructure.Migrations
                 name: "IX_Orders_CustomerId",
                 table: "Orders",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_FlightId",
+                table: "Tickets",
+                column: "FlightId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_LuggageId",
+                table: "Tickets",
+                column: "LuggageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_OrderId",
+                table: "Tickets",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_TicketCategoryId",
+                table: "Tickets",
+                column: "TicketCategoryId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -231,10 +293,7 @@ namespace webapi.infrastructure.Migrations
                 name: "FlightTicketCategories");
 
             migrationBuilder.DropTable(
-                name: "Luggages");
-
-            migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "Users");
@@ -246,13 +305,19 @@ namespace webapi.infrastructure.Migrations
                 name: "Flights");
 
             migrationBuilder.DropTable(
+                name: "Luggages");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
+
+            migrationBuilder.DropTable(
                 name: "TicketCatogories");
 
             migrationBuilder.DropTable(
-                name: "Customers");
+                name: "Airlines");
 
             migrationBuilder.DropTable(
-                name: "Airlines");
+                name: "Customers");
         }
     }
 }

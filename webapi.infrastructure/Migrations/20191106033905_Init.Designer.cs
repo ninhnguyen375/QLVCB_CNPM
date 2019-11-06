@@ -9,7 +9,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191106030234_Init")]
+    [Migration("20191106033905_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -203,6 +203,46 @@ namespace webapi.infrastructure.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("webapi.core.Domain.Entities.Ticket", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FlightId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LuggageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OrderId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PassengerGender")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PassengerName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TicketCategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlightId");
+
+                    b.HasIndex("LuggageId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("TicketCategoryId");
+
+                    b.ToTable("Tickets");
+                });
+
             modelBuilder.Entity("webapi.core.Domain.Entities.TicketCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -297,6 +337,29 @@ namespace webapi.infrastructure.Migrations
                     b.HasOne("webapi.core.Domain.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.Ticket", b =>
+                {
+                    b.HasOne("webapi.core.Domain.Entities.Flight", "Flight")
+                        .WithMany()
+                        .HasForeignKey("FlightId");
+
+                    b.HasOne("webapi.core.Domain.Entities.Luggage", "Luggage")
+                        .WithMany()
+                        .HasForeignKey("LuggageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("webapi.core.Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId");
+
+                    b.HasOne("webapi.core.Domain.Entities.TicketCategory", "TicketCategory")
+                        .WithMany()
+                        .HasForeignKey("TicketCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

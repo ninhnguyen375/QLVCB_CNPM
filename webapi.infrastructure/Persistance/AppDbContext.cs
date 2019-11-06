@@ -18,6 +18,7 @@ namespace webapi.infrastructure.Persistance {
         public DbSet<DateFlight> DateFlights {get; set; }
         public DbSet<TicketCategory> TicketCatogories {get; set; }
         public DbSet<FlightTicketCategory> FlightTicketCategories {get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
