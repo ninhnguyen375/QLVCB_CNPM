@@ -28,7 +28,8 @@ namespace webapi.infrastructure.Persistance {
                     page,
                     offset,
                     count,
-                    totalCount
+                    totalCount,
+                    totalPage
             };
         }
     }
