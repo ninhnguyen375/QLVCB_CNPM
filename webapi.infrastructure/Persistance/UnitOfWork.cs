@@ -16,6 +16,7 @@ namespace webapi.infrastructure.Persistance {
         public IDateFlightRepository DateFlights { get; private set; }
         public ITicketCategoryRepository TicketCatogories { get; private set; }
         public IFlightTicketCategoryRepository FlightTicketCategories { get; private set; }
+        public ITicketRepository Tickets { get; private set; }
 
         public UnitOfWork (AppDbContext context) {
             Users = new UserRepository (context);
@@ -29,6 +30,7 @@ namespace webapi.infrastructure.Persistance {
             DateFlights = new DateFlightRepository(context);
             TicketCatogories = new TicketCategoryRepository(context);
             FlightTicketCategories = new FlightTicketCategoryRepository(context);
+            Tickets = new TicketRepository(context);
             _context = context;
         }
         public int Complete () {
