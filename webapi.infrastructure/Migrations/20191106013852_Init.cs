@@ -47,6 +47,19 @@ namespace webapi.infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Dates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DateFlight = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Dates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Luggages",
                 columns: table => new
                 {
@@ -124,6 +137,36 @@ namespace webapi.infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "DateFlights",
+                columns: table => new
+                {
+                    DateId = table.Column<int>(nullable: false),
+                    FlightId = table.Column<string>(nullable: false),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DateFlights", x => new { x.DateId, x.FlightId });
+                    table.ForeignKey(
+                        name: "FK_DateFlights_Dates_DateId",
+                        column: x => x.DateId,
+                        principalTable: "Dates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DateFlights_Flights_FlightId",
+                        column: x => x.FlightId,
+                        principalTable: "Flights",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DateFlights_FlightId",
+                table: "DateFlights",
+                column: "FlightId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Flights_AirlineId",
                 table: "Flights",
@@ -141,7 +184,7 @@ namespace webapi.infrastructure.Migrations
                 name: "Airports");
 
             migrationBuilder.DropTable(
-                name: "Flights");
+                name: "DateFlights");
 
             migrationBuilder.DropTable(
                 name: "Luggages");
@@ -153,10 +196,16 @@ namespace webapi.infrastructure.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Airlines");
+                name: "Dates");
+
+            migrationBuilder.DropTable(
+                name: "Flights");
 
             migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "Airlines");
         }
     }
 }

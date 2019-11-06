@@ -9,11 +9,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<< HEAD:webapi.infrastructure/Migrations/20191105181440_Init.Designer.cs
-    [Migration("20191105181440_Init")]
-=======
-    [Migration("20191105183123_Init")]
->>>>>>> Add Flight model:webapi.infrastructure/Migrations/20191105183123_Init.Designer.cs
+    [Migration("20191106013852_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,6 +69,38 @@ namespace webapi.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.Date", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateFlight")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Dates");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.DateFlight", b =>
+                {
+                    b.Property<int>("DateId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FlightId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("DateId", "FlightId");
+
+                    b.HasIndex("FlightId");
+
+                    b.ToTable("DateFlights");
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Flight", b =>
@@ -186,6 +214,21 @@ namespace webapi.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.DateFlight", b =>
+                {
+                    b.HasOne("webapi.core.Domain.Entities.Date", "Date")
+                        .WithMany("DateFlights")
+                        .HasForeignKey("DateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("webapi.core.Domain.Entities.Flight", "Flight")
+                        .WithMany("DateFlights")
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Flight", b =>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.ComponentModel.DataAnnotations;
 using webapi.core.Interfaces;
@@ -22,5 +23,8 @@ namespace webapi.core.Domain.Entities
       // Foreign Key (N - 1)
       public string AirlineId { get; set; }
       public Airline Airline { get; set; }
+
+
+      public virtual ICollection<DateFlight> DateFlights { get; set; } 
     }
 }
