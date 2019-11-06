@@ -69,6 +69,38 @@ namespace webapi.infrastructure.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("webapi.core.Domain.Entities.Flight", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AirlineId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AirportFrom")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AirportTo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FlightTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StartTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AirlineId");
+
+                    b.ToTable("Flights");
+                });
+
             modelBuilder.Entity("webapi.core.Domain.Entities.Luggage", b =>
                 {
                     b.Property<int>("Id")
@@ -148,6 +180,13 @@ namespace webapi.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.Flight", b =>
+                {
+                    b.HasOne("webapi.core.Domain.Entities.Airline", "Airline")
+                        .WithMany()
+                        .HasForeignKey("AirlineId");
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Order", b =>
