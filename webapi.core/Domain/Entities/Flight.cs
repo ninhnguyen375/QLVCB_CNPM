@@ -26,5 +26,7 @@ namespace webapi.core.Domain.Entities
 
 
       public virtual ICollection<DateFlight> DateFlights { get; set; } 
+
+      public virtual ICollection<FlightTicketCategory> FlightTicketCategories { get; set; } 
     }
 }

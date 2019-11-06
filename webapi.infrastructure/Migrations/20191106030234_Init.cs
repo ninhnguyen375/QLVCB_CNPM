@@ -74,6 +74,19 @@ namespace webapi.infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TicketCatogories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketCatogories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -162,6 +175,34 @@ namespace webapi.infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "FlightTicketCategories",
+                columns: table => new
+                {
+                    FlightId = table.Column<string>(nullable: false),
+                    TicketCategoryId = table.Column<int>(nullable: false),
+                    SeatsCount = table.Column<int>(nullable: false),
+                    SeatsLeft = table.Column<int>(nullable: false),
+                    Price = table.Column<decimal>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FlightTicketCategories", x => new { x.TicketCategoryId, x.FlightId });
+                    table.UniqueConstraint("AK_FlightTicketCategories_FlightId_TicketCategoryId", x => new { x.FlightId, x.TicketCategoryId });
+                    table.ForeignKey(
+                        name: "FK_FlightTicketCategories_Flights_FlightId",
+                        column: x => x.FlightId,
+                        principalTable: "Flights",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FlightTicketCategories_TicketCatogories_TicketCategoryId",
+                        column: x => x.TicketCategoryId,
+                        principalTable: "TicketCatogories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_DateFlights_FlightId",
                 table: "DateFlights",
@@ -187,6 +228,9 @@ namespace webapi.infrastructure.Migrations
                 name: "DateFlights");
 
             migrationBuilder.DropTable(
+                name: "FlightTicketCategories");
+
+            migrationBuilder.DropTable(
                 name: "Luggages");
 
             migrationBuilder.DropTable(
@@ -200,6 +244,9 @@ namespace webapi.infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Flights");
+
+            migrationBuilder.DropTable(
+                name: "TicketCatogories");
 
             migrationBuilder.DropTable(
                 name: "Customers");

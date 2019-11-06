@@ -16,9 +16,12 @@ namespace webapi.infrastructure.Persistance {
         public DbSet<Flight> Flights {get; set; }
         public DbSet<Date> Dates {get; set; }
         public DbSet<DateFlight> DateFlights {get; set; }
+        public DbSet<TicketCategory> TicketCatogories {get; set; }
+        public DbSet<FlightTicketCategory> FlightTicketCategories {get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // For table DateFlight
             modelBuilder.Entity<DateFlight>()
                 .HasKey(df => new { df.DateId, df.FlightId });  
 
@@ -31,6 +34,20 @@ namespace webapi.infrastructure.Persistance {
                 .HasOne<Date>(d => d.Date)
                 .WithMany(df => df.DateFlights)
                 .HasForeignKey(d => d.DateId);
+
+            // For table FlightTicketCategory
+            modelBuilder.Entity<FlightTicketCategory>()
+                .HasKey(ftc => new { ftc.TicketCategoryId, ftc.FlightId });  
+
+            modelBuilder.Entity<FlightTicketCategory>()
+                .HasOne<Flight>(f => f.Flight)
+                .WithMany(ftc => ftc.FlightTicketCategories)
+                .HasForeignKey(f => f.FlightId);  
+
+            modelBuilder.Entity<FlightTicketCategory>()
+                .HasOne<TicketCategory>(tc => tc.TicketCategory)
+                .WithMany(ftc => ftc.FlightTicketCategories)
+                .HasForeignKey(tc => tc.TicketCategoryId);
 
 
             base.OnModelCreating(modelBuilder);

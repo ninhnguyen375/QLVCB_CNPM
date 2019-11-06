@@ -9,7 +9,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191106013852_Init")]
+    [Migration("20191106030234_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -135,6 +135,30 @@ namespace webapi.infrastructure.Migrations
                     b.ToTable("Flights");
                 });
 
+            modelBuilder.Entity("webapi.core.Domain.Entities.FlightTicketCategory", b =>
+                {
+                    b.Property<int>("TicketCategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FlightId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeatsCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeatsLeft")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("TicketCategoryId", "FlightId");
+
+                    b.HasAlternateKey("FlightId", "TicketCategoryId");
+
+                    b.ToTable("FlightTicketCategories");
+                });
+
             modelBuilder.Entity("webapi.core.Domain.Entities.Luggage", b =>
                 {
                     b.Property<int>("Id")
@@ -177,6 +201,21 @@ namespace webapi.infrastructure.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.TicketCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketCatogories");
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.User", b =>
@@ -236,6 +275,21 @@ namespace webapi.infrastructure.Migrations
                     b.HasOne("webapi.core.Domain.Entities.Airline", "Airline")
                         .WithMany()
                         .HasForeignKey("AirlineId");
+                });
+
+            modelBuilder.Entity("webapi.core.Domain.Entities.FlightTicketCategory", b =>
+                {
+                    b.HasOne("webapi.core.Domain.Entities.Flight", "Flight")
+                        .WithMany("FlightTicketCategories")
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("webapi.core.Domain.Entities.TicketCategory", "TicketCategory")
+                        .WithMany("FlightTicketCategories")
+                        .HasForeignKey("TicketCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Order", b =>
