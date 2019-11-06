@@ -9,6 +9,8 @@ namespace webapi.core.Interfaces {
         ICustomerRepository Customers { get; }
         IOrderRepository Orders { get; }
         IFlightRepository Flights { get; }
+        IDateRepository Dates { get; }
+        IDateFlightRepository DateFlights { get; }
         int Complete ();
     }
 }
