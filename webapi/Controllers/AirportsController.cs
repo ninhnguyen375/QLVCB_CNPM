@@ -19,11 +19,11 @@ namespace webapi.Controllers
 
         // GET: api/airports (GET all airports)
         [HttpGet]
-        public ActionResult GetAirports () {
+        public ActionResult GetAirports ([FromQuery] Pagination pagination) {
           var airports = _unitOfWork.Airports.GetAll();
-          int totalCount = airports.Count<Airport> (); // Đang test thui
+          // int totalCount = airports.Count<Airport> (); // Đang test thui
 
-          return Ok (new { data = airports, totalCount = totalCount });
+          return Ok (PaginatedList<Airport>.Create (airports, pagination.page, pagination.offset));
         }
 
         // GET: api/airports/id (GET airport by Id)
