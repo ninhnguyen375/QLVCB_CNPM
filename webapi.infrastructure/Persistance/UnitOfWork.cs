@@ -14,7 +14,7 @@ namespace webapi.infrastructure.Persistance {
         public IFlightRepository Flights { get; private set; }
         public IDateRepository Dates { get; private set; }
         public IDateFlightRepository DateFlights { get; private set; }
-        public ITicketCategoryRepository TicketCatogories { get; private set; }
+        public ITicketCategoryRepository TicketCategories { get; private set; }
         public IFlightTicketCategoryRepository FlightTicketCategories { get; private set; }
         public ITicketRepository Tickets { get; private set; }
 
@@ -28,7 +28,7 @@ namespace webapi.infrastructure.Persistance {
             Flights = new FlightRepository(context);
             Dates = new DateRepository(context);
             DateFlights = new DateFlightRepository(context);
-            TicketCatogories = new TicketCategoryRepository(context);
+            TicketCategories = new TicketCategoryRepository(context);
             FlightTicketCategories = new FlightTicketCategoryRepository(context);
             Tickets = new TicketRepository(context);
             _context = context;

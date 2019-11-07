@@ -11,7 +11,7 @@ namespace webapi.core.Interfaces {
         IFlightRepository Flights { get; }
         IDateRepository Dates { get; }
         IDateFlightRepository DateFlights { get; }
-        ITicketCategoryRepository TicketCatogories { get; }
+        ITicketCategoryRepository TicketCategories { get; }
         IFlightTicketCategoryRepository FlightTicketCategories { get; }
         ITicketRepository Tickets { get; }
         int Complete ();
