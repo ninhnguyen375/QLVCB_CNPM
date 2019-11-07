@@ -1,0 +1,25 @@
+POST http://localhost:5000/api/orders HTTP/1.1
+Content-Type: application/json
+
+{
+	"customerid": "0123456789",
+	"fullname": "Sang",
+	"phone": "789654321",
+	"ticketcount": 4,
+	"totalprice": 5000000,
+	"passengers": [
+		{  
+			"passengername": "Ninh",
+			"passengergender": 0,
+			"luggageids": [1, 2],
+			"ticketcategoryid": 1
+		}, 
+		{  
+			"passengername": "Phát",
+			"passengergender": 0,
+			"luggageids": [2, 1],
+			"ticketcategoryid": 2
+		}
+	],
+	"flightids": ["VJ100", "VJ101"]
+}

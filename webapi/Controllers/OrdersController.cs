@@ -88,6 +88,21 @@ namespace webapi.Controllers {
 
       for (int i = 0; i < values.FlightIds.Count; i++) {
         for (int j = 0; j < values.Passengers.Count; j++) {
+          // Luggage Price
+          decimal luggagePrice = Convert.ToDecimal(
+            _unitOfWork.Luggages.Find(l =>
+              l.Id == values.Passengers.ElementAt(j).LuggageIds.ElementAt(i)
+            ).ElementAt(0).Price
+          );
+
+          // TicketPrice
+          decimal ticketPrice = Convert.ToDecimal(
+            _unitOfWork.FlightTicketCategories.Find(ft => 
+              ft.TicketCategoryId == values.Passengers.ElementAt(j).TicketCategoryId && 
+              ft.FlightId == values.FlightIds.ElementAt(i)
+            ).ElementAt(0).Price
+          );
+
           var ticket = new Ticket {
             Id = this.autoTicketId(),
             PassengerName = values.Passengers.ElementAt(j).PassengerName,
@@ -96,8 +111,9 @@ namespace webapi.Controllers {
             FlightId = values.FlightIds.ElementAt(i),
             OrderId = order.Id,
             TicketCategoryId = values.Passengers.ElementAt(j).TicketCategoryId,
-            Price = 500000
+            Price = ticketPrice + luggagePrice
           };
+
           tickets.Add(ticket);
           _unitOfWork.Tickets.Add (ticket);
           _unitOfWork.Complete ();
