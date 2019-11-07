@@ -160,20 +160,20 @@ namespace webapi.infrastructure.Persistance {
 
       context.Airlines.AddRange(
         new Airline {
-          Id = "VN",
-          Name = "Vietnam Airlines"
-        },
-        new Airline {
           Id = "QH",
           Name = "Bamboo Airways"
+        }, 
+        new Airline {
+          Id = "VJ",
+          Name = "Vietjet Air"
         },
         new Airline {
           Id = "BL",
           Name = "Jetstar Paciffic"
         },
         new Airline {
-          Id = "VJ",
-          Name = "Vietjet Air"
+          Id = "VN",
+          Name = "Vietnam Airlines"
         }
       );
       context.SaveChanges();
@@ -184,28 +184,111 @@ namespace webapi.infrastructure.Persistance {
 
       context.Luggages.AddRange(
         new Luggage {
-          LuggageWeight = 15,
-          Price = 200000
-        },
-        new Luggage {
-          LuggageWeight = 20,
-          Price = 220000
-        },
-        new Luggage {
-          LuggageWeight = 25,
-          Price = 310000
-        },
-        new Luggage {
-          LuggageWeight = 30,
-          Price = 440000
+          LuggageWeight = 40,
+          Price = 570000
         },
         new Luggage {
           LuggageWeight = 35,
           Price = 505000
         },
         new Luggage {
-          LuggageWeight = 40,
-          Price = 570000
+          LuggageWeight = 30,
+          Price = 440000
+        },
+        new Luggage {
+          LuggageWeight = 25,
+          Price = 310000
+        },
+        new Luggage {
+          LuggageWeight = 20,
+          Price = 220000
+        },
+        new Luggage {
+          LuggageWeight = 15,
+          Price = 200000
+        },
+        new Luggage {
+          LuggageWeight = 0,
+          Price = 0
+        }
+      );
+      context.SaveChanges();
+
+      if (context.Flights.Any ()) {
+        return;
+      }
+
+      context.Flights.AddRange(
+        new Flight {
+          Id = "VJ100",
+          StartTime = 1200,
+          FlightTime = 125,
+          AirportFrom = "VCS",
+          AirportTo = "HAN",
+          Status = 1,
+          AirlineId = "VN",
+        },
+        new Flight {
+          Id = "VJ101",
+          StartTime = 500,
+          FlightTime = 60,
+          AirportFrom = "VDO",
+          AirportTo = "UIH",
+          Status = 1,
+          AirlineId = "VJ",
+        }
+      );
+      context.SaveChanges();
+
+      if (context.TicketCategories.Any ()) {
+        return;
+      }
+
+      context.TicketCategories.AddRange(
+        new TicketCategory {
+          Name = "Em Bé"
+        },
+        new TicketCategory {
+          Name = "Trẻ Em"
+        },
+        new TicketCategory {
+          Name = "Nguời Lớn"
+        }
+      );
+      context.SaveChanges();
+      
+      if (context.FlightTicketCategories.Any ()) {
+        return;
+      }
+
+      context.FlightTicketCategories.AddRange(
+        new FlightTicketCategory {
+          FlightId = "VJ100",
+          TicketCategoryId = 1,
+          SeatsCount = 100,
+          SeatsLeft = 70,
+          Price = 700000
+        },
+        new FlightTicketCategory {
+          FlightId = "VJ100",
+          TicketCategoryId = 2,
+          SeatsCount = 100,
+          SeatsLeft = 70,
+          Price = 100000
+        },
+        new FlightTicketCategory {
+          FlightId = "VJ101",
+          TicketCategoryId = 1,
+          SeatsCount = 100,
+          SeatsLeft = 60,
+          Price = 600000
+        },
+        new FlightTicketCategory {
+          FlightId = "VJ101",
+          TicketCategoryId = 2,
+          SeatsCount = 100,
+          SeatsLeft = 60,
+          Price = 100000
         }
       );
       context.SaveChanges();

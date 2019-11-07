@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
@@ -56,9 +57,6 @@ namespace webapi.Controllers {
     public ActionResult PostOrder (AddOrder values) {
       // Check Customer existence
       var customer = _unitOfWork.Customers.GetBy (values.CustomerId);
-      if (values.FlightIds.Count () <= 0) {
-        return Ok ();
-      }
 
       if (customer != null) {
         customer.BookingCount++; // Tăng số lần đặt vé nếu tồn tại ID
@@ -81,26 +79,32 @@ namespace webapi.Controllers {
         TotalPrice = values.TotalPrice,
         CreateAt = DateTime.Now, // Lấy thời điểm đặt vé
         Status = 0,
-        CustomerId = values.CustomerId
+        CustomerId = values.CustomerId,
+        UserId = null
       };
       _unitOfWork.Orders.Add (order);
 
-      for (int i = 0; i < values.FlightIds.Count (); i++) {
+      IList<Ticket> tickets = new List<Ticket>();
 
-      // Add tickets
-        for (int j = 0; j < values.TicketCount; i++) {
-          _unitOfWork.Tickets.Add (new Ticket {
-            Id = this.autoTicketId (),
-              // Price = 
-          });
+      for (int i = 0; i < values.FlightIds.Count; i++) {
+        for (int j = 0; j < values.Passengers.Count; j++) {
+          var ticket = new Ticket {
+            Id = this.autoTicketId(),
+            PassengerName = values.Passengers.ElementAt(j).PassengerName,
+            PassengerGender = values.Passengers.ElementAt(j).PassengerGender,
+            LuggageId = values.Passengers.ElementAt(j).LuggageIds.ElementAt(i),
+            FlightId = values.FlightIds.ElementAt(i),
+            OrderId = order.Id,
+            TicketCategoryId = values.Passengers.ElementAt(j).TicketCategoryId,
+            Price = 500000
+          };
+          tickets.Add(ticket);
+          _unitOfWork.Tickets.Add (ticket);
+          _unitOfWork.Complete ();
         }
       }
 
-
-
-      _unitOfWork.Complete ();
-
-      return Ok (new { success = true, message = "Add Successfully" });
+      return Ok (new { success = true, message = "Add Successfully", data = tickets });
     }
 
     // Hàm phát sinh:
@@ -146,31 +150,31 @@ namespace webapi.Controllers {
     }
     // 1. Tự động sinh OrderId
     private string autoTicketId () {
-      string orderId = "";
-      var orders = _unitOfWork.Tickets.GetAll ();
+      string ticketId = "";
+      var tickets = _unitOfWork.Tickets.GetAll ();
 
-      if (orders.Any ()) {
-        int orderIdNum = Int32.Parse (orders.Last ().Id) + 1; // Lấy mã đơn hàng cũ chuyển qua kiểu int và + 1
-        int totalDigits = this.totalDigits (orderIdNum); // Tính tổng chữ số của mã mới lấy được
+      if (tickets.Any ()) {
+        int ticketIdNum = Int32.Parse (tickets.Last ().Id) + 1; // Lấy mã đơn hàng cũ chuyển qua kiểu int và + 1
+        int totalDigits = this.totalDigits (ticketIdNum); // Tính tổng chữ số của mã mới lấy được
         switch (totalDigits) {
           case 1:
-            orderId = "000" + orderIdNum;
+            ticketId = "000" + ticketIdNum;
             break;
           case 2:
-            orderId = "00" + orderIdNum;
+            ticketId = "00" + ticketIdNum;
             break;
           case 3:
-            orderId = "0" + orderIdNum;
+            ticketId = "0" + ticketIdNum;
             break;
           default:
-            orderId += orderIdNum;
+            ticketId += ticketIdNum;
             break;
         }
       } else {
-        orderId = "0001";
+        ticketId = "0001";
       }
 
-      return orderId;
+      return ticketId;
     }
   }
 }
