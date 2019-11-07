@@ -16,7 +16,7 @@ namespace webapi.infrastructure.Persistance {
         public DbSet<Flight> Flights {get; set; }
         public DbSet<Date> Dates {get; set; }
         public DbSet<DateFlight> DateFlights {get; set; }
-        public DbSet<TicketCategory> TicketCatogories {get; set; }
+        public DbSet<TicketCategory> TicketCategories {get; set; }
         public DbSet<FlightTicketCategory> FlightTicketCategories {get; set; }
         public DbSet<Ticket> Tickets { get; set; }
 

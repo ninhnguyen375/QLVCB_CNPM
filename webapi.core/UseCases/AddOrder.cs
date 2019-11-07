@@ -5,8 +5,8 @@ namespace webapi.core.UseCases
 {
     public class Passenger {
       public string PassengerName { get; set; }
-      public string PassengerGender { get; set; }
-      public int LuggageId { get; set; }
+      public int PassengerGender { get; set; }
+      public IList<int> LuggageIds { get; set; }
       public int TicketCategoryId { get; set; }
     }
 
@@ -23,6 +23,6 @@ namespace webapi.core.UseCases
 
       // Property of Ticket
       public IList<Passenger> Passengers { set; get; }
-      public IList<String> FlightIds { set; get; }
+      public IList<string> FlightIds { set; get; }
     }
 }

@@ -26,7 +26,7 @@ namespace webapi.core.Domain.Entities
       public Customer Customer { get; set; }
 
       // Foreign Key (N - 1)
-      public int UserId { get; set; } // Để thao tác trong Controller
+      public int? UserId { get; set; } // Để thao tác trong Controller
       public User User { get; set; }
     }
 }
