@@ -9,7 +9,7 @@ using webapi.infrastructure.Persistance;
 namespace webapi.infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20191107072308_Init")]
+    [Migration("20191107081950_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
