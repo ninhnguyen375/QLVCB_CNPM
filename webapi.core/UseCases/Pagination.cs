@@ -1,6 +1,6 @@
 namespace webapi.core.UseCases {
     public class Pagination {
-        public int page { get; set; } = 1;
-        public int offset { get; set; } = 10;
+        public int current { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
     }
 }
