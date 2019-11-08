@@ -17,6 +17,12 @@ namespace webapi.core.Domain.Entities
       public string AirportFrom { get; set; }
       [Required]
       public string AirportTo { get; set; }
+
+      [Required]
+      public int SeatsCount { get; set; }
+      [Required]
+      public int SeatsLeft { get; set; }
+
       // Status: 1 => Active, 0 => Inactive
       public int Status { get; set; }
       
