@@ -17,10 +17,6 @@ namespace webapi.core.Domain.Entities
       public virtual TicketCategory TicketCategory { get; set; }
 
       [Required]
-      public int SeatsCount { get; set; }
-      [Required]
-      public int SeatsLeft { get; set; }
-      [Required]
       public decimal Price { get; set; }
 
       

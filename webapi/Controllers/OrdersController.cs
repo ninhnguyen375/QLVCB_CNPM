@@ -84,7 +84,7 @@ namespace webapi.Controllers {
       };
       _unitOfWork.Orders.Add (order);
 
-      IList<Ticket> tickets = new List<Ticket>();
+      IList<Ticket> tickets = new List<Ticket>(); // Dòng này để kiểm tra dữ liệu tạm thời (xóa sau)
 
       for (int i = 0; i < values.FlightIds.Count; i++) {
         for (int j = 0; j < values.Passengers.Count; j++) {
@@ -114,7 +114,7 @@ namespace webapi.Controllers {
             Price = ticketPrice + luggagePrice
           };
 
-          tickets.Add(ticket);
+          tickets.Add(ticket); // Xóa sau
           _unitOfWork.Tickets.Add (ticket);
           _unitOfWork.Complete ();
         }
