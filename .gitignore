@@ -4,3 +4,4 @@
 **/bin
 App.db*
 **/Migrations/**
+webapi.infrastructure/Migrations/AppDbContextModelSnapshot.cs
