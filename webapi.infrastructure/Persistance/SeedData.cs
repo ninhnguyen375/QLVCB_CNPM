@@ -225,6 +225,8 @@ namespace webapi.infrastructure.Persistance {
           FlightTime = 125,
           AirportFrom = "VCS",
           AirportTo = "HAN",
+          SeatsCount = 100,
+          SeatsLeft = 100,
           Status = 1,
           AirlineId = "VN",
         },
@@ -234,6 +236,8 @@ namespace webapi.infrastructure.Persistance {
           FlightTime = 60,
           AirportFrom = "VDO",
           AirportTo = "UIH",
+          SeatsCount = 100,
+          SeatsLeft = 100,
           Status = 1,
           AirlineId = "VJ",
         }
@@ -265,29 +269,21 @@ namespace webapi.infrastructure.Persistance {
         new FlightTicketCategory {
           FlightId = "VJ100",
           TicketCategoryId = 1,
-          SeatsCount = 100,
-          SeatsLeft = 70,
           Price = 700000
         },
         new FlightTicketCategory {
           FlightId = "VJ100",
           TicketCategoryId = 2,
-          SeatsCount = 100,
-          SeatsLeft = 70,
           Price = 100000
         },
         new FlightTicketCategory {
           FlightId = "VJ101",
           TicketCategoryId = 1,
-          SeatsCount = 100,
-          SeatsLeft = 60,
           Price = 600000
         },
         new FlightTicketCategory {
           FlightId = "VJ101",
           TicketCategoryId = 2,
-          SeatsCount = 100,
-          SeatsLeft = 60,
           Price = 100000
         }
       );

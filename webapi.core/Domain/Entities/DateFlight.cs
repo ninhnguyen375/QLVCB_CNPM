@@ -16,6 +16,7 @@ namespace webapi.core.Domain.Entities
       public virtual Flight Flight { get; set; }
       public virtual Date Date { get; set; }
 
+      // Status: 0 => Sold out, 1 => In Stock
       public int Status { get; set; }
       
     }

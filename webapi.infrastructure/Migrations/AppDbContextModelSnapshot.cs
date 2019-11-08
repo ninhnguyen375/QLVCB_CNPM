@@ -120,6 +120,12 @@ namespace webapi.infrastructure.Migrations
                     b.Property<int>("FlightTime")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SeatsCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeatsLeft")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("StartTime")
                         .HasColumnType("INTEGER");
 
@@ -143,12 +149,6 @@ namespace webapi.infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("SeatsCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeatsLeft")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("TicketCategoryId", "FlightId");
 
