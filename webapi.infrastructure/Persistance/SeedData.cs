@@ -18,16 +18,22 @@ namespace webapi.infrastructure.Persistance {
             Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
             Role = "ADMIN",
             Status = 1
-        },
-        new User {
-          Email = "ninh@ninh.com",
-            FullName = "ninh",
-            Identifier = "99999999",
-            Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
-            Role = "NINHROOT",
-            Status = 1
         }
       );
+
+      for (int i = 0; i < 50; i++)
+      {
+          context.Users.Add (
+            new User {
+              Email = "ning@ninh.com" + i,
+                FullName = "ninh" + i,
+                Identifier = "000000" + i,
+                Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
+                Role = "STAFF",
+                Status = 1
+            }
+        );
+      }
       context.SaveChanges ();
 
       if (context.Airports.Any()) {

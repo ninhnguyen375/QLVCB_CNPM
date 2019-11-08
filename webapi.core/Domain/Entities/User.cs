@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Linq;
 using webapi.core.Interfaces;
 
 namespace webapi.core.Domain.Entities {

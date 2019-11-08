@@ -4,6 +4,7 @@ using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.infrastructure.Persistance;
+using webapi.Services;
 
 namespace webapi.Controllers
 {
@@ -23,7 +24,7 @@ namespace webapi.Controllers
           var airports = _unitOfWork.Airports.GetAll();
           // int totalCount = airports.Count<Airport> (); // Đang test thui
 
-          return Ok (PaginatedList<Airport>.Create (airports, pagination.page, pagination.offset));
+          return Ok (PaginatedList<Airport>.Create (airports, pagination.current, pagination.pageSize));
         }
 
         // GET: api/airports/id (GET airport by Id)
