@@ -194,9 +194,14 @@ namespace webapi.infrastructure.Migrations
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -335,6 +340,12 @@ namespace webapi.infrastructure.Migrations
                     b.HasOne("webapi.core.Domain.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId");
+
+                    b.HasOne("webapi.core.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Ticket", b =>
