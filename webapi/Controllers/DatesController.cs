@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
@@ -9,6 +10,7 @@ using webapi.Services;
 
 namespace webapi.Controllers
 {
+    [Authorize]
     [Route ("api/[controller]")]
     [ApiController]
     public class DatesController : ControllerBase
@@ -20,6 +22,7 @@ namespace webapi.Controllers
       }
 
       // GET: api/dates
+      [Authorize (Roles = "STAFF")]
       [HttpGet]
       public ActionResult GetDates([FromQuery] Pagination pagination) {
         var dates = _unitOfWork.Dates.GetAll();
@@ -28,6 +31,7 @@ namespace webapi.Controllers
       }
 
       // GET: api/dates/id
+      [Authorize (Roles = "STAFF")]
       [HttpGet ("{id}")]
       public ActionResult GetDate(int id) {
         var date = _unitOfWork.Dates.GetBy(id);
@@ -40,13 +44,13 @@ namespace webapi.Controllers
       }
 
       // POST: api/dates
+      [Authorize (Roles = "STAFF")]
       [HttpPost]
       public ActionResult PostDate(AddDate values) {
-        DateTime dateFlight = Convert.ToDateTime(values.DateFlight);
-      
-        var dates = _unitOfWork.Dates.GetAll();
-        var date = dates.Where(d =>
-          d.DateFlight == dateFlight
+        DateTime departureDate = Convert.ToDateTime(values.DepartureDate);
+
+        var date = _unitOfWork.Dates.Find(d =>
+          d.DepartureDate == departureDate
         );
 
         if (date.Count() > 0) {
@@ -55,7 +59,7 @@ namespace webapi.Controllers
 
         _unitOfWork.Dates.Add(
           new Date {
-            DateFlight = dateFlight
+            DepartureDate = departureDate
           }
         );
         _unitOfWork.Complete();
