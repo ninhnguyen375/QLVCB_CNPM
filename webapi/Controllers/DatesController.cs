@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
-using webapi.infrastructure.Persistance;
+using webapi.Services;
 
 namespace webapi.Controllers
 {
@@ -21,7 +24,7 @@ namespace webapi.Controllers
       public ActionResult GetDates([FromQuery] Pagination pagination) {
         var dates = _unitOfWork.Dates.GetAll();
         
-        return Ok (PaginatedList<Date>.Create(dates, pagination.page, pagination.offset));
+        return Ok (PaginatedList<Date>.Create(dates, pagination.current, pagination.pageSize));
       }
 
       // GET: api/dates/id
@@ -38,12 +41,24 @@ namespace webapi.Controllers
 
       // POST: api/dates
       [HttpPost]
-      public ActionResult PostDate(Date date) {
-        var dateTemp = _unitOfWork.Dates.GetBy(date.Id);
+      public ActionResult PostDate(AddDate values) {
+        DateTime dateFlight = Convert.ToDateTime(values.DateFlight);
+      
+        var dates = _unitOfWork.Dates.GetAll();
+        var date = dates.Where(d =>
+          d.DateFlight == dateFlight
+        );
 
-        if (dateTemp != null) {
-          return BadRequest (new { success = false, message = "Date Flight already exists" });
+        if (date.Count() > 0) {
+          return BadRequest (new { success = false, message = "DateFlight already exists" });
         }
+
+        _unitOfWork.Dates.Add(
+          new Date {
+            DateFlight = dateFlight
+          }
+        );
+        _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Add Successfully" });
       }

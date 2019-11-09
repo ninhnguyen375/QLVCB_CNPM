@@ -27,16 +27,14 @@ namespace webapi.infrastructure.Persistance.Repositories {
     public IEnumerable<T> GetAll () {
       return Context.Set<T> ().ToList ();
     }
-
+    
     public T GetBy (string id) {
       return Context.Set<T> ().Find (id);
     }
     public T GetBy (int id) {
       return Context.Set<T> ().Find (id);
     }
-    public T GetBy (DateTime dateFlight) {
-      return Context.Set<T> ().Find (dateFlight);
-    }
+    
     public void Remove (T entity) {
       Context.Set<T> ().Remove (entity);
     }

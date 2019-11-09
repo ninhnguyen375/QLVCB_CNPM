@@ -1,0 +1,6 @@
+POST http://localhost:5000/api/dates HTTP/1.1
+Content-Type: application/json
+
+{
+  "dateflight": "2019-11-10"
+}
