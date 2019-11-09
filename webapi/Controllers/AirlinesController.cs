@@ -56,10 +56,10 @@ namespace webapi.Controllers
         [HttpPost]
         public ActionResult PostAirline(Airline airline) {
           // Check id đã tồn tại trong Database chưa
-          var airlineTemp = _unitOfWork.Airlines.GetBy(airline.Id);
-
-          if (airlineTemp != null) {
-            return BadRequest (new { success = false, message = "Id already exists" });
+          if(_unitOfWork.Airlines.Find(u => u.Id.Equals(airline.Id)).Count() != 0) {
+            return BadRequest(new {
+                Id = "Mã hãng hàng không đã được sử dụng"
+            });
           }
 
           _unitOfWork.Airlines.Add(airline);
