@@ -1,4 +1,5 @@
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
@@ -7,6 +8,7 @@ using webapi.Services;
 
 namespace webapi.Controllers
 {
+    [Authorize]
     [Route ("api/[controller]")]
     [ApiController]
     public class TicketsController : ControllerBase
@@ -18,6 +20,7 @@ namespace webapi.Controllers
         }
 
         // GET: api/tickets
+        [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet]
         public ActionResult GetTickets([FromQuery] Pagination pagination, [FromQuery] SearchTicket search) {
           var tickets = _unitOfWork.Tickets.GetAll();
@@ -32,6 +35,7 @@ namespace webapi.Controllers
         }
 
         // GET: api/tickets/id
+        [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
         public ActionResult GetTicket(string id) {
           var ticket = _unitOfWork.Tickets.GetBy(id);
