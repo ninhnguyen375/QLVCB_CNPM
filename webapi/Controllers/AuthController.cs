@@ -63,7 +63,7 @@ namespace webapi.Controllers {
     // POST: api/user/me
     [Route ("/api/auth/me")]
     [HttpPost]
-    public ActionResult GetMe ([FromBody] Login data) {
+    public ActionResult GetMe () {
       var currentUserId = int.Parse (User.Identity.Name);
       User user = _unitOfWork.Users.GetBy(currentUserId);
       if(user == null)
