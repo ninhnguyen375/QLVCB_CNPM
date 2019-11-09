@@ -56,6 +56,11 @@ namespace webapi.Controllers
         // POST: api/luggages
         [HttpPost]
         public ActionResult PostLuggage(Luggage luggage) {
+          if(_unitOfWork.Luggages.Find(u => u.LuggageWeight.Equals(luggage.LuggageWeight)).Count() != 0) {
+            return BadRequest(new {
+                LuggageWeight = "Khối lượng hành lý đã được thiết lập"
+            });
+          }
           _unitOfWork.Luggages.Add(luggage);
           _unitOfWork.Complete();
 
