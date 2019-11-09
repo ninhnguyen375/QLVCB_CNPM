@@ -75,7 +75,7 @@ namespace webapi.infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("DateFlight")
+                    b.Property<DateTime>("DepartureDate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
