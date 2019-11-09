@@ -11,7 +11,7 @@ namespace webapi.core.Domain.Entities
       public int Id { get; set; }
 
       [DataType(DataType.Date)]
-      public DateTime DateFlight { get; set; }
+      public DateTime DepartureDate { get; set; }
       
       public virtual ICollection<DateFlight> DateFlights { get; set; } 
     }
