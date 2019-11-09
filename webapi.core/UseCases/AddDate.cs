@@ -2,6 +2,6 @@ namespace webapi.core.UseCases
 {
     public class AddDate
     {
-        public string DateFlight { get; set; }
+        public string DepartureDate { get; set; }
     }
 }
