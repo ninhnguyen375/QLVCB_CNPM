@@ -60,10 +60,10 @@ namespace webapi.Controllers
         [HttpPost]
         public ActionResult PostAirport (Airport airport) {
           // Check Id đã tồn tại trong database chưa
-          var isValidId = _unitOfWork.Airports.Find(a => a.Id == airport.Id).Count();
-
-          if (isValidId > 0) {
-            return BadRequest (new { success = false, message = "Id already exists" });
+          if(_unitOfWork.Airports.Find(u => u.Id.Equals(airport.Id)).Count() != 0) {
+            return BadRequest(new {
+                Id = "Mã sân bay bay đã được sử dụng"
+            });
           }
 
           _unitOfWork.Airports.Add(airport);
