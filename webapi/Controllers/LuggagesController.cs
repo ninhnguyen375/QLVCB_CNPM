@@ -46,7 +46,6 @@ namespace webapi.Controllers
             return NotFound (new { success = false, message = "Invalid luggage" });
           }
 
-          luggage.LuggageWeight = values.LuggageWeight;
           luggage.Price = values.Price;
           _unitOfWork.Complete();
 
