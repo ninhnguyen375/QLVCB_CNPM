@@ -30,7 +30,7 @@ namespace webapi.Controllers {
             var currentUserId = int.Parse (User.Identity.Name);
             var usersQuery = _unitOfWork.Users;
             IEnumerable<User> users = usersQuery.GetAll();
-
+            // Searching
             if(search.email != "") {
                 users = users.Where(u => u.Email.Contains(search.email));
             }
@@ -38,10 +38,19 @@ namespace webapi.Controllers {
                 users = users.Where(u => u.FullName.Contains(search.fullname));
             }
             if(search.identifier != "") {
-                users = users.Where(u => u.Identifier.Contains(search.identifier));
+                users = users.Where(u => u.Identifier.Equals(search.identifier));
             }
             if(search.phone != "") {
-                users = users.Where(u => u.Phone.Contains(search.phone));
+                users = users.Where(u => u.Phone.Equals(search.phone));
+            }
+            // Sorting
+            if(search.sortAsc != "") {
+                Console.WriteLine(search.sortAsc);
+                users = users.OrderBy(u => u.GetType().GetProperty(search.sortAsc).GetValue(u, null));
+            }
+            if(search.sortDesc != "") {
+                Console.WriteLine(search.sortDesc);
+                users = users.OrderByDescending(u => u.GetType().GetProperty(search.sortDesc).GetValue(u, null));
             }
             
             if (User.IsInRole ("ADMIN"))
