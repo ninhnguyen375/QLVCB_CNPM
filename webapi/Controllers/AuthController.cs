@@ -37,14 +37,18 @@ namespace webapi.Controllers {
       User user = query.Find (i => i.Email.Equals (email)).SingleOrDefault ();
 
       if (user == null) {
-        return BadRequest (new { success = false, message = "User not found" });
+        return BadRequest (new { success = false, message = "Tên tài khoản hoặc mật khẩu không chính xác" });
       }
 
       /** compare hashed password with password from body */
       bool verify = BCrypt.Net.BCrypt.Verify (password, user.Password);
 
       if (verify == false) {
-        return BadRequest (new { success = false, message = "User name or password incorect" });
+        return BadRequest (new { success = false, message = "Tên tài khoản hoặc mật khẩu không chính xác" });
+      }
+
+      if (user.Status == 2) { // 2: banned
+        return BadRequest (new { success = false, message = "Tài khoản đã bị khóa" });
       }
 
       /** render jwt */
