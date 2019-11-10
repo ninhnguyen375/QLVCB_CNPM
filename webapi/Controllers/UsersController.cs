@@ -72,15 +72,69 @@ namespace webapi.Controllers {
             return Ok (new { success = true, user });
         }
 
+        // PUT: api/users/5/block
+        [HttpPut ("{id}/block")]
+        public ActionResult BlockUser (int id) {
+            var user = _unitOfWork.Users.GetBy (id);
+            if (user == null) {
+                return NotFound ();
+            }
+            user.Status = 2; // 2: Banned
+            _unitOfWork.Complete();
+
+            return Ok (new { success = true, user });
+        }
+
+        // PUT: api/users/5/unblock
+        [HttpPut ("{id}/unblock")]
+        public ActionResult UnblockUser (int id) {
+            var user = _unitOfWork.Users.GetBy (id);
+            if (user == null) {
+                return NotFound ();
+            }
+            user.Status = 1; // 1: Active
+            _unitOfWork.Complete();
+
+            return Ok (new { success = true, user });
+        }
+
         // PUT: api/users/5
         [HttpPut ("{id}")]
-        [Authorize (Roles = "ADMIN")]
+        [Authorize (Roles = "ADMIN, STAFF")]
         public ActionResult PutUser (int id, EditUser values) {
             var user = _unitOfWork.Users.GetBy (id);
             if (user == null) {
                 return NotFound ();
             }
-            user.Email = values.email;
+            // Check exists
+            if(_unitOfWork.Users.Find(
+                u => u.Identifier.Equals(values.identifier) && 
+                u.Id != id
+            ).Count() != 0) {
+                return BadRequest(new {
+                    Identifier = "CMND đã được sử dụng"
+                });
+            }
+            if(_unitOfWork.Users.Find(
+                u => u.Email.Equals(values.email) &&
+                u.Id != id
+            ).Count() != 0) {
+                return BadRequest(new {
+                    Email = "Email đã được sử dụng"
+                });
+            }
+            
+            // Editing
+            if (values.email != "")
+                user.Email = values.email;
+            if (values.phone != "")
+                user.Phone = values.phone;
+            if (values.identifier != "")
+                user.Identifier = values.identifier;
+            if (values.fullName != "")
+                user.FullName = values.fullName;
+            if (values.password != "")
+                user.Password = values.password;
 
             _unitOfWork.Complete ();
 
