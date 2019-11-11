@@ -227,9 +227,8 @@ namespace webapi.infrastructure.Persistance {
           AirportFrom = "VCS",
           AirportTo = "HAN",
           SeatsCount = 100,
-          SeatsLeft = 100,
           Status = 1,
-          AirlineId = "VN",
+          AirlineId = "VN"
         },
         new Flight {
           Id = "VJ101",
@@ -238,9 +237,8 @@ namespace webapi.infrastructure.Persistance {
           AirportFrom = "VDO",
           AirportTo = "UIH",
           SeatsCount = 100,
-          SeatsLeft = 100,
           Status = 1,
-          AirlineId = "VJ",
+          AirlineId = "VJ"
         }
       );
       context.SaveChanges();

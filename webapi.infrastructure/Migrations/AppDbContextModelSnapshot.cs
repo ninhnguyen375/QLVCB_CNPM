@@ -123,9 +123,6 @@ namespace webapi.infrastructure.Migrations
                     b.Property<int>("SeatsCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeatsLeft")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("StartTime")
                         .HasColumnType("INTEGER");
 

@@ -20,8 +20,6 @@ namespace webapi.core.Domain.Entities
 
       [Required]
       public int SeatsCount { get; set; }
-      [Required]
-      public int SeatsLeft { get; set; }
 
       // Status: 1 => Active, 0 => Inactive
       public int Status { get; set; }
