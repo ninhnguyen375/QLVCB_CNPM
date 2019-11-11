@@ -21,6 +21,10 @@ namespace webapi.core.Domain.Entities
       // Status: 0 => Unconfirm, 1 => Confirm
       public int Status { get; set; } = 0;
       
+      // Foreign key for DateId
+      public int DateId { get; set; }
+      public Date Date { get; set; }
+
       // Foreign Key (N - 1)
       public string CustomerId { get; set; } // Để thao tác trong Controller
       public Customer Customer { get; set; }

@@ -13,6 +13,7 @@ namespace webapi.core.Domain.Entities
       [Key, Column(Order = 1)]
       public string FlightId { get; set; }
 
+      public int SeatsLeft { get; set; }
       public virtual Flight Flight { get; set; }
       public virtual Date Date { get; set; }
 
