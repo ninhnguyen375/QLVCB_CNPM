@@ -24,9 +24,29 @@ namespace webapi.Controllers
       // GET: api/dates
       [Authorize (Roles = "STAFF")]
       [HttpGet]
-      public ActionResult GetDates([FromQuery] Pagination pagination) {
+      public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
         var dates = _unitOfWork.Dates.GetAll();
+
+        // Search by DepartureDate
+        if (search.DepartureDate != "") {
+          DateTime departureDate = Convert.ToDateTime(search.DepartureDate);
+
+          dates = dates.Where(d =>
+            d.DepartureDate == departureDate);
+        }
+
+        // Sort Asc:
+        if (search.sortAsc != "") {
+          dates = dates.OrderBy(d =>
+            d.GetType().GetProperty(search.sortAsc).GetValue(d));
+        }
         
+        // Sort Desc:
+        if (search.sortDesc != "") {
+          dates = dates.OrderByDescending(d =>
+            d.GetType().GetProperty(search.sortDesc).GetValue(d));
+        }
+
         return Ok (PaginatedList<Date>.Create(dates, pagination.current, pagination.pageSize));
       }
 
@@ -37,10 +57,32 @@ namespace webapi.Controllers
         var date = _unitOfWork.Dates.GetBy(id);
 
         if (date == null) {
-          return NotFound (new  { success = false, message = "Invalid Date" });
+          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
         }
 
         return Ok (new { success = true, data = date });
+      }
+
+      // PUT: api/dates/id
+      [Authorize (Roles = "STAFF")]
+      [HttpPut ("{id}")]
+      public ActionResult PutDate(int id, EditDate values) {
+        var date = _unitOfWork.Dates.GetBy(id);
+
+        if (date == null) {
+          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
+        }
+
+        if (_unitOfWork.Dates.Find(d =>
+              d.DepartureDate == Convert.ToDateTime(values.DepartureDate))
+              .Count() != 0 ) {
+          return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });        
+        }
+
+        date.DepartureDate = Convert.ToDateTime(values.DepartureDate);
+        _unitOfWork.Complete();
+
+        return Ok (new { success = true, data = date, message = "Sửa thành công" });
       }
 
       // POST: api/dates
@@ -54,7 +96,7 @@ namespace webapi.Controllers
         );
 
         if (date.Count() > 0) {
-          return BadRequest (new { success = false, message = "DateFlight already exists" });
+          return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });
         }
 
         _unitOfWork.Dates.Add(
@@ -64,7 +106,23 @@ namespace webapi.Controllers
         );
         _unitOfWork.Complete();
 
-        return Ok (new { success = true, message = "Add Successfully" });
+        return Ok (new { success = true, message = "Thêm thành công." });
+      }
+
+      // DELETE: api/dates/id
+      [Authorize (Roles = "STAFF")]
+      [HttpDelete ("{id}")]
+      public ActionResult DeleteDate(int id) {
+        var date = _unitOfWork.Dates.GetBy(id);
+
+        if (date == null) {
+          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
+        }
+      
+        _unitOfWork.Dates.Remove(date);
+        _unitOfWork.Complete();
+
+        return Ok (new { success = true, message = "Xóa thành công" });
       }
     }
 }
