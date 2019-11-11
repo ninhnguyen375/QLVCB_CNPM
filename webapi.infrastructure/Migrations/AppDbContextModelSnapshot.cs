@@ -91,6 +91,9 @@ namespace webapi.infrastructure.Migrations
                     b.Property<string>("FlightId")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("SeatsLeft")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -182,6 +185,9 @@ namespace webapi.infrastructure.Migrations
                     b.Property<string>("CustomerId")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DateId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -197,6 +203,8 @@ namespace webapi.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("DateId");
 
                     b.HasIndex("UserId");
 
@@ -337,6 +345,12 @@ namespace webapi.infrastructure.Migrations
                     b.HasOne("webapi.core.Domain.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId");
+
+                    b.HasOne("webapi.core.Domain.Entities.Date", "Date")
+                        .WithMany()
+                        .HasForeignKey("DateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("webapi.core.Domain.Entities.User", "User")
                         .WithMany()

@@ -287,6 +287,52 @@ namespace webapi.infrastructure.Persistance {
         }
       );
       context.SaveChanges();
+
+      if (context.Dates.Any ()) {
+        return;
+      }
+
+      context.Dates.AddRange(
+        new Date {
+          DepartureDate = DateTime.Parse("2019/11/11")
+        },
+        new Date {
+          DepartureDate = DateTime.Parse("2019/11/12")
+        }
+      );
+      context.SaveChanges();
+
+      if (context.DateFlights.Any ()) {
+        return;
+      }
+      
+      context.DateFlights.AddRange(
+        new DateFlight {
+          DateId = 1,
+          FlightId = "VJ100",
+          SeatsLeft = 100,
+          Status = 1
+        },
+        new DateFlight {
+          DateId = 1,
+          FlightId = "VJ101",
+          SeatsLeft = 100,
+          Status = 1
+        },
+        new DateFlight {
+          DateId = 2,
+          FlightId = "VJ100",
+          SeatsLeft = 100,
+          Status = 1
+        },
+        new DateFlight {
+          DateId = 2,
+          FlightId = "VJ101",
+          SeatsLeft = 100,
+          Status = 1
+        }
+      );
+      context.SaveChanges();
     }
   }
 }

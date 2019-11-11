@@ -7,6 +7,7 @@ Content-Type: application/json
 	"phone": "789654321",
 	"ticketcount": 4,
 	"totalprice": 5000000,
+  "dateid": 1,
 	"passengers": [
 		{  
 			"passengername": "Ninh",
