@@ -20,6 +20,7 @@ namespace webapi.core.UseCases
       // Property of Order
       public int TicketCount { get; set; }
       public decimal TotalPrice { get; set; }
+      public int DateId { get; set; }
 
       // Property of Ticket
       public IList<Passenger> Passengers { set; get; }

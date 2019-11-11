@@ -22,9 +22,89 @@ namespace webapi.Controllers {
     // GET: api/orders
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet]
-    public ActionResult GetOrders ([FromQuery] Pagination pagination) {
+    public ActionResult GetOrders ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
       var orders = _unitOfWork.Orders.GetAll ();
       
+      // Search by TicketCount:
+      if (search.TicketCount != null) {
+        orders = orders.Where(o =>
+          o.TicketCount == search.TicketCount);
+      }
+
+      // Search by TotalPrice:
+      if (search.TotalPrice != null) {
+        orders = orders.Where(o =>
+          o.TotalPrice == search.TotalPrice);
+      }
+
+      // Search by Status:
+      if (search.Status != null) {
+        orders = orders.Where(o =>
+          o.Status == search.Status);
+      }
+
+      // Search by CreateAt:
+      if (search.DateFrom != "" && search.DateTo != "") {
+          orders = orders.Where(o =>
+            Convert.ToDateTime(o.CreateAt.ToShortDateString()) >= Convert.ToDateTime(search.DateFrom) && 
+            Convert.ToDateTime(o.CreateAt.ToShortDateString()) <= Convert.ToDateTime(search.DateTo));
+      } else if (search.DateFrom != "" && search.DateTo == "") {
+          orders = orders.Where(o =>
+            Convert.ToDateTime(o.CreateAt.ToShortDateString()) >= Convert.ToDateTime(search.DateFrom));
+      } else if (search.DateFrom == "" && search.DateTo != "") {
+          orders = orders.Where(o =>
+            Convert.ToDateTime(o.CreateAt.ToShortDateString()) <= Convert.ToDateTime(search.DateTo));
+      }
+
+      // Search by DateId:
+      if (search.DateCreateFrom != "" && search.DateCreateTo != "") {
+        var dates = _unitOfWork.Dates.GetAll();
+        orders = (from o in orders
+                  from d in dates
+                  where o.DateId == d.Id && 
+                    d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom) &&
+                    d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
+                  select o);
+      } else if (search.DateCreateFrom != "" && search.DateCreateTo == "") {
+        var dates = _unitOfWork.Dates.GetAll();
+        orders = (from o in orders
+                  from d in dates
+                  where o.DateId == d.Id && 
+                    d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom)
+                  select o);
+      } else if (search.DateCreateFrom == "" && search.DateCreateTo != "") {
+        var dates = _unitOfWork.Dates.GetAll();
+        orders = (from o in orders
+                  from d in dates
+                  where o.DateId == d.Id && 
+                    d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
+                  select o);
+      }
+
+      // Search by CustomerId:
+      if (search.CustomerId != "") {
+        orders = orders.Where(o =>
+          o.CustomerId.Equals(search.CustomerId));
+      }
+
+      // Search by UserId:
+      if (search.UserId != null) {
+        orders = orders.Where(o =>
+          o.UserId == search.UserId);
+      }
+
+      // Sort Asc:
+      if (search.sortAsc != "") {
+        orders = orders.OrderBy(o =>
+          o.GetType().GetProperty(search.sortAsc).GetValue(o));
+      }
+
+      // Sort Desc:
+      if (search.sortDesc != "") {
+        orders = orders.OrderByDescending(o =>
+          o.GetType().GetProperty(search.sortDesc).GetValue(o));
+      }
+
       return Ok (PaginatedList<Order>.Create(orders, pagination.current, pagination.pageSize));
     }
 
@@ -35,7 +115,7 @@ namespace webapi.Controllers {
       var order = _unitOfWork.Orders.GetBy (id);
 
       if (order == null) {
-        return NotFound (new { success = false, message = "Invalid Order" });
+        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
       }
 
       return Ok (new { success = true, data = order });
@@ -44,55 +124,56 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/accept
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/accept")]
-    public ActionResult AcceptOrder (string id) {
+    public ActionResult AcceptOrder (string id, EditOrder values) {
       var order = _unitOfWork.Orders.GetBy (id);
 
       if (order == null) {
-        return NotFound (new { success = false, message = "Invalid Order" });
+        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
       }
       
       var customer = _unitOfWork.Customers.GetBy(order.CustomerId);
-      var flights = _unitOfWork.Flights.GetAll();
+      var dateFlights = _unitOfWork.DateFlights.GetAll();
       var tickets = _unitOfWork.Tickets.GetAll();
-      var flight = (
-        from f in flights
+      var dateFlight = (
+        from df in dateFlights
         from t in tickets
-        where f.Id == t.FlightId && t.OrderId == id
-        select f
+        where t.OrderId == id && order.DateId == df.DateId && t.FlightId == df.FlightId
+        select df
       );
 
-      foreach (var f in flight) {
-        if (f.SeatsLeft > 0) {
-          f.SeatsLeft--;
-          if (f.SeatsLeft == 0) {
-            var dateFlight = _unitOfWork.DateFlights.GetBy(f.Id);
-            dateFlight.Status = 0;
+      foreach (var df in dateFlight) {
+        if (df.SeatsLeft > 0) {
+          df.SeatsLeft--;
+          if (df.SeatsLeft == 0) {
+            df.Status = 0; // Sold out
           }
         }
       }
 
-      order.Status = 1;
+      order.Status = 1; // Confirm
+      order.UserId = values.UserId; // Get User do this
       customer.BookingCount++;
 
       _unitOfWork.Complete();
 
-      return Ok (new { success = true, data = order });
+      return Ok (new { success = true, data = order, message = "Xác nhận hóa đơn thành công." });
     }
   
     // PUT: api/orders/id/refuse
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/refuse")]
-    public ActionResult RefuseOrder (string id) {
+    public ActionResult RefuseOrder (string id, EditOrder values) {
       var order = _unitOfWork.Orders.GetBy (id);
 
       if (order == null) {
-        return NotFound (new { success = false, message = "Invalid Order" });
+        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
       }
 
-      order.Status = 2;
+      order.Status = 2; // Unconfirm
+      order.UserId = values.UserId; // Get User do this
       _unitOfWork.Complete();
 
-      return Ok (new { success = true, data = order });
+      return Ok (new { success = true, data = order, message = "Từ chối hóa đơn thành công." });
     }
 
     // POST: api/orders
@@ -123,6 +204,7 @@ namespace webapi.Controllers {
         CreateAt = DateTime.Now, // Lấy thời điểm đặt vé
         Status = 0,
         CustomerId = values.CustomerId,
+        DateId = values.DateId,
         UserId = null
       };
       _unitOfWork.Orders.Add (order);
@@ -138,7 +220,7 @@ namespace webapi.Controllers {
             ).ElementAt(0).Price
           );
 
-          // TicketPrice
+          // Ticket Price
           decimal ticketPrice = Convert.ToDecimal(
             _unitOfWork.FlightTicketCategories.Find(ft => 
               ft.TicketCategoryId == values.Passengers.ElementAt(j).TicketCategoryId && 
@@ -163,7 +245,7 @@ namespace webapi.Controllers {
         }
       }
 
-      return Ok (new { success = true, message = "Add Successfully", data = tickets });
+      return Ok (new { success = true, message = "Thêm thành công.", data = tickets });
     }
 
     // Hàm phát sinh:
