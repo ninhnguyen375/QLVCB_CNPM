@@ -22,7 +22,7 @@ namespace webapi.Controllers
       }
 
       // GET: api/dates
-      [Authorize (Roles = "STAFF")]
+      [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
         var dates = _unitOfWork.Dates.GetAll();
@@ -51,7 +51,7 @@ namespace webapi.Controllers
       }
 
       // GET: api/dates/id
-      [Authorize (Roles = "STAFF")]
+      [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet ("{id}")]
       public ActionResult GetDate(int id) {
         var date = _unitOfWork.Dates.GetBy(id);
@@ -64,7 +64,7 @@ namespace webapi.Controllers
       }
 
       // PUT: api/dates/id
-      [Authorize (Roles = "STAFF")]
+      [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
       public ActionResult PutDate(int id, EditDate values) {
         var date = _unitOfWork.Dates.GetBy(id);
@@ -86,7 +86,7 @@ namespace webapi.Controllers
       }
 
       // POST: api/dates
-      [Authorize (Roles = "STAFF")]
+      [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public ActionResult PostDate(AddDate values) {
         DateTime departureDate = Convert.ToDateTime(values.DepartureDate);
@@ -110,7 +110,7 @@ namespace webapi.Controllers
       }
 
       // DELETE: api/dates/id
-      [Authorize (Roles = "STAFF")]
+      [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
       public ActionResult DeleteDate(int id) {
         var date = _unitOfWork.Dates.GetBy(id);
