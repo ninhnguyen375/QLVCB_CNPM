@@ -66,6 +66,12 @@ namespace webapi.Controllers
                      select f);
         }
 
+        // Search by Status:
+        if (search.Status != null) {
+          flights = flights.Where(f =>
+            f.Status == search.Status);
+        }
+
         // Sort Asc:
         if (search.sortAsc != "") {
           flights = flights.OrderBy(f =>
