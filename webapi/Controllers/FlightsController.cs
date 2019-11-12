@@ -33,8 +33,8 @@ namespace webapi.Controllers
       public ActionResult GetFlights([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
         _unitOfWork.Airlines.GetAll();
         _unitOfWork.Airports.GetAll();
+        _unitOfWork.TicketCategories.GetAll();
         IEnumerable<FlightDTO> flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
-
         
         // Search by Id:
         if (search.Id != "") {
