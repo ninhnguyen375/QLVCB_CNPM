@@ -34,8 +34,9 @@ namespace webapi.Controllers
         _unitOfWork.Airlines.GetAll();
         _unitOfWork.Airports.GetAll();
         _unitOfWork.TicketCategories.GetAll();
+        _unitOfWork.Flights.GetFlightTicketCategories();
         IEnumerable<FlightDTO> flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
-        
+
         // Search by Id:
         if (search.Id != "") {
           flights = flights.Where(f =>
@@ -102,8 +103,11 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet ("{id}")]
       public ActionResult GetFlight(string id) {
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        _unitOfWork.Airlines.GetAll();
+        _unitOfWork.Airports.GetAll();
+        _unitOfWork.TicketCategories.GetAll();
+        _unitOfWork.Flights.GetFlightTicketCategories();
+        var flight = _mapper.Map<Flight, FlightDTO>(_unitOfWork.Flights.GetBy(id));
 
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
