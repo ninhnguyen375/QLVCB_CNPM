@@ -11,6 +11,7 @@ namespace webapi.core.DTOs
       public string FlightId { get; set; }
 
       public int TicketCategoryId { get; set; }
+      public TicketCategoryDTO TicketCategory { get; set; }
 
       public decimal Price { get; set; }
     }
