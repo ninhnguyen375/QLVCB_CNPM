@@ -1,29 +1,23 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
-using System;
-using System.ComponentModel.DataAnnotations;
-using webapi.core.Interfaces;
+using webapi.core.Domain.Entities;
 
-namespace webapi.core.Domain.Entities
+namespace webapi.core.DTOs
 {
-    public class Flight : IAggregateRoot
+    public class FlightDTO
     {
-      [Key]
       public string Id { get; set; }
-      [Required]
       public int StartTime { get; set; }
-      [Required]
       public int FlightTime { get; set; }
-      [Required]
+
       public string AirportFrom { get; set; }
       [ForeignKey("AirportFrom")]
-      public Airport AirportFromData { get; set; }
-      [Required]
+      public AirportDTO AirportFromData { get; set; }
+
       public string AirportTo { get; set; }
       [ForeignKey("AirportTo")]
-      public Airport AirportToData { get; set; }
+      public AirportDTO AirportToData { get; set; }
 
-      [Required]
       public int SeatsCount { get; set; }
 
       // Status: 1 => Active, 0 => Inactive
@@ -31,7 +25,7 @@ namespace webapi.core.Domain.Entities
       
       // Foreign Key (N - 1)
       public string AirlineId { get; set; }
-      public Airline Airline { get; set; }
+      public AirlineDTO Airline { get; set; }
 
 
       public virtual ICollection<DateFlight> DateFlights { get; set; } 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using webapi.core.Interfaces;
 
@@ -10,5 +11,7 @@ namespace webapi.core.Domain.Entities
 
         [Required]
         public string Name { get; set; }
+
+        public ICollection<Flight> Flights { get; set; }
     }
 }
