@@ -24,3 +24,12 @@ Content-Type: application/json
 	],
 	"flightids": ["VJ100", "VJ101"]
 }
+
+### acept order
+PUT http://localhost:5000/api/orders/0002/accept HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
+
+{
+	"userId": 1
+}
