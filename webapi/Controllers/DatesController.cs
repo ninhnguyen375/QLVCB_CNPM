@@ -88,22 +88,30 @@ namespace webapi.Controllers
       // POST: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
-      public ActionResult PostDate(AddDate values) {
-        DateTime departureDate = Convert.ToDateTime(values.DepartureDate);
+      public ActionResult PostDate(Date date) {
+        DateTime departureDate = Convert.ToDateTime(date.DepartureDate);
 
-        var date = _unitOfWork.Dates.Find(d =>
-          d.DepartureDate == departureDate
-        );
+        var dateTemp = _unitOfWork.Dates.Find(d =>
+          d.DepartureDate == departureDate);
 
-        if (date.Count() > 0) {
+        if (dateTemp.Count() > 0) {
           return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });
         }
 
-        _unitOfWork.Dates.Add(
-          new Date {
-            DepartureDate = departureDate
+        if (date.DateFlights != null) {
+          var flights = _unitOfWork.Flights.GetAll();
+
+          // Thêm ghế còn lại và trạng thái cho chuyến bay
+          foreach (var dateFlight in date.DateFlights) {
+            dateFlight.SeatsLeft = flights.Where(f =>
+              f.Id == dateFlight.FlightId)
+              .Select(f => f.SeatsCount)
+              .SingleOrDefault();
+            dateFlight.Status = 1; // Còn chỗ
           }
-        );
+        }
+
+        _unitOfWork.Dates.Add(date);
         _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Thêm thành công." });
@@ -119,7 +127,73 @@ namespace webapi.Controllers
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
         }
       
+        // Xóa các chuyến bay trong ngày bị xóa
+        var dateFlights = _unitOfWork.DateFlights.GetAll();
+        foreach (var dateFlight in dateFlights) {
+          if (dateFlight.DateId == id) {
+            _unitOfWork.DateFlights.Remove(dateFlight);
+          }
+        }
+
         _unitOfWork.Dates.Remove(date);
+        _unitOfWork.Complete();
+
+        return Ok (new { success = true, message = "Xóa thành công" });
+      }
+
+      // POST: api/dates/id/addflights
+      [Authorize (Roles = "STAFF, ADMIN")]
+      [HttpPost ("{id}/addflights")]
+      public ActionResult PostFlight(int id, AddDateFlight values) {
+        var date = _unitOfWork.Dates.GetBy(id);
+
+        if (date == null) {
+          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
+        }
+
+        var flights = _unitOfWork.Flights.GetAll();
+
+        // Thêm thông tin cho chuyến bay: gồm ngày, ghế còn lại, trạng thái
+        foreach (var dateFlight in values.DateFlights) {
+          dateFlight.DateId = id;
+          dateFlight.SeatsLeft = flights.Where(f =>
+            f.Id == dateFlight.FlightId)
+            .Select(f => f.SeatsCount)
+            .SingleOrDefault();
+          dateFlight.Status = 1; // Còn chỗ
+          _unitOfWork.DateFlights.Add(dateFlight);
+        }
+
+        _unitOfWork.Complete();
+
+        return Ok (new { success = true, message = "Thêm thành công." });
+      }
+
+      // DELETE: api/dates/id/removeflight
+      [Authorize (Roles = "STAFF, ADMIN")]
+      [HttpDelete ("{id}/removeflight")]
+      public ActionResult DeleteFlight(int id, RemoveFlight values) {
+        var date = _unitOfWork.Dates.GetBy(id);
+
+        if (date == null) {
+          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
+        }
+      
+        var flight = _unitOfWork.Flights.Find(a =>
+            a.Id.ToLower().Equals(values.FlightId.ToLower()))
+            .SingleOrDefault();
+
+        // Kiểm tra chuyến bay có tồn tại hay không
+        if (flight == null) {
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
+        }
+
+        // Xóa chuyến bay được chọn
+        var dateFlight = _unitOfWork.DateFlights.Find(df =>
+          df.DateId == id &&
+          df.FlightId.ToLower().Equals(values.FlightId.ToLower())).SingleOrDefault();
+
+        _unitOfWork.DateFlights.Remove(dateFlight);
         _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Xóa thành công" });
