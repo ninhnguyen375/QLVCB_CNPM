@@ -27,9 +27,6 @@ namespace webapi.core.DTOs
       public string AirlineId { get; set; }
       public AirlineDTO Airline { get; set; }
 
-
-      public virtual ICollection<DateFlight> DateFlights { get; set; } 
-
-      public virtual ICollection<FlightTicketCategory> FlightTicketCategories { get; set; } 
+      public virtual ICollection<FlightTicketCategoryDTO> FlightTicketCategories { get; set; } 
     }
 }
