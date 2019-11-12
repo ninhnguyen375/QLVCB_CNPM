@@ -1,10 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
+using AutoMapper;
+using webapi.core.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers
 {
@@ -14,16 +20,21 @@ namespace webapi.Controllers
     public class FlightsController : ControllerBase
     {
       private readonly IUnitOfWork _unitOfWork;
+      private readonly IMapper _mapper;
 
-      public FlightsController(IUnitOfWork unitOfWork) {
+      public FlightsController(IUnitOfWork unitOfWork, IMapper mapper) {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
       }
 
       // GET: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetFlights([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
-        var flights = _unitOfWork.Flights.GetAll();
+        _unitOfWork.Airlines.GetAll();
+        _unitOfWork.Airports.GetAll();
+        IEnumerable<FlightDTO> flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
+
         
         // Search by Id:
         if (search.Id != "") {
@@ -61,7 +72,7 @@ namespace webapi.Controllers
 
           flights = (from f in flights
                      from a in airlines
-                     where f.AirlineId.ToLower().Equals(a.Id.ToLower()) && 
+                     where f.AirlineId.Equals(a.Id) && 
                      a.Name.ToLower().Contains(search.AirlineName.ToLower())
                      select f);
         }
@@ -84,7 +95,7 @@ namespace webapi.Controllers
             f.GetType().GetProperty(search.sortDesc).GetValue(f));
         }
 
-        return Ok (PaginatedList<Flight>.Create(flights, pagination.current, pagination.pageSize));
+        return Ok (PaginatedList<FlightDTO>.Create(flights, pagination.current, pagination.pageSize));
       }
 
       // GET: api/flights/id

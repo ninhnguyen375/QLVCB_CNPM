@@ -1,0 +1,2 @@
+GET http://localhost:5000/api/airports HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
