@@ -26,7 +26,7 @@ namespace webapi.infrastructure.Persistance {
       {
           context.Users.Add (
             new User {
-              Email = "ning@ninh.com" + i,
+                Email = "ninh" +  i + "@ninh.com",
                 FullName = "ninh" + i,
                 Identifier = "000000" + i,
                 Password = "$2b$10$IZshIpJy3mRvjTGJJYD45OOccUcUNI8RrCUvURHcemPbdNfXR/q3i",
