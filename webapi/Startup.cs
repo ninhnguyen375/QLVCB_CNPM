@@ -19,6 +19,7 @@ using webapi.core.Interfaces;
 using webapi.Helpers;
 using webapi.infrastructure.Persistance;
 using webapi.infrastructure.Persistance.Repositories;
+using webapi.core.Mapping;
 
 namespace webapi {
     public class Startup {
@@ -31,6 +32,7 @@ namespace webapi {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services) {
+            services.AddAutoMapper(typeof(MappingProfile));
             services.AddControllers().AddNewtonsoftJson();
             services.AddCors (options => {
                 options.AddPolicy (MyAllowSpecificOrigins,
