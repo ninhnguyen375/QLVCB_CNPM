@@ -53,6 +53,10 @@ namespace webapi.Controllers
             d.GetType().GetProperty(search.sortDesc).GetValue(d));
         }
 
+        // Default order newest departureDate
+        dates = dates.OrderByDescending(d =>
+            d.DepartureDate);
+
         return Ok (PaginatedList<DateDTO>.Create(dates, pagination.current, pagination.pageSize));
       }
 

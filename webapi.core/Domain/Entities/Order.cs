@@ -18,7 +18,7 @@ namespace webapi.core.Domain.Entities
       [DataType(DataType.DateTime)]
       public DateTime CreateAt { get; set; }
 
-      // Status: 0 => Unconfirm, 1 => Confirm
+      // Status: 0 => New, 1 => Confirm, 2 => Unconfirm
       public int Status { get; set; } = 0;
       
       // Foreign key for DateId
