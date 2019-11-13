@@ -213,5 +213,12 @@ namespace webapi.Controllers
 
         return Ok (new { success = true, message = "Xóa thành công" });
       }
+
+      // GET: api/dates/searchflights
+      [AllowAnonymous]
+      [HttpGet]
+      public ActionResult SearchFlights(SearchFlightFE value) {
+            return Ok();
+      }
     }
 }
