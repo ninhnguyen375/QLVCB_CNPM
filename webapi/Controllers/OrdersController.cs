@@ -1,4 +1,5 @@
 using System;
+using webapi.core.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
+using AutoMapper;
 
 namespace webapi.Controllers {
   [Authorize]
@@ -14,16 +16,19 @@ namespace webapi.Controllers {
   [ApiController]
   public class OrdersController : ControllerBase {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-    public OrdersController (IUnitOfWork unitOfWork) {
+    public OrdersController (IUnitOfWork unitOfWork, IMapper mapper) {
       _unitOfWork = unitOfWork;
+      _mapper = mapper;
     }
     
     // GET: api/orders
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet]
     public ActionResult GetOrders ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
-      var orders = _unitOfWork.Orders.GetAll ();
+      _unitOfWork.Customers.GetAll();
+      var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(_unitOfWork.Orders.GetAll ());
       
       // Search by TicketCount:
       if (search.TicketCount != null) {
@@ -105,7 +110,7 @@ namespace webapi.Controllers {
           o.GetType().GetProperty(search.sortDesc).GetValue(o));
       }
 
-      return Ok (PaginatedList<Order>.Create(orders, pagination.current, pagination.pageSize));
+      return Ok (PaginatedList<OrderDTO>.Create(orders, pagination.current, pagination.pageSize));
     }
 
     // GET: api/orders/id
