@@ -1,3 +1,4 @@
+using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
+using AutoMapper;
+using webapi.core.DTOs;
 
 namespace webapi.Controllers
 {
@@ -16,16 +19,19 @@ namespace webapi.Controllers
     public class DatesController : ControllerBase
     {
       private readonly IUnitOfWork _unitOfWork;
+      private readonly IMapper _mapper;
 
-      public DatesController(IUnitOfWork unitOfWork) {
+      public DatesController(IUnitOfWork unitOfWork, IMapper mapper) {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
       }
 
       // GET: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
-        var dates = _unitOfWork.Dates.GetAll();
+        _unitOfWork.Dates.getDateFlights();
+        var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(_unitOfWork.Dates.GetAll());
 
         // Search by DepartureDate
         if (search.DepartureDate != "") {
@@ -47,7 +53,7 @@ namespace webapi.Controllers
             d.GetType().GetProperty(search.sortDesc).GetValue(d));
         }
 
-        return Ok (PaginatedList<Date>.Create(dates, pagination.current, pagination.pageSize));
+        return Ok (PaginatedList<DateDTO>.Create(dates, pagination.current, pagination.pageSize));
       }
 
       // GET: api/dates/id
@@ -151,17 +157,22 @@ namespace webapi.Controllers
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
         }
 
+
         var flights = _unitOfWork.Flights.GetAll();
 
         // Thêm thông tin cho chuyến bay: gồm ngày, ghế còn lại, trạng thái
         foreach (var dateFlight in values.DateFlights) {
-          dateFlight.DateId = id;
-          dateFlight.SeatsLeft = flights.Where(f =>
-            f.Id == dateFlight.FlightId)
-            .Select(f => f.SeatsCount)
-            .SingleOrDefault();
-          dateFlight.Status = 1; // Còn chỗ
-          _unitOfWork.DateFlights.Add(dateFlight);
+          if(_unitOfWork.Dates.getDateFlight(id, dateFlight.FlightId) == null) {
+            dateFlight.DateId = id;
+            dateFlight.SeatsLeft = flights.Where(f =>
+              f.Id == dateFlight.FlightId)
+              .Select(f => f.SeatsCount)
+              .SingleOrDefault();
+            dateFlight.Status = 1; // Còn chỗ
+            _unitOfWork.DateFlights.Add(dateFlight);
+          } else {
+            return BadRequest(new { success = false, message = "Chuyến bay đã tồn tại trong ngày." });
+          }
         }
 
         _unitOfWork.Complete();
