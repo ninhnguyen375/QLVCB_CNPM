@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -11,5 +12,7 @@ namespace webapi.core.DTOs
       public int Id { get; set; }
 
       public DateTime DepartureDate { get; set; }
+
+      public virtual ICollection<DateFlightDTO> DateFlights { get; set; }
     }
 }

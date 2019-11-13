@@ -136,6 +136,10 @@ namespace webapi.infrastructure.Migrations
 
                     b.HasIndex("AirlineId");
 
+                    b.HasIndex("AirportFrom");
+
+                    b.HasIndex("AirportTo");
+
                     b.ToTable("Flights");
                 });
 
@@ -321,8 +325,20 @@ namespace webapi.infrastructure.Migrations
             modelBuilder.Entity("webapi.core.Domain.Entities.Flight", b =>
                 {
                     b.HasOne("webapi.core.Domain.Entities.Airline", "Airline")
-                        .WithMany()
+                        .WithMany("Flights")
                         .HasForeignKey("AirlineId");
+
+                    b.HasOne("webapi.core.Domain.Entities.Airport", "AirportFromData")
+                        .WithMany()
+                        .HasForeignKey("AirportFrom")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("webapi.core.Domain.Entities.Airport", "AirportToData")
+                        .WithMany()
+                        .HasForeignKey("AirportTo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("webapi.core.Domain.Entities.FlightTicketCategory", b =>
