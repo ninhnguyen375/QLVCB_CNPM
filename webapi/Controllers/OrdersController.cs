@@ -129,7 +129,8 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/accept
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/accept")]
-    public ActionResult AcceptOrder (string id, EditOrder values) {
+    public ActionResult AcceptOrder (string id) {
+      var currentUserId = int.Parse (User.Identity.Name);
       var order = _unitOfWork.Orders.GetBy (id);
 
       if (order == null) {
@@ -156,7 +157,7 @@ namespace webapi.Controllers {
       }
 
       order.Status = 1; // Confirm
-      order.UserId = values.UserId; // Get User do this
+      order.UserId = currentUserId; // Get User do this
       customer.BookingCount++;
 
       _unitOfWork.Complete();
@@ -167,7 +168,8 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/refuse
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/refuse")]
-    public ActionResult RefuseOrder (string id, EditOrder values) {
+    public ActionResult RefuseOrder (string id) {
+      var currentUserId = int.Parse (User.Identity.Name);
       var order = _unitOfWork.Orders.GetBy (id);
 
       if (order == null) {
@@ -175,7 +177,7 @@ namespace webapi.Controllers {
       }
 
       order.Status = 2; // Unconfirm
-      order.UserId = values.UserId; // Get User do this
+      order.UserId = currentUserId; // Get User do this
       _unitOfWork.Complete();
 
       return Ok (new { success = true, data = order, message = "Từ chối hóa đơn thành công." });
