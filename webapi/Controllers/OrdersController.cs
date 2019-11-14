@@ -30,6 +30,12 @@ namespace webapi.Controllers {
       _unitOfWork.Customers.GetAll();
       var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(_unitOfWork.Orders.GetAll ());
       
+      // Search by Id:
+      if (search.Id != "") {
+        orders = orders.Where(o =>
+          o.Id.Contains(search.Id));
+      }
+
       // Search by TicketCount:
       if (search.TicketCount != null) {
         orders = orders.Where(o =>

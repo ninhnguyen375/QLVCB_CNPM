@@ -4,6 +4,7 @@ namespace webapi.core.UseCases
 {
     public class SearchOrder
     {
+        public string Id { get; set; } = "";
         public int? TicketCount { get; set; }
         public decimal? TotalPrice  { get; set; }
         public int? Status { get; set; }
