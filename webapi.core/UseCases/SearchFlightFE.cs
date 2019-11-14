@@ -11,7 +11,7 @@ namespace webapi.core.UseCases
         public string AirportFrom { get; set; }
         public string AirportTo { get; set; }
         public string DepartureDate { get; set; }
-        public string ReturnDate { get; set; }
+        public string ReturnDate { get; set; } = "";
         public IList<TicketCategoriesOfSearchFlightFE> TicketCategories  { get; set; }
     }
 }

@@ -11,17 +11,16 @@ namespace webapi.infrastructure.Persistance.Repositories
       {
       }
     
-      public IEnumerable<DateFlight> getDateFlights() {
+      public IEnumerable<DateFlight> GetDateFlights() {
         return AppDbContext.DateFlights.ToList();
       }
 
-        public DateFlight getDateFlight(int dateId, string flightId){
+      public DateFlight GetDateFlight(int dateId, string flightId){
         return AppDbContext.DateFlights.SingleOrDefault(
           df => df.DateId.Equals(dateId) && 
           df.FlightId.Equals(flightId)
         );
       }
-
 
       protected AppDbContext AppDbContext {
         get { return Context as AppDbContext; }
