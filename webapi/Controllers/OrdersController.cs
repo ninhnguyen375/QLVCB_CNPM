@@ -117,11 +117,22 @@ namespace webapi.Controllers {
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet ("{id}")]
     public ActionResult GetOrder (string id) {
-      var order = _unitOfWork.Orders.GetBy (id);
+      _unitOfWork.Customers.GetAll();
+      _unitOfWork.Luggages.GetAll();
+      _unitOfWork.TicketCategories.GetAll();
+      _unitOfWork.Airports.GetAll();
+      _unitOfWork.Airlines.GetAll();
+      _unitOfWork.Flights.GetAll();
+      _unitOfWork.Dates.GetAll();
+
+      var order = _mapper.Map<Order, OrderDTO>(_unitOfWork.Orders.GetBy (id));
+      var tickets = _mapper.Map<IEnumerable<Ticket>, IEnumerable<TicketDTO>>(_unitOfWork.Tickets.Find(t => t.OrderId.Equals(order.Id)));
 
       if (order == null) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
       }
+
+      order.Tickets = (ICollection<TicketDTO>)tickets;
 
       return Ok (new { success = true, data = order });
     }
