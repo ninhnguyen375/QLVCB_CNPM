@@ -16,19 +16,18 @@ namespace webapi.core.DTOs
 
       // Foreign key for Luggage
       public int LuggageId { get; set; }
-      public Luggage Luggage { get; set; }
+      public LuggageDTO Luggage { get; set; }
       
       // Foreign key for Flight
       public string FlightId { get; set; }
-      public Flight Flight { get; set; } 
+      public FlightDTO Flight { get; set; } 
       
       // Foreign key for Order
       public string OrderId { get; set; }
-      public Order Order { get; set; } 
       
       // Foreign key for TicketCategory
       public int TicketCategoryId { get; set; }
-      public TicketCategory TicketCategory { get; set; } 
+      public TicketCategoryDTO TicketCategory { get; set; } 
       
     }
 }
