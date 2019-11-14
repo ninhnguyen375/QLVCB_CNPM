@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System;
 using System.ComponentModel.DataAnnotations;
 using webapi.core.Interfaces;
@@ -20,14 +22,16 @@ namespace webapi.core.DTOs
       
       // Foreign key for DateId
       public int DateId { get; set; }
-      public Date Date { get; set; }
+      public DateDTO Date { get; set; }
 
       // Foreign Key (N - 1)
       public string CustomerId { get; set; } // Để thao tác trong Controller
-      public Customer Customer { get; set; }
+      public CustomerDTO Customer { get; set; }
 
       // Foreign Key (N - 1)
       public int? UserId { get; set; } // Để thao tác trong Controller
-      public User User { get; set; }
+      public UserDTO User { get; set; }
+
+      public virtual ICollection<TicketDTO> Tickets { get; set; }
     }
 }
