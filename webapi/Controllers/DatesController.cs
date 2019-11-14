@@ -30,7 +30,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
-        _unitOfWork.Dates.getDateFlights();
+        _unitOfWork.Dates.GetDateFlights();
         var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(_unitOfWork.Dates.GetAll());
 
         // Search by DepartureDate
@@ -166,7 +166,7 @@ namespace webapi.Controllers
 
         // Thêm thông tin cho chuyến bay: gồm ngày, ghế còn lại, trạng thái
         foreach (var dateFlight in values.DateFlights) {
-          if(_unitOfWork.Dates.getDateFlight(id, dateFlight.FlightId) == null) {
+          if(_unitOfWork.Dates.GetDateFlight(id, dateFlight.FlightId) == null) {
             dateFlight.DateId = id;
             dateFlight.SeatsLeft = flights.Where(f =>
               f.Id == dateFlight.FlightId)
@@ -214,11 +214,68 @@ namespace webapi.Controllers
         return Ok (new { success = true, message = "Xóa thành công" });
       }
 
-      // GET: api/dates/searchflights
+      // POST: api/dates/searchflights
       [AllowAnonymous]
-      [HttpGet]
-      public ActionResult SearchFlights(SearchFlightFE value) {
-            return Ok();
+      [HttpPost ("searchflights")]
+      public ActionResult SearchFlights(SearchFlightFE values) {
+        var departureDate = Convert.ToDateTime(values.DepartureDate);
+
+        // Flights:
+        _unitOfWork.Airlines.GetAll();
+        _unitOfWork.Airports.GetAll();
+        _unitOfWork.TicketCategories.GetAll();
+        _unitOfWork.Flights.GetFlightTicketCategories();
+        var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
+
+        // DateFlights:
+        var dateFlights = _mapper.Map<IEnumerable<DateFlight>, IEnumerable<DateFlightDTO>>(_unitOfWork.DateFlights.GetAll());
+
+        // Dates:
+        var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(_unitOfWork.Dates.GetAll());
+
+        // Total Passengers:
+        int totalSeats= 0;
+        foreach (var passenger in values.TicketCategories) {
+          if (passenger.Id != 3) { // *Gán cứng*: 3 là em bé nên ko tính số ghế
+            totalSeats += passenger.Quantity;
+          }   
+        }
+
+        // Search Departure Flights:
+        var departureFlights = (
+          from f in flights 
+          from df in dateFlights
+          from d in dates
+          where f.Id.Equals(df.FlightId) &&
+                d.Id.Equals(df.DateId) &&
+                d.DepartureDate == departureDate &&
+                f.AirportFrom.Equals(values.AirportFrom) &&
+                f.AirportTo.Equals(values.AirportTo) &&
+                df.SeatsLeft >= totalSeats // Số ghế trống phải >= Số hành khách đăng ký
+          select f
+        );
+
+        // Search Return Flights:
+        IEnumerable<FlightDTO> returnFlights = null;
+        if (values.ReturnDate != "") {
+          var returnDate = Convert.ToDateTime(values.ReturnDate);
+          returnFlights = (
+            from f in flights 
+            from df in dateFlights
+            from d in dates
+            where f.Id.Equals(df.FlightId) &&
+                  d.Id.Equals(df.DateId) &&
+                  d.DepartureDate == returnDate &&
+                  f.AirportFrom.Equals(values.AirportTo) && // Đổi vị trí From và To cho chiều về
+                  f.AirportTo.Equals(values.AirportFrom) &&
+                  df.SeatsLeft >= totalSeats
+            select f
+          );
+        } else {
+          return Ok (new { success = true, DepartureFlights = departureFlights });
+        }
+
+        return Ok (new { success = true, DepartureFlights = departureFlights, ReturnFlights = returnFlights });
       }
     }
 }
