@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
+using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
@@ -14,16 +17,20 @@ namespace webapi.Controllers
     public class AirlinesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public AirlinesController(IUnitOfWork unitOfWork) {
+        public AirlinesController(IUnitOfWork unitOfWork, IMapper mapper) {
           _unitOfWork = unitOfWork;
+          _mapper = mapper;
         }
 
         // GET: api/airlines
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetAirlines([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
-          var airlines = _unitOfWork.Airlines.GetAll();
+          // Mapping: Airline
+          var airlinesSource = _unitOfWork.Airlines.GetAll();
+          var airlines = _mapper.Map<IEnumerable<Airline>, IEnumerable<AirlineDTO>>(airlinesSource);
 
           // Search by Id:
           if (search.Id != "") {
@@ -49,15 +56,17 @@ namespace webapi.Controllers
               a.GetType().GetProperty(search.sortDesc).GetValue(a));
           }
 
-          return Ok (PaginatedList<Airline>.Create(airlines, pagination.current, pagination.pageSize));
+          return Ok (PaginatedList<AirlineDTO>.Create(airlines, pagination.current, pagination.pageSize));
         }
 
         // GET: api/airlines/id
         [AllowAnonymous]
         [HttpGet ("{id}")]
         public ActionResult GetAirline(string id) {
-          var airline = _unitOfWork.Airlines.Find(a =>
+          // Mapping: Airline
+          var airlineSource = _unitOfWork.Airlines.Find(a =>
             a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airline = _mapper.Map<Airline, AirlineDTO>(airlineSource);
 
           if (airline == null) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
