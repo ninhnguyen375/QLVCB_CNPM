@@ -78,7 +78,7 @@ namespace webapi.Controllers
         // PUT: api/airlines/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutAirline(string id, EditAirline values) {
+        public ActionResult PutAirline(string id, SaveAirlineDTO saveAirlineDTO) {
           var airline = _unitOfWork.Airlines.Find(a =>
             a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
 
@@ -87,13 +87,15 @@ namespace webapi.Controllers
           }
           
           if (_unitOfWork.Airlines.Find(a =>
-                a.Name.ToLower().Equals(values.Name.ToLower()) &&
+                a.Name.ToLower().Equals(saveAirlineDTO.Name.ToLower()) &&
                 !a.Id.ToLower().Equals(id.ToLower()))
                 .Count() != 0) {
             return BadRequest (new  { Name = "Tên hãng hàng không này đã tồn tại." });
           }
 
-          airline.Name = values.Name;
+          // Mapping: SaveAirline
+          _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO, airline);
+
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = airline, message = "Sửa thành công." });
@@ -102,7 +104,10 @@ namespace webapi.Controllers
         // POST: api/airlines
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostAirline(Airline airline) {
+        public ActionResult PostAirline(SaveAirlineDTO saveAirlineDTO) {
+          // Mapping: SaveAirline
+          var airline = _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO);
+
           // Check id đã tồn tại trong Database chưa
           if(_unitOfWork.Airlines.Find(a => 
               a.Id.ToLower().Equals(airline.Id.ToLower()))
