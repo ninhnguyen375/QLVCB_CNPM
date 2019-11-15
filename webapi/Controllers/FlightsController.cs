@@ -102,7 +102,7 @@ namespace webapi.Controllers
       }
 
       // GET: api/flights/id
-      [Authorize (Roles = "STAFF, ADMIN")]
+      [AllowAnonymous]
       [HttpGet ("{id}")]
       public ActionResult GetFlight(string id) {
         // Mapping: Flight
