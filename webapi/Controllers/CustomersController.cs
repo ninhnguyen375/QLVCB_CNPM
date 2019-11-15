@@ -91,7 +91,7 @@ namespace webapi.Controllers
         // PUT: api/customers/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutCustomer(string id, EditCustomer values) {
+        public ActionResult PutCustomer(string id, SaveCustomerDTO saveCustomerDTO) {
           var customer = _unitOfWork.Customers.Find(c =>
             c.Id.Equals(id)).SingleOrDefault();
           
@@ -100,13 +100,15 @@ namespace webapi.Controllers
           }
 
           if (_unitOfWork.Customers.Find(c =>
-                c.Phone.Equals(values.Phone))
+                c.Phone.Equals(saveCustomerDTO.Phone) &&
+                !c.Id.Equals(id))
                 .Count() != 0) {
             return BadRequest (new { Phone = "Số điện thoại này đã tồn tại." });
           }
 
-          customer.FullName = values.FullName;
-          customer.Phone = values.Phone;
+          // Mapping: SaveCustomer
+          _mapper.Map<SaveCustomerDTO, Customer>(saveCustomerDTO, customer);
+
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = customer, message = "Sửa thành công." });
