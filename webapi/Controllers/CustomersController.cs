@@ -79,6 +79,12 @@ namespace webapi.Controllers
             return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
           }
 
+          var ordersSource = _unitOfWork.Customers.GetOrdersById(customer.Id);
+          _unitOfWork.Users.GetAll();
+          var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(ordersSource);
+
+          customer.Orders = (ICollection<OrderDTO>) orders;
+
           return Ok (new { success = true, data = customer });
         }
 

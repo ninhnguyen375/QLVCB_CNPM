@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 
 namespace webapi.core.DTOs
@@ -13,5 +14,7 @@ namespace webapi.core.DTOs
         public string Phone { get; set; }
 
         public int BookingCount { get; set; }
+
+        public ICollection<OrderDTO> Orders { get; set; }
     }
 }
