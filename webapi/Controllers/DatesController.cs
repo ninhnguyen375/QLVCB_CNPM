@@ -81,7 +81,7 @@ namespace webapi.Controllers
       // PUT: api/dates/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutDate(int id, EditDate values) {
+      public ActionResult PutDate(int id, SaveDateDTO saveDateDTO) {
         var date = _unitOfWork.Dates.GetBy(id);
 
         if (date == null) {
@@ -89,12 +89,15 @@ namespace webapi.Controllers
         }
 
         if (_unitOfWork.Dates.Find(d =>
-              d.DepartureDate == Convert.ToDateTime(values.DepartureDate))
+              d.DepartureDate == Convert.ToDateTime(saveDateDTO.DepartureDate) &&
+              d.Id != id)
               .Count() != 0 ) {
           return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });        
         }
 
-        date.DepartureDate = Convert.ToDateTime(values.DepartureDate);
+        // Mapping: SaveDate
+        _mapper.Map<SaveDateDTO, Date>(saveDateDTO, date);
+
         _unitOfWork.Complete();
 
         return Ok (new { success = true, data = date, message = "Sửa thành công" });
@@ -103,7 +106,10 @@ namespace webapi.Controllers
       // POST: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
-      public ActionResult PostDate(Date date) {
+      public ActionResult PostDate(SaveDateDTO saveDateDTO) {
+        // Mapping: SaveDate
+        var date = _mapper.Map<SaveDateDTO, Date>(saveDateDTO);
+        
         DateTime departureDate = Convert.ToDateTime(date.DepartureDate);
 
         var dateTemp = _unitOfWork.Dates.Find(d =>
