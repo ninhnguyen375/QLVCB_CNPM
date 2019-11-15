@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
+using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
@@ -14,16 +17,21 @@ namespace webapi.Controllers
     public class TicketCategoriesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        public TicketCategoriesController(IUnitOfWork unitOfWork) {
+        private readonly IMapper _mapper;
+        
+        public TicketCategoriesController(IUnitOfWork unitOfWork, IMapper mapper) {
           _unitOfWork = unitOfWork;
+          _mapper = mapper;
         }
 
         // GET: api/ticketcategories
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetTicketCategories([FromQuery] Pagination pagination, [FromQuery] SearchTicketCategory search) {
-          var ticketCategories = _unitOfWork.TicketCategories.GetAll();
-          
+          // Mapping: TicketCategory
+          var ticketCategoriesSource = _unitOfWork.TicketCategories.GetAll();
+          var ticketCategories = _mapper.Map<IEnumerable<TicketCategory>, IEnumerable<TicketCategoryDTO>>(ticketCategoriesSource);
+
           // Search by Name:
           if (search.Name != "") {
             ticketCategories = ticketCategories.Where(tc => 
@@ -42,14 +50,16 @@ namespace webapi.Controllers
               tc.GetType().GetProperty(search.sortDesc).GetValue(tc));
           }
 
-          return Ok (PaginatedList<TicketCategory>.Create(ticketCategories, pagination.current, pagination.pageSize));
+          return Ok (PaginatedList<TicketCategoryDTO>.Create(ticketCategories, pagination.current, pagination.pageSize));
         }
 
         // GET: api/ticketcategories/id
         [AllowAnonymous]
         [HttpGet ("{id}")]
         public ActionResult GetTicketCategory(int id) {
-          var ticketCategory = _unitOfWork.TicketCategories.GetBy(id);
+          // Mapping: TicketCategory
+          var ticketCategorySource = _unitOfWork.TicketCategories.GetBy(id);
+          var ticketCategory = _mapper.Map<TicketCategory, TicketCategoryDTO>(ticketCategorySource);
 
           if (ticketCategory == null) {
             return NotFound (new { Id = "Mã loại vé này không tồn tại." });

@@ -127,8 +127,7 @@ namespace webapi.Controllers {
     [HttpGet ("{id}")]
     public ActionResult GetOrder (string id) {
       // Mapping: Order
-      var orderSource = _unitOfWork.Orders.Find(o =>
-        o.Id.Equals(id)).SingleOrDefault();
+      var orderSource = _unitOfWork.Orders.GetBy(id);
       _unitOfWork.Customers.GetAll();
       _unitOfWork.Luggages.GetAll();
       _unitOfWork.TicketCategories.GetAll();
