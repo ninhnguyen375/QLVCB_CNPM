@@ -4,16 +4,16 @@ namespace webapi.core.DTOs
 {
     public class SaveAirportDTO
     {
-        [Required]
-        [StringLength(3, MinimumLength = 3)]
+        [Required(ErrorMessage = "Mã sân bay không được để trống.")]
+        [StringLength(3, MinimumLength = 3, ErrorMessage = "Mã sân bay phải có 3 ký tự.")]
         public string Id { get; set; }
 
-        [Required]
-        [StringLength(40, MinimumLength = 4)]
+        [Required(ErrorMessage = "Tên sân bay không được để trống.")]
+        [StringLength(40, MinimumLength = 4, ErrorMessage = "Tên sân bay phải có ít nhất 4 ký tự.")]
         public string Name { get; set; }
 
-        [Required]
-        [StringLength(40, MinimumLength = 4)]
+        [Required(ErrorMessage = "Tỉnh/Thành phố không được để trống.")]
+        [StringLength(40, MinimumLength = 4, ErrorMessage = "Tên sân bay phải có ít nhất 4 ký tự.")]
         public string Location { get; set; }
     }
 }
