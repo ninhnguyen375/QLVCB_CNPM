@@ -11,10 +11,11 @@ namespace webapi.core.Mapping
 
             // 2. Airport
             CreateMap<Airport, AirportDTO>();
-            
             CreateMap<SaveAirportDTO, Airport>();
 
+            // 3. Airline
             CreateMap<Airline, AirlineDTO>();
+            CreateMap<SaveAirlineDTO, Airline>();
 
             CreateMap<Customer, CustomerDTO>();
 
