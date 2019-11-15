@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 
@@ -10,6 +12,13 @@ namespace webapi.infrastructure.Persistance.Repositories
       }
       protected AppDbContext AppDbContext {
         get { return Context as AppDbContext; }
+      }
+
+      public IEnumerable<Order> GetOrdersById(string id) {
+        return (
+          Context.Orders.Where(o =>
+            o.CustomerId.Equals(id))
+        );
       }
     }
 }
