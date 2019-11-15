@@ -31,11 +31,13 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetFlights([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
+        // Mapping: Flight
+        var flightsSource = _unitOfWork.Flights.GetAll();
         _unitOfWork.Airlines.GetAll();
         _unitOfWork.Airports.GetAll();
         _unitOfWork.TicketCategories.GetAll();
         _unitOfWork.Flights.GetFlightTicketCategories();
-        IEnumerable<FlightDTO> flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
+        var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(flightsSource);
 
         // Search by Id:
         if (search.Id != "") {
@@ -103,11 +105,13 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet ("{id}")]
       public ActionResult GetFlight(string id) {
+        // Mapping: Flight
+        var flightSource = _unitOfWork.Flights.GetBy(id);
         _unitOfWork.Airlines.GetAll();
         _unitOfWork.Airports.GetAll();
         _unitOfWork.TicketCategories.GetAll();
         _unitOfWork.Flights.GetFlightTicketCategories();
-        var flight = _mapper.Map<Flight, FlightDTO>(_unitOfWork.Flights.GetBy(id));
+        var flight = _mapper.Map<Flight, FlightDTO>(flightSource);
 
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
