@@ -214,10 +214,10 @@ namespace webapi.Controllers
         return Ok (new { success = true, message = "Xóa thành công" });
       }
 
-      // POST: api/dates/searchflights
+      // GET: api/dates/searchflights
       [AllowAnonymous]
-      [HttpPost ("searchflights")]
-      public ActionResult SearchFlights(SearchFlightFE values) {
+      [HttpGet ("/api/searchflights")]
+      public ActionResult SearchFlights([FromQuery] SearchFlightFE values) {
         var departureDate = Convert.ToDateTime(values.DepartureDate);
 
         // Flights:
