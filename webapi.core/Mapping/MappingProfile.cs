@@ -17,7 +17,9 @@ namespace webapi.core.Mapping
             CreateMap<Airline, AirlineDTO>();
             CreateMap<SaveAirlineDTO, Airline>();
 
+            // 4. Customer
             CreateMap<Customer, CustomerDTO>();
+            CreateMap<SaveCustomerDTO, Customer>();
 
             CreateMap<Date, DateDTO>();
 
