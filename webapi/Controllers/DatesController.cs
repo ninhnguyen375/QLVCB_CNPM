@@ -30,8 +30,10 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
+        // Mapping: Date
+        var datesSource = _unitOfWork.Dates.GetAll();
         _unitOfWork.Dates.GetDateFlights();
-        var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(_unitOfWork.Dates.GetAll());
+        var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(datesSource);
 
         // Search by DepartureDate
         if (search.DepartureDate != "") {
@@ -64,7 +66,10 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet ("{id}")]
       public ActionResult GetDate(int id) {
-        var date = _unitOfWork.Dates.GetBy(id);
+        // Mapping: Date
+        var dateSource = _unitOfWork.Dates.GetBy(id);
+        _unitOfWork.Dates.GetDateFlights();
+        var date = _mapper.Map<Date, DateDTO>(dateSource);
 
         if (date == null) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -160,7 +165,6 @@ namespace webapi.Controllers
         if (date == null) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
         }
-
 
         var flights = _unitOfWork.Flights.GetAll();
 
