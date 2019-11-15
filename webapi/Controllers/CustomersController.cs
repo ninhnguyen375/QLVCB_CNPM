@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
+using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
@@ -15,16 +18,20 @@ namespace webapi.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public CustomersController(IUnitOfWork unitOfWork) {
+        public CustomersController(IUnitOfWork unitOfWork, IMapper mapper) {
           _unitOfWork = unitOfWork;
+          _mapper = mapper;
         }
 
         // GET: api/customers/
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet]
         public ActionResult GetCustomers([FromQuery] Pagination pagination, [FromQuery] SearchCustomer search) {
-          var customers = _unitOfWork.Customers.GetAll();
+          // Mapping: Customer
+          var customersSource = _unitOfWork.Customers.GetAll();
+          var customers = _mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerDTO>>(customersSource);
           
           // Search by Id:
           if (search.Id != "") {
@@ -56,15 +63,17 @@ namespace webapi.Controllers
               c.GetType().GetProperty(search.sortDesc).GetValue(c));
           }
 
-          return Ok (PaginatedList<Customer>.Create(customers, pagination.current, pagination.pageSize));
+          return Ok (PaginatedList<CustomerDTO>.Create(customers, pagination.current, pagination.pageSize));
         }
 
         // GET: api/customers/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
         public ActionResult GetCustomer(string id) {
-          var customer = _unitOfWork.Customers.Find(c =>
+          // Mapping: Customer
+          var customerSource = _unitOfWork.Customers.Find(c =>
             c.Id.Equals(id)).SingleOrDefault();
+          var customer = _mapper.Map<Customer, CustomerDTO>(customerSource);
           
           if (customer == null) {
             return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
