@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
+using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Services;
@@ -15,16 +18,20 @@ namespace webapi.Controllers
     public class LuggagesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public LuggagesController(IUnitOfWork unitOfWork) {
+        public LuggagesController(IUnitOfWork unitOfWork, IMapper mapper) {
           _unitOfWork = unitOfWork;
+          _mapper = mapper;
         }
 
         // GET: api/luggages
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet]
         public ActionResult GetLuggages([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
-          var luggages = _unitOfWork.Luggages.GetAll();
+          // Mapping: Luggage
+          var luggagesSource = _unitOfWork.Luggages.GetAll();
+          var luggages = _mapper.Map<IEnumerable<Luggage>, IEnumerable<LuggageDTO>>(luggagesSource);
           
           // Search by LuggageWeight:
           if (search.LuggageWeight != null) {
@@ -57,14 +64,16 @@ namespace webapi.Controllers
               l.GetType().GetProperty(search.sortDesc).GetValue(l));
           }
 
-          return Ok (PaginatedList<Luggage>.Create(luggages, pagination.current, pagination.pageSize));
+          return Ok (PaginatedList<LuggageDTO>.Create(luggages, pagination.current, pagination.pageSize));
         }
 
         // GET: api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
         public ActionResult GetLuggage(int id) {
-          var luggage = _unitOfWork.Luggages.GetBy(id);
+          // Mapping: Luggage
+          var luggageSource = _unitOfWork.Luggages.GetBy(id);
+          var luggage = _mapper.Map<Luggage, LuggageDTO>(luggageSource);
 
           if (luggage == null) {
             return NotFound (new { Id = "Mã hành lý này không tồn tại." });
