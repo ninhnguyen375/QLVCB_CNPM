@@ -7,7 +7,6 @@ using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
-using webapi.infrastructure.Persistance;
 using webapi.Services;
 
 namespace webapi.Controllers
@@ -85,7 +84,7 @@ namespace webapi.Controllers
         // PUT: api/airports/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutAirport (string id, EditAirport values) {
+        public ActionResult PutAirport (string id, SaveAirportDTO saveAirportDTO) {
           var airport = _unitOfWork.Airports.Find(a =>
             a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
 
@@ -94,14 +93,15 @@ namespace webapi.Controllers
           }
           
           if (_unitOfWork.Airports.Find(a =>
-                a.Name.ToLower().Equals(values.Name.ToLower()) &&
+                a.Name.ToLower().Equals(saveAirportDTO.Name.ToLower()) &&
                 !a.Id.ToLower().Equals(id.ToLower()))
                 .Count() != 0) {
             return BadRequest (new  { Name = "Tên sân bay này đã tồn tại." });
           }
 
-          airport.Name = values.Name;
-          airport.Location = values.Location;
+          // Mapping: SaveAirport
+          _mapper.Map<SaveAirportDTO, Airport>(saveAirportDTO, airport); 
+
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = airport, message = "Sửa thành công." });
@@ -110,7 +110,10 @@ namespace webapi.Controllers
         // POST: api/airports
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostAirport (Airport airport) {
+        public ActionResult PostAirport (SaveAirportDTO saveAirportDTO) {
+          // Mapping: SaveAirport
+          var airport = _mapper.Map<SaveAirportDTO, Airport>(saveAirportDTO);
+
           // Check id đã tồn tại trong Database chưa
           if(_unitOfWork.Airports.Find(a => 
               a.Id.ToLower().Equals(airport.Id.ToLower()))

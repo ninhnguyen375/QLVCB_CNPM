@@ -9,7 +9,10 @@ namespace webapi.core.Mapping
         public MappingProfile () {
             CreateMap<Flight, FlightDTO>();
 
+            // 2. Airport
             CreateMap<Airport, AirportDTO>();
+            
+            CreateMap<SaveAirportDTO, Airport>();
 
             CreateMap<Airline, AirlineDTO>();
 
