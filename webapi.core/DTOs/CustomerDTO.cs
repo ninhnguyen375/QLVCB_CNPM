@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using webapi.core.Interfaces;
 
@@ -11,6 +12,6 @@ namespace webapi.core.DTOs
 
         public string Phone { get; set; }
 
-        public int BookingCount { get; set; } = 1;
+        public int BookingCount { get; set; }
     }
 }
