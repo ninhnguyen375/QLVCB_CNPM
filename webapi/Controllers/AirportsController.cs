@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
+using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.infrastructure.Persistance;
@@ -15,16 +18,20 @@ namespace webapi.Controllers
     public class AirportsController : ControllerBase 
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public AirportsController (IUnitOfWork unitOfWork) {
+        public AirportsController (IUnitOfWork unitOfWork, IMapper mapper) {
           _unitOfWork = unitOfWork;
+          _mapper = mapper;
         }
 
         // GET: api/airports (GET all airports)
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetAirports ([FromQuery] Pagination pagination, [FromQuery] SearchAirport search) {
-          var airports = _unitOfWork.Airports.GetAll();
+          // Mapping: Airport
+          var airportsSource = _unitOfWork.Airports.GetAll();
+          var airports = _mapper.Map<IEnumerable<Airport>, IEnumerable<AirportDTO>>(airportsSource);
           
           // Search by Id:
           if (search.Id != "") {
@@ -56,15 +63,17 @@ namespace webapi.Controllers
               a.GetType().GetProperty(search.sortDesc).GetValue(a));
           }
 
-          return Ok (PaginatedList<Airport>.Create (airports, pagination.current, pagination.pageSize));
+          return Ok (PaginatedList<AirportDTO>.Create (airports, pagination.current, pagination.pageSize));
         }
 
         // GET: api/airports/id (GET airport by Id)
         [AllowAnonymous]
         [HttpGet ("{id}")]
         public ActionResult GetAirport (string id) {
-          var airport = _unitOfWork.Airports.Find(a =>
+          // Mapping: Airport
+          var airportSource = _unitOfWork.Airports.Find(a =>
             a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airport = _mapper.Map<Airport, AirportDTO>(airportSource);
 
           if (airport == null) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
