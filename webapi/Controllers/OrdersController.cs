@@ -27,8 +27,11 @@ namespace webapi.Controllers {
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet]
     public ActionResult GetOrders ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
+      // Mapping: Order
+      var ordersSource = _unitOfWork.Orders.GetAll ();
       _unitOfWork.Customers.GetAll();
-      var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(_unitOfWork.Orders.GetAll ());
+      _unitOfWork.Users.GetAll();
+      var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(ordersSource);
       
       // Search by Id:
       if (search.Id != "") {
@@ -123,6 +126,9 @@ namespace webapi.Controllers {
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet ("{id}")]
     public ActionResult GetOrder (string id) {
+      // Mapping: Order
+      var orderSource = _unitOfWork.Orders.Find(o =>
+        o.Id.Equals(id)).SingleOrDefault();
       _unitOfWork.Customers.GetAll();
       _unitOfWork.Luggages.GetAll();
       _unitOfWork.TicketCategories.GetAll();
@@ -130,14 +136,16 @@ namespace webapi.Controllers {
       _unitOfWork.Airlines.GetAll();
       _unitOfWork.Flights.GetAll();
       _unitOfWork.Dates.GetAll();
+      _unitOfWork.Users.GetAll();
 
-      var order = _mapper.Map<Order, OrderDTO>(_unitOfWork.Orders.GetBy (id));
-      var tickets = _mapper.Map<IEnumerable<Ticket>, IEnumerable<TicketDTO>>(_unitOfWork.Tickets.Find(t => t.OrderId.Equals(order.Id)));
+      var order = _mapper.Map<Order, OrderDTO>(orderSource);     
 
       if (order == null) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
       }
 
+      var ticketsSource = _unitOfWork.Orders.GetTicketsById(order.Id);
+      var tickets = _mapper.Map<IEnumerable<Ticket>, IEnumerable<TicketDTO>>(ticketsSource);
       order.Tickets = (ICollection<TicketDTO>)tickets;
 
       return Ok (new { success = true, data = order });
