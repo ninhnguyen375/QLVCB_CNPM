@@ -1,20 +1,2 @@
-// GET: api/dates/searchflights
-POST http://localhost:5000/api/dates/searchflights HTTP/1.1
+GET http://localhost:5000/api/searchflights?airportFrom=VDO&airportTo=UIH&departureDate=2019-11-13&returnDate=2019-11-15&ticketCategories[]={"id":1,"quantity":1}&ticketCategories[]={"id":2,"quantity":1}&ticketCategories[]={"id":3,"quantity":1} HTTP/1.1
 Content-Type: application/json
-
-{
-	 "airportfrom": "VDO",
-	 "airportto": "UIH",
-	 "departuredate": "2019-11-13",
-	 "returndate": "2019-11-15",
-	 "ticketcategories": [
-		 {
-		      "id": 1,
-		      "quantity": 1
-	     },
-	     {
-		      "id": 2,
-		      "quantity": 10
-	     }
-	  ]
-}
