@@ -20,9 +20,13 @@ namespace webapi.core.DTOs
       // Status: 0 => Unconfirm, 1 => Confirm
       public int Status { get; set; }
       
-      // Foreign key for DateId
-      public int DateId { get; set; }
-      public DateDTO Date { get; set; }
+      // Foreign key for DepartureDate
+      public int DepartureDateId { get; set; }
+      public Date DepartureDate { get; set; }
+
+      // Foreign key for ReturnDate
+      public int? ReturnDateId { get; set; }
+      public Date ReturnDate { get; set; }
 
       // Foreign Key (N - 1)
       public string CustomerId { get; set; } // Để thao tác trong Controller
