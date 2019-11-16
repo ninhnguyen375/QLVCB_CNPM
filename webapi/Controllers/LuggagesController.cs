@@ -26,7 +26,7 @@ namespace webapi.Controllers
         }
 
         // GET: api/luggages
-        [Authorize (Roles = "STAFF, ADMIN")]
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult GetLuggages([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
           // Mapping: Luggage
