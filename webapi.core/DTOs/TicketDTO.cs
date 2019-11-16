@@ -21,6 +21,10 @@ namespace webapi.core.DTOs
       // Foreign key for Flight
       public string FlightId { get; set; }
       public FlightDTO Flight { get; set; } 
+
+      // Foreign key for Date
+      public int DateId { get; set; }
+      public Date Date { get; set; }
       
       // Foreign key for Order
       public string OrderId { get; set; }
