@@ -31,6 +31,7 @@ namespace webapi.Controllers {
       var ordersSource = _unitOfWork.Orders.GetAll ();
       _unitOfWork.Customers.GetAll();
       _unitOfWork.Users.GetAll();
+      _unitOfWork.Dates.GetAll();
       var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(ordersSource);
       
       // Search by Id:
@@ -70,30 +71,30 @@ namespace webapi.Controllers {
             Convert.ToDateTime(o.CreateAt.ToShortDateString()) <= Convert.ToDateTime(search.DateTo));
       }
 
-      // Search by DateId:
-      if (search.DateCreateFrom != "" && search.DateCreateTo != "") {
-        var dates = _unitOfWork.Dates.GetAll();
-        orders = (from o in orders
-                  from d in dates
-                  where o.DateId == d.Id && 
-                    d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom) &&
-                    d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
-                  select o);
-      } else if (search.DateCreateFrom != "" && search.DateCreateTo == "") {
-        var dates = _unitOfWork.Dates.GetAll();
-        orders = (from o in orders
-                  from d in dates
-                  where o.DateId == d.Id && 
-                    d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom)
-                  select o);
-      } else if (search.DateCreateFrom == "" && search.DateCreateTo != "") {
-        var dates = _unitOfWork.Dates.GetAll();
-        orders = (from o in orders
-                  from d in dates
-                  where o.DateId == d.Id && 
-                    d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
-                  select o);
-      }
+      // // Search by DateId:
+      // if (search.DateCreateFrom != "" && search.DateCreateTo != "") {
+      //   var dates = _unitOfWork.Dates.GetAll();
+      //   orders = (from o in orders
+      //             from d in dates
+      //             where o.DateId == d.Id && 
+      //               d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom) &&
+      //               d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
+      //             select o);
+      // } else if (search.DateCreateFrom != "" && search.DateCreateTo == "") {
+      //   var dates = _unitOfWork.Dates.GetAll();
+      //   orders = (from o in orders
+      //             from d in dates
+      //             where o.DateId == d.Id && 
+      //               d.DepartureDate >= Convert.ToDateTime(search.DateCreateFrom)
+      //             select o);
+      // } else if (search.DateCreateFrom == "" && search.DateCreateTo != "") {
+      //   var dates = _unitOfWork.Dates.GetAll();
+      //   orders = (from o in orders
+      //             from d in dates
+      //             where o.DateId == d.Id && 
+      //               d.DepartureDate <= Convert.ToDateTime(search.DateCreateTo)
+      //             select o);
+      // }
 
       // Search by CustomerId:
       if (search.CustomerId != "") {
@@ -164,10 +165,12 @@ namespace webapi.Controllers {
       var customer = _unitOfWork.Customers.GetBy(order.CustomerId);
       var dateFlights = _unitOfWork.DateFlights.GetAll();
       var tickets = _unitOfWork.Tickets.GetAll();
+
+      // Departure Date Flight:
       var dateFlight = (
         from df in dateFlights
         from t in tickets
-        where t.OrderId == id && order.DateId == df.DateId && t.FlightId == df.FlightId
+        where t.OrderId == id && t.DateId == df.DateId && t.FlightId == df.FlightId
         select df
       );
 
@@ -227,6 +230,11 @@ namespace webapi.Controllers {
         _unitOfWork.Customers.Add (customer);
       }
 
+      // Lấy DepartureDate Id
+      var departureDateId = _unitOfWork.Dates.Find(d =>
+          d.DepartureDate == Convert.ToDateTime(values.DepartureDateName))
+          .Select(d => d.Id).SingleOrDefault();
+
       // Add Order
       Order order = new Order {
         Id = this.autoOrderId (),
@@ -235,9 +243,18 @@ namespace webapi.Controllers {
         CreateAt = DateTime.Now, // Lấy thời điểm đặt vé
         Status = 0,
         CustomerId = values.CustomerId,
-        DateId = values.DateId,
+        DepartureDateId = departureDateId,
+        ReturnDateId = null,
         UserId = null
       };
+
+      // Lấy ReturnDate Id
+      if (values.ReturnDateName != "") {
+        order.ReturnDateId = _unitOfWork.Dates.Find(d =>
+          d.DepartureDate == Convert.ToDateTime(values.ReturnDateName))
+          .Select(d => d.Id).SingleOrDefault();
+      }
+      
       _unitOfWork.Orders.Add (order);
 
       IList<Ticket> tickets = new List<Ticket>(); // Dòng này để kiểm tra dữ liệu tạm thời (xóa sau)
@@ -259,6 +276,14 @@ namespace webapi.Controllers {
             ).ElementAt(0).Price
           );
 
+          // Lấy ngày bay, i = 0 là của chiều đi, i = 1 là của chiều về
+          int dateId = 0;
+          if (i == 0) {
+            dateId = order.DepartureDateId;
+          } else {
+            dateId = (int) order.ReturnDateId;
+          }
+
           var ticket = new Ticket {
             Id = this.autoTicketId(),
             PassengerName = values.Passengers.ElementAt(j).PassengerName,
@@ -266,6 +291,7 @@ namespace webapi.Controllers {
             LuggageId = values.Passengers.ElementAt(j).LuggageIds.ElementAt(i),
             FlightId = values.FlightIds.ElementAt(i),
             OrderId = order.Id,
+            DateId = dateId,
             TicketCategoryId = values.Passengers.ElementAt(j).TicketCategoryId,
             Price = ticketPrice + luggagePrice
           };
