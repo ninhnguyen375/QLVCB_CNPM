@@ -3,3 +3,55 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6I
 
 ### get by id
 GET http://localhost:5000/api/flights/VJ101 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
+
+### PUT Flight + FlightTicketCategories
+PUT http://localhost:5000/api/flights/VJ103 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+Content-Type: application/json
+
+{
+	"id": "VJ103",
+	"starttime": 1000,
+	"flighttime": 100,
+	"seatscount": 100,
+	"airportfrom": "HAN",
+	"airportto": "SGN",
+	"airlineid": "VJ",
+	"flightticketcategories": [
+		{
+			"ticketcategoryid": 1,
+			"price": 600000
+		},
+		{
+			"ticketcategoryid": 2,
+			"price": 400000
+		},
+    {
+			"ticketcategoryid": 3,
+			"price": 200000
+		}
+	]
+}
+
+### POST: Add FlightTicketCategory
+POST http://localhost:5000/api/flights/VJ103/addflightticketcategory HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+Content-Type: application/json
+
+{
+	"flightid": "VJ103",
+  "ticketcategoryid": 2,
+  "price": 400000
+}
+
+### Remove Flight + FlightTicketCategories
+DELETE http://localhost:5000/api/flights/VJ103/removeflightticketcategory HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+Content-Type: application/json
+
+{
+	"ticketcategoryid": 3
+}
+
+

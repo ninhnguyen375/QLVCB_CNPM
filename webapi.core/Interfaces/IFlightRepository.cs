@@ -5,6 +5,8 @@ namespace webapi.core.Interfaces
 {
     public interface IFlightRepository : IRepository<Flight>
     {  
-        public IEnumerable<FlightTicketCategory> GetFlightTicketCategories ();     
+        public IEnumerable<FlightTicketCategory> GetFlightTicketCategories ();
+
+        public IEnumerable<FlightTicketCategory> GetFlightTicketCategoriesById (string id);    
     }
 }
