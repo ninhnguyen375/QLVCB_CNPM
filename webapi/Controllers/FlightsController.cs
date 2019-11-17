@@ -123,7 +123,7 @@ namespace webapi.Controllers
       // PUT: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutFlight(string id, EditFlight values) {
+      public ActionResult PutFlight(string id, Flight saveFlightDTO) {
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
 
@@ -131,23 +131,31 @@ namespace webapi.Controllers
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
-        flight.StartTime = values.StartTime;
-        flight.FlightTime = values.FlightTime;
-        flight.AirportFrom = values.AirportFrom;
-        flight.AirportTo = values.AirportTo;
-        flight.SeatsCount = values.SeatsCount;
-        flight.Status = values.Status;
-        flight.AirlineId = values.AirlineId;
+        flight.StartTime = saveFlightDTO.StartTime;
+        flight.FlightTime = saveFlightDTO.FlightTime;
+        flight.AirportFrom = saveFlightDTO.AirportFrom;
+        flight.AirportTo = saveFlightDTO.AirportTo;
+        flight.SeatsCount = saveFlightDTO.SeatsCount;
+        flight.Status = saveFlightDTO.Status;
+        flight.AirlineId = saveFlightDTO.AirlineId;
+        
+        var flightTicketCategories = _unitOfWork.Flights.GetFlightTicketCategoriesById(id);
+        for (int i = 0; i < saveFlightDTO.FlightTicketCategories.Count; i++) {
+          flightTicketCategories.ElementAt(i).Price = saveFlightDTO.FlightTicketCategories.ElementAt(i).Price;
+        }
 
         _unitOfWork.Complete();
 
-        return Ok (new { success = true, data = flight, message = "Sửa thành công" });
+        return Ok (new { success = true, message = "Sửa thành công" });
       }
 
       // POST: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
-      public ActionResult PostFlight(Flight flight) {
+      public ActionResult PostFlight(SaveFlightDTO saveFlightDTO) {
+        // Mapping: SaveFlightDTO
+        var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
+
         var flightTemp = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(flight.Id.ToLower())).SingleOrDefault();
 
@@ -175,7 +183,58 @@ namespace webapi.Controllers
         _unitOfWork.Flights.Remove(flight);
         _unitOfWork.Complete();
 
-        return Ok (new { success = true, message = "Xóa thành công" });
+        return Ok (new { success = true, message = "Xóa thành công." });
+      }
+
+      // POST: api/flights/id/addflightticketcategory
+      [Authorize (Roles = "STAFF, ADMIN")]
+      [HttpPost ("{id}/addflightticketcategory")]
+      public ActionResult PostFlightTicketCategories(string id, FlightTicketCategory values) {
+        var flight = _unitOfWork.Flights.Find(f =>
+          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        
+        if (flight == null) {
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
+        }
+
+        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
+          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
+          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
+
+        if (flightTicketCategory != null) {
+          return BadRequest (new { Id = "Loại vé của chuyến bay này đã tồn tại." });
+        }
+
+        _unitOfWork.FlightTicketCategories.Add(values);
+        _unitOfWork.Complete();
+
+        return Ok (new { success = true, message = "Thêm loại vé thành công." });
+      }
+
+      // DELETE: api/flights/id/removeflightticketcategory
+      [Authorize (Roles = "STAFF, ADMIN")]
+      [HttpDelete ("{id}/removeflightticketcategory")]
+      public ActionResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values) {
+        var flight = _unitOfWork.Flights.Find(f =>
+          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        
+        if (flight == null) {
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
+        }
+
+        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
+          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
+          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
+
+        if (flightTicketCategory == null) {
+          return BadRequest (new { Id = "Loại vé của chuyến bay này không tồn tại." });
+        }
+
+        _unitOfWork.FlightTicketCategories.Remove(flightTicketCategory);
+        _unitOfWork.Complete();
+
+        
+        return Ok (new { success = true, message = "Xóa thành công." });
       }
     }
 }
