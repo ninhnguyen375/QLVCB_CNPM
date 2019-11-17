@@ -71,7 +71,7 @@ namespace webapi.Controllers
         // PUT: api/ticketcategories/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutTicketCategory(int id, EditTicketCategory values) {
+        public ActionResult PutTicketCategory(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
           var ticketCategory = _unitOfWork.TicketCategories.GetBy(id);
 
           if (ticketCategory == null) {
@@ -79,13 +79,15 @@ namespace webapi.Controllers
           }
 
           if (_unitOfWork.TicketCategories.Find(tc =>
-                tc.Name.ToLower().Equals(values.Name.ToLower()) &&
+                tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()) &&
                 tc.Id != id)
                 .Count() != 0) {
             return BadRequest (new { Name = "Loại vé này đã tồn tại." });
           }
 
-          ticketCategory.Name = values.Name;
+          // Mapping: SaveTicketCategory
+          _mapper.Map<SaveTicketCategoryDTO, TicketCategory>(saveTicketCategoryDTO, ticketCategory);
+
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = ticketCategory, message = "Sửa thành công." });
@@ -94,12 +96,15 @@ namespace webapi.Controllers
         // POST: api/ticketcategories
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostTicketCategory(TicketCategory ticketCategory) {
+        public ActionResult PostTicketCategory(SaveTicketCategoryDTO saveTicketCategoryDTO) {
           if (_unitOfWork.TicketCategories.Find(tc => 
-                tc.Name.ToLower().Equals(ticketCategory.Name.ToLower()))
+                tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()))
                 .Count() != 0) {
             return BadRequest (new { Name = "Loại vé này đã tồn tại." });
           }
+
+          // Mapping: SaveTicketCategory
+          var ticketCategory = _mapper.Map<SaveTicketCategoryDTO, TicketCategory>(saveTicketCategoryDTO);
 
           _unitOfWork.TicketCategories.Add(ticketCategory);
           _unitOfWork.Complete();
