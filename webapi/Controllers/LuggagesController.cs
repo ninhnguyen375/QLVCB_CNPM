@@ -85,7 +85,7 @@ namespace webapi.Controllers
         // PUT: api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutLuggage(int id, EditLuggage values) {
+        public ActionResult PutLuggage(int id, SaveLuggageDTO saveLuggageDTO) {
           var luggage = _unitOfWork.Luggages.GetBy(id);
 
           if (luggage == null) {
@@ -93,13 +93,15 @@ namespace webapi.Controllers
           }
 
           if (_unitOfWork.Luggages.Find(l =>
-                l.LuggageWeight == values.LuggageWeight)
+                l.LuggageWeight == saveLuggageDTO.LuggageWeight &&
+                l.Id != id)
                 .Count() != 0 ) {
             return BadRequest (new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
           }
 
-          luggage.LuggageWeight = values.LuggageWeight;
-          luggage.Price = values.Price;
+          // Mapping: SaveLuggage
+          _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO, luggage);
+          
           _unitOfWork.Complete();
 
           return Ok (new { success = true, data = luggage, message = "Sửa thành công." });
@@ -108,7 +110,10 @@ namespace webapi.Controllers
         // POST: api/luggages
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostLuggage(Luggage luggage) {
+        public ActionResult PostLuggage(SaveLuggageDTO saveLuggageDTO) {
+          // Mapping: SaveLuggage
+          var luggage = _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO);
+
           if(_unitOfWork.Luggages.Find(l => 
                 l.LuggageWeight.Equals(luggage.LuggageWeight))
                 .Count() != 0) {
