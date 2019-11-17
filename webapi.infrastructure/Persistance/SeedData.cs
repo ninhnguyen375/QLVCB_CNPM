@@ -255,7 +255,7 @@ namespace webapi.infrastructure.Persistance {
           Name = "Trẻ Em"
         },
         new TicketCategory {
-          Name = "Nguời Lớn"
+          Name = "Người Lớn"
         }
       );
       context.SaveChanges();
