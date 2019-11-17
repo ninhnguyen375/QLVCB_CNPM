@@ -39,7 +39,9 @@ namespace webapi.core.Mapping
 
             CreateMap<Order, OrderDTO>();
 
+            // 9. TicketCategory
             CreateMap<TicketCategory, TicketCategoryDTO>();
+            CreateMap<SaveTicketCategoryDTO, TicketCategory>();
 
             CreateMap<Ticket, TicketDTO>();
 
