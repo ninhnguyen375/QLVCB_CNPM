@@ -16,6 +16,14 @@ namespace webapi.infrastructure.Persistance.Repositories
         return AppDbContext.FlightTicketCategories.ToList();
       }
 
+      public IEnumerable<FlightTicketCategory> GetFlightTicketCategoriesById(string id)
+      {
+        return (
+          AppDbContext.FlightTicketCategories.Where(ftc =>
+            ftc.FlightId.ToLower().Equals(id.ToLower()))
+        );
+      }
+
       protected AppDbContext AppDbContext {
         get { return Context as AppDbContext; }
       }
