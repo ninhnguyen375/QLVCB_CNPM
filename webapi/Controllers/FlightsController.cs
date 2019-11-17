@@ -123,7 +123,7 @@ namespace webapi.Controllers
       // PUT: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutFlight(string id, Flight saveFlightDTO) {
+      public ActionResult PutFlight(string id, EditFlight values) {
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
 
@@ -131,17 +131,31 @@ namespace webapi.Controllers
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
-        flight.StartTime = saveFlightDTO.StartTime;
-        flight.FlightTime = saveFlightDTO.FlightTime;
-        flight.AirportFrom = saveFlightDTO.AirportFrom;
-        flight.AirportTo = saveFlightDTO.AirportTo;
-        flight.SeatsCount = saveFlightDTO.SeatsCount;
-        flight.Status = saveFlightDTO.Status;
-        flight.AirlineId = saveFlightDTO.AirlineId;
-        
-        var flightTicketCategories = _unitOfWork.Flights.GetFlightTicketCategoriesById(id);
-        for (int i = 0; i < saveFlightDTO.FlightTicketCategories.Count; i++) {
-          flightTicketCategories.ElementAt(i).Price = saveFlightDTO.FlightTicketCategories.ElementAt(i).Price;
+        // Create SaveFlightDTO
+        SaveFlightDTO saveFlightDTO = new SaveFlightDTO {
+          Id = values.Id,
+          StartTime = values.StartTime,
+          FlightTime = values.FlightTime,
+          AirportFrom = values.AirportFrom,
+          AirportTo = values.AirportTo,
+          SeatsCount = values.SeatsCount,
+          AirlineId = values.AirlineId
+        };
+
+        // Mapping: SaveAirport
+        _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO, flight);
+
+        // Mapping: SaveFlightTicketCategory
+        foreach (var val in values.FlightTicketCategories) {
+          var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
+            ftc.FlightId == values.Id &&
+            ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
+          SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
+            FlightId = values.Id,
+            TicketCategoryId = val.TicketCategoryId,
+            Price = val.Price,
+          };
+          _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(save, flightTicketCategory);
         }
 
         _unitOfWork.Complete();
@@ -189,7 +203,7 @@ namespace webapi.Controllers
       // POST: api/flights/id/addflightticketcategory
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflightticketcategory")]
-      public ActionResult PostFlightTicketCategories(string id, FlightTicketCategory values) {
+      public ActionResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values) {
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
         
@@ -205,7 +219,10 @@ namespace webapi.Controllers
           return BadRequest (new { Id = "Loại vé của chuyến bay này đã tồn tại." });
         }
 
-        _unitOfWork.FlightTicketCategories.Add(values);
+        // Mapping: SaveFlightTicketCategory
+        flightTicketCategory = _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(values);
+
+        _unitOfWork.FlightTicketCategories.Add(flightTicketCategory);
         _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Thêm loại vé thành công." });
