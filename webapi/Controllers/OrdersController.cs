@@ -220,13 +220,14 @@ namespace webapi.Controllers {
       if (customer == null) // Nếu không tồn tại khách hàng này trong db
       {
         // Add Customer
-        customer = new Customer {
+        var saveCustomerDTO = new SaveCustomerDTO {
           Id = values.CustomerId,
           FullName = values.FullName,
           Phone = values.Phone,
-          BookingCount = 0
       };
 
+        // Mapping: SaveCustomer
+        customer = _mapper.Map<SaveCustomerDTO, Customer>(saveCustomerDTO);
         _unitOfWork.Customers.Add (customer);
       }
 
@@ -236,7 +237,7 @@ namespace webapi.Controllers {
           .Select(d => d.Id).SingleOrDefault();
 
       // Add Order
-      Order order = new Order {
+      SaveOrderDTO saveOrderDTO = new SaveOrderDTO {
         Id = this.autoOrderId (),
         TicketCount = values.TicketCount,
         TotalPrice = values.TotalPrice,
@@ -250,15 +251,18 @@ namespace webapi.Controllers {
 
       // Lấy ReturnDate Id
       if (values.ReturnDateName != "") {
-        order.ReturnDateId = _unitOfWork.Dates.Find(d =>
+        saveOrderDTO.ReturnDateId = _unitOfWork.Dates.Find(d =>
           d.DepartureDate == Convert.ToDateTime(values.ReturnDateName))
           .Select(d => d.Id).SingleOrDefault();
       }
       
+      // Mapping: SaveOrder
+      var order = _mapper.Map<SaveOrderDTO, Order>(saveOrderDTO);
       _unitOfWork.Orders.Add (order);
 
       IList<Ticket> tickets = new List<Ticket>(); // Dòng này để kiểm tra dữ liệu tạm thời (xóa sau)
-
+      
+      // Add Tickets
       for (int i = 0; i < values.FlightIds.Count; i++) {
         for (int j = 0; j < values.Passengers.Count; j++) {
           // Luggage Price
@@ -284,7 +288,7 @@ namespace webapi.Controllers {
             dateId = (int) order.ReturnDateId;
           }
 
-          var ticket = new Ticket {
+          var saveTicketDTO = new SaveTicketDTO {
             Id = this.autoTicketId(),
             PassengerName = values.Passengers.ElementAt(j).PassengerName,
             PassengerGender = values.Passengers.ElementAt(j).PassengerGender,
@@ -295,6 +299,9 @@ namespace webapi.Controllers {
             TicketCategoryId = values.Passengers.ElementAt(j).TicketCategoryId,
             Price = ticketPrice + luggagePrice
           };
+
+          // Mapping: SaveTicket
+          var ticket = _mapper.Map<SaveTicketDTO, Ticket>(saveTicketDTO);
 
           tickets.Add(ticket); // Xóa sau
           _unitOfWork.Tickets.Add (ticket);
