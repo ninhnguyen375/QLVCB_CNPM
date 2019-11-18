@@ -177,13 +177,18 @@ namespace webapi.Controllers
         // Thêm thông tin cho chuyến bay: gồm ngày, ghế còn lại, trạng thái
         foreach (var dateFlight in values.DateFlights) {
           if(_unitOfWork.Dates.GetDateFlight(id, dateFlight.FlightId) == null) {
-            dateFlight.DateId = id;
-            dateFlight.SeatsLeft = flights.Where(f =>
-              f.Id == dateFlight.FlightId)
-              .Select(f => f.SeatsCount)
-              .SingleOrDefault();
-            dateFlight.Status = 1; // Còn chỗ
-            _unitOfWork.DateFlights.Add(dateFlight);
+            // Mapping: SaveDateFlight
+            SaveDateFlightDTO saveDateFlightDTO = new SaveDateFlightDTO {
+              FlightId = dateFlight.FlightId,
+              DateId = id,
+              SeatsLeft =  flights.Where(f =>
+                f.Id == dateFlight.FlightId)
+                .Select(f => f.SeatsCount)
+                .SingleOrDefault(),
+              Status = 1, // Còn chỗ
+            };
+            var dateFlight1 = _mapper.Map<SaveDateFlightDTO, DateFlight>(saveDateFlightDTO);
+            _unitOfWork.DateFlights.Add(dateFlight1);
           } else {
             return BadRequest(new { success = false, message = "Chuyến bay đã tồn tại trong ngày." });
           }
@@ -211,6 +216,19 @@ namespace webapi.Controllers
         // Kiểm tra chuyến bay có tồn tại hay không
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
+        }
+
+        // Kiểm tra chuyến bay này trong ngày đã được bán chưa
+        var seatsCount = _unitOfWork.Flights.Find(f =>
+           f.Id.ToLower().Equals(values.FlightId.ToLower()))
+          .Select(f => f.SeatsCount).SingleOrDefault();
+        var flightTemp = _unitOfWork.DateFlights.Find(df =>
+          df.DateId == id &&
+          df.FlightId.ToLower().Equals(values.FlightId.ToLower()) &&
+          df.SeatsLeft == seatsCount).SingleOrDefault(); // Chưa bán vé nào
+        
+        if (flightTemp == null) {
+          return BadRequest (new { SeatsLeft = "Không thể xóa vì loại vé của chuyến bay này đã được bán." });
         }
 
         // Xóa chuyến bay được chọn
@@ -261,6 +279,7 @@ namespace webapi.Controllers
                 d.DepartureDate == departureDate &&
                 f.AirportFrom.Equals(values.AirportFrom) &&
                 f.AirportTo.Equals(values.AirportTo) &&
+                f.Status == 1 && // 1 => Chuyến bay đang hoạt động
                 df.SeatsLeft >= totalSeats // Số ghế trống phải >= Số hành khách đăng ký
           select f
         );
@@ -278,6 +297,7 @@ namespace webapi.Controllers
                   d.DepartureDate == returnDate &&
                   f.AirportFrom.Equals(values.AirportTo) && // Đổi vị trí From và To cho chiều về
                   f.AirportTo.Equals(values.AirportFrom) &&
+                  f.Status == 1 && // 1 => Chuyến bay đang hoạt động
                   df.SeatsLeft >= totalSeats
             select f
           );

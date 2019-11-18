@@ -27,7 +27,9 @@ namespace webapi.core.Mapping
             CreateMap<Date, DateDTO>();
             CreateMap<SaveDateDTO, Date>();
 
+            // 6. DateFlight
             CreateMap<DateFlight, DateFlightDTO>();
+            CreateMap<SaveDateFlightDTO, DateFlight>();
 
             // 7. FlightTicketCategory
             CreateMap<FlightTicketCategory, FlightTicketCategoryDTO>();
