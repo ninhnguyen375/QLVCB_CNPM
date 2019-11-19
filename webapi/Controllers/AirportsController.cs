@@ -7,6 +7,7 @@ using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
+using webapi.Interfaces;
 using webapi.Services;
 
 namespace webapi.Controllers
@@ -16,51 +17,17 @@ namespace webapi.Controllers
     [ApiController]
     public class AirportsController : ControllerBase 
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly IAirportService _service;
 
-        public AirportsController (IUnitOfWork unitOfWork, IMapper mapper) {
-          _unitOfWork = unitOfWork;
-          _mapper = mapper;
+        public AirportsController (IAirportService airportService) {
+          _service = airportService;
         }
 
         // GET: api/airports (GET all airports)
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetAirports ([FromQuery] Pagination pagination, [FromQuery] SearchAirport search) {
-          // Mapping: Airport
-          var airportsSource = _unitOfWork.Airports.GetAll();
-          var airports = _mapper.Map<IEnumerable<Airport>, IEnumerable<AirportDTO>>(airportsSource);
-          
-          // Search by Id:
-          if (search.Id != "") {
-            airports = airports.Where(a =>
-              a.Id.ToLower().Contains(search.Id.ToLower()));
-          }
-
-          // Search by Name:
-          if (search.Name != "") {
-            airports = airports.Where(a =>
-              a.Name.ToLower().Contains(search.Name.ToLower()));
-          }
-
-          // Search by Location:
-          if (search.Location != "") {
-            airports = airports.Where(a =>
-              a.Location.ToLower().Contains(search.Location.ToLower()));
-          }
-
-          // Sort Asc:
-          if (search.sortAsc != "") {
-            airports = airports.OrderBy(a =>
-              a.GetType().GetProperty(search.sortAsc).GetValue(a));
-          }
-
-          // Sort Desc:
-          if (search.sortDesc != "") {
-            airports = airports.OrderByDescending(a =>
-              a.GetType().GetProperty(search.sortDesc).GetValue(a));
-          }
+          var airports = _service.GetAirports(pagination, search);
 
           return Ok (PaginatedList<AirportDTO>.Create (airports, pagination.current, pagination.pageSize));
         }
@@ -69,10 +36,7 @@ namespace webapi.Controllers
         [AllowAnonymous]
         [HttpGet ("{id}")]
         public ActionResult GetAirport (string id) {
-          // Mapping: Airport
-          var airportSource = _unitOfWork.Airports.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
-          var airport = _mapper.Map<Airport, AirportDTO>(airportSource);
+          var airport = _service.GetAirport(id);
 
           if (airport == null) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
@@ -85,55 +49,28 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public ActionResult PutAirport (string id, SaveAirportDTO saveAirportDTO) {
-          var airport = _unitOfWork.Airports.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airport = _service.PutAirport(id, saveAirportDTO);
 
-          if (airport == null) {
+          if (airport.Error == 1) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
-          }
-          
-          if (_unitOfWork.Airports.Find(a =>
-                a.Name.ToLower().Equals(saveAirportDTO.Name.ToLower()) &&
-                !a.Id.ToLower().Equals(id.ToLower()))
-                .Count() != 0) {
+          } else if (airport.Error == 2) {
             return BadRequest (new  { Name = "Tên sân bay này đã tồn tại." });
           }
 
-          // Mapping: SaveAirport
-          _mapper.Map<SaveAirportDTO, Airport>(saveAirportDTO, airport); 
-
-          _unitOfWork.Complete();
-
-          return Ok (new { success = true, data = airport, message = "Sửa thành công." });
+          return Ok (new { success = true, data = airport.Data, message = "Sửa thành công." });
         }
 
         // POST: api/airports
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public ActionResult PostAirport (SaveAirportDTO saveAirportDTO) {
-          // Mapping: SaveAirport
-          var airport = _mapper.Map<SaveAirportDTO, Airport>(saveAirportDTO);
+          var airport = _service.PostAirport(saveAirportDTO);
 
-          // Check id đã tồn tại trong Database chưa
-          if(_unitOfWork.Airports.Find(a => 
-              a.Id.ToLower().Equals(airport.Id.ToLower()))
-              .Count() != 0) {
-            return BadRequest(new {
-                Id = "Mã sân bay này đã tồn tại."
-            });
+          if (airport.Error == 1) {
+            return BadRequest(new { Id = "Mã sân bay này đã tồn tại." });
+          } else if (airport.Error == 2) {
+            return BadRequest(new { Name = "Tên sân bay này đã tồn tại." });
           }
-
-          // Check name đã tồn tại trong Database chưa
-          if(_unitOfWork.Airports.Find(a => 
-              a.Name.ToLower().Equals(airport.Name.ToLower()))
-              .Count() != 0) {
-            return BadRequest(new {
-                Name = "Tên sân bay này đã tồn tại."
-            });
-          }
-
-          _unitOfWork.Airports.Add(airport);
-          _unitOfWork.Complete();
 
           return Ok (new { sucess = true, message = "Thêm thành công." });
         }
@@ -142,15 +79,11 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")] 
         public ActionResult DeleteAirport (string id) {
-          var airport = _unitOfWork.Airports.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airport = _service.DeleteAirport(id);
 
-          if (airport == null) {
+          if (airport.Error == 1) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
           }
-
-          _unitOfWork.Airports.Remove(airport);
-          _unitOfWork.Complete();
 
           return Ok (new { success = true, message = "Xóa thành công" });
         }
