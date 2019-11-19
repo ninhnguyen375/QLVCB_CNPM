@@ -91,6 +91,7 @@ namespace webapi {
             services.AddScoped<IAirlineService, AirlineService> ();
             services.AddScoped<IAirportService, AirportService> ();
             services.AddScoped<ICustomerService, CustomerService> ();
+            services.AddScoped<ILuggageService, LuggageService> ();
 
 
         }
