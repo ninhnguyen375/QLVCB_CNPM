@@ -123,40 +123,43 @@ namespace webapi.Controllers
       // PUT: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutFlight(string id, EditFlight values) {
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+      public ActionResult PutFlight(string id, SaveFlightDTO values) {
+        var flight = _unitOfWork.Flights.GetBy(id);
 
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
+        if(id != values.Id) {
+          return BadRequest("Mã chuyến bay không hợp lệ.");
+        }
+
         // Create SaveFlightDTO
-        SaveFlightDTO saveFlightDTO = new SaveFlightDTO {
-          Id = values.Id,
-          StartTime = values.StartTime,
-          FlightTime = values.FlightTime,
-          AirportFrom = values.AirportFrom,
-          AirportTo = values.AirportTo,
-          SeatsCount = values.SeatsCount,
-          AirlineId = values.AirlineId
-        };
+        // SaveFlightDTO saveFlightDTO = new SaveFlightDTO {
+        //   Id = values.Id,
+        //   StartTime = values.StartTime,
+        //   FlightTime = values.FlightTime,
+        //   AirportFrom = values.AirportFrom,
+        //   AirportTo = values.AirportTo,
+        //   SeatsCount = values.SeatsCount,
+        //   AirlineId = values.AirlineId
+        // };
 
         // Mapping: SaveAirport
-        _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO, flight);
+        _mapper.Map<SaveFlightDTO, Flight>(values, flight);
 
         // Mapping: SaveFlightTicketCategory
-        foreach (var val in values.FlightTicketCategories) {
-          var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-            ftc.FlightId == values.Id &&
-            ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
-          SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
-            FlightId = values.Id,
-            TicketCategoryId = val.TicketCategoryId,
-            Price = val.Price,
-          };
-          _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(save, flightTicketCategory);
-        }
+        // foreach (var val in values.FlightTicketCategories) {
+        //   var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
+        //     ftc.FlightId == values.Id &&
+        //     ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
+        //   SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
+        //     FlightId = values.Id,
+        //     TicketCategoryId = val.TicketCategoryId,
+        //     Price = val.Price,
+        //   };
+        //   _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(save, flightTicketCategory);
+        // }
 
         _unitOfWork.Complete();
 
