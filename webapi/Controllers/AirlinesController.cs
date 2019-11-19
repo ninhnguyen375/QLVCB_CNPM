@@ -7,6 +7,7 @@ using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
+using webapi.Interfaces;
 using webapi.Services;
 
 namespace webapi.Controllers
@@ -16,45 +17,17 @@ namespace webapi.Controllers
     [ApiController]
     public class AirlinesController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly IAirlineService _service;
 
-        public AirlinesController(IUnitOfWork unitOfWork, IMapper mapper) {
-          _unitOfWork = unitOfWork;
-          _mapper = mapper;
+        public AirlinesController(IAirlineService airlineService) {
+          _service = airlineService;
         }
 
         // GET: api/airlines
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetAirlines([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
-          // Mapping: Airline
-          var airlinesSource = _unitOfWork.Airlines.GetAll();
-          var airlines = _mapper.Map<IEnumerable<Airline>, IEnumerable<AirlineDTO>>(airlinesSource);
-
-          // Search by Id:
-          if (search.Id != "") {
-            airlines = airlines.Where(a =>
-              a.Id.ToLower().Contains(search.Id.ToLower()));
-          }
-
-          // Search by Name:
-          if (search.Name != "") {
-            airlines = airlines.Where(a =>
-            a.Name.ToLower().Contains(search.Name.ToLower()));
-          }
-
-          // Sort Asc:
-          if (search.sortAsc != "") {
-            airlines = airlines.OrderBy(a => 
-              a.GetType().GetProperty(search.sortAsc).GetValue(a));
-          }
-
-          // Sort Desc:
-          if (search.sortDesc != "") {
-            airlines = airlines.OrderByDescending(a =>
-              a.GetType().GetProperty(search.sortDesc).GetValue(a));
-          }
+          var airlines = _service.GetAirlines(pagination, search);
 
           return Ok (PaginatedList<AirlineDTO>.Create(airlines, pagination.current, pagination.pageSize));
         }
@@ -63,10 +36,7 @@ namespace webapi.Controllers
         [AllowAnonymous]
         [HttpGet ("{id}")]
         public ActionResult GetAirline(string id) {
-          // Mapping: Airline
-          var airlineSource = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
-          var airline = _mapper.Map<Airline, AirlineDTO>(airlineSource);
+          var airline = _service.GetAirline(id);
 
           if (airline == null) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
@@ -79,55 +49,28 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public ActionResult PutAirline(string id, SaveAirlineDTO saveAirlineDTO) {
-          var airline = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airline = _service.PutAirline(id, saveAirlineDTO);
 
-          if (airline == null) {
+          if (airline.Error == 1) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
+          } else if (airline.Error == 2) {
+            return BadRequest (new { Name = "Tên hãng hàng không này đã tồn tại." });
           }
           
-          if (_unitOfWork.Airlines.Find(a =>
-                a.Name.ToLower().Equals(saveAirlineDTO.Name.ToLower()) &&
-                !a.Id.ToLower().Equals(id.ToLower()))
-                .Count() != 0) {
-            return BadRequest (new  { Name = "Tên hãng hàng không này đã tồn tại." });
-          }
-
-          // Mapping: SaveAirline
-          _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO, airline);
-
-          _unitOfWork.Complete();
-
-          return Ok (new { success = true, data = airline, message = "Sửa thành công." });
+          return Ok (new { success = true, data = airline.Data, message = "Sửa thành công." });
         }
 
         // POST: api/airlines
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public ActionResult PostAirline(SaveAirlineDTO saveAirlineDTO) {
-          // Mapping: SaveAirline
-          var airline = _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO);
+          var airline = _service.PostAirline(saveAirlineDTO);
 
-          // Check id đã tồn tại trong Database chưa
-          if(_unitOfWork.Airlines.Find(a => 
-              a.Id.ToLower().Equals(airline.Id.ToLower()))
-              .Count() != 0) {
-            return BadRequest(new {
-                Id = "Mã hãng hàng không này đã tồn tại."
-            });
+          if(airline.Error == 1) {
+            return BadRequest (new { Id = "Mã hãng hàng không này đã tồn tại." });
+          } else if (airline.Error == 2) {
+            return BadRequest(new { Name = "Tên hãng hàng không này đã tồn tại." });
           }
-
-          // Check name đã tồn tại trong Database chưa
-          if(_unitOfWork.Airlines.Find(a => 
-              a.Name.ToLower().Equals(airline.Name.ToLower()))
-              .Count() != 0) {
-            return BadRequest(new {
-                Name = "Tên hãng hàng không này đã tồn tại."
-            });
-          }
-
-          _unitOfWork.Airlines.Add(airline);
-          _unitOfWork.Complete();
 
           return Ok (new { sucess = true, message = "Thêm thành công." });
         }
@@ -136,15 +79,11 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
         public ActionResult DeleteAirline(string id) {
-          var airline = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+          var airline = _service.DeleteAirline(id);
 
-          if (airline == null) {
+          if (airline.Error == 1) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
           }
-
-          _unitOfWork.Airlines.Remove(airline);
-          _unitOfWork.Complete();
 
           return Ok (new { success = true, message = "Xóa thành công" });
         }
