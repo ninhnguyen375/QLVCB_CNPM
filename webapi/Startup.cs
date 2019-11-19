@@ -20,6 +20,8 @@ using webapi.Helpers;
 using webapi.infrastructure.Persistance;
 using webapi.infrastructure.Persistance.Repositories;
 using webapi.core.Mapping;
+using webapi.Interfaces;
+using webapi.Services;
 
 namespace webapi {
     public class Startup {
@@ -86,6 +88,8 @@ namespace webapi {
                 });
 
             services.AddScoped<IUnitOfWork, UnitOfWork> ();
+            services.AddScoped<IAirlineService, AirlineService> ();
+
 
         }
 
