@@ -8,6 +8,7 @@ using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
+using webapi.Interfaces;
 using webapi.Services;
 
 namespace webapi.Controllers
@@ -17,52 +18,17 @@ namespace webapi.Controllers
     [ApiController]
     public class LuggagesController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly ILuggageService _service;
 
-        public LuggagesController(IUnitOfWork unitOfWork, IMapper mapper) {
-          _unitOfWork = unitOfWork;
-          _mapper = mapper;
+        public LuggagesController(ILuggageService luggageService) {
+          _service = luggageService;
         }
 
         // GET: api/luggages
         [AllowAnonymous]
         [HttpGet]
         public ActionResult GetLuggages([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
-          // Mapping: Luggage
-          var luggagesSource = _unitOfWork.Luggages.GetAll();
-          var luggages = _mapper.Map<IEnumerable<Luggage>, IEnumerable<LuggageDTO>>(luggagesSource);
-          
-          // Search by LuggageWeight:
-          if (search.LuggageWeight != null) {
-            luggages = luggages.Where(l =>
-              l.LuggageWeight == search.LuggageWeight);
-          }
-
-          // Search by Price:
-          if (search.PriceFrom != null && search.PriceTo != null) {
-            luggages = luggages.Where(l =>
-              l.Price >= search.PriceFrom &&
-              l.Price <= search.PriceTo);
-          } else if (search.PriceFrom != null && search.PriceTo == null) {
-            luggages = luggages.Where(l =>
-              l.Price >= search.PriceFrom);
-          } else if (search.PriceFrom == null && search.PriceTo != null) {
-            luggages = luggages.Where(l =>
-              l.Price <= search.PriceTo);
-          }
-
-          // Sort Asc:
-          if (search.sortAsc != "") {
-            luggages = luggages.OrderBy(l =>
-              l.GetType().GetProperty(search.sortAsc).GetValue(l));
-          }
-
-          // Sort Desc:
-          if (search.sortDesc != "") {
-            luggages = luggages.OrderByDescending(l =>
-              l.GetType().GetProperty(search.sortDesc).GetValue(l));
-          }
+          var luggages = _service.GetLuggages(pagination, search);
 
           return Ok (PaginatedList<LuggageDTO>.Create(luggages, pagination.current, pagination.pageSize));
         }
@@ -71,9 +37,7 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
         public ActionResult GetLuggage(int id) {
-          // Mapping: Luggage
-          var luggageSource = _unitOfWork.Luggages.GetBy(id);
-          var luggage = _mapper.Map<Luggage, LuggageDTO>(luggageSource);
+          var luggage = _service.GetLuggage(id);
 
           if (luggage == null) {
             return NotFound (new { Id = "Mã hành lý này không tồn tại." });
@@ -86,25 +50,15 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public ActionResult PutLuggage(int id, SaveLuggageDTO saveLuggageDTO) {
-          var luggage = _unitOfWork.Luggages.GetBy(id);
+          var luggage = _service.PutLuggage(id, saveLuggageDTO);
 
-          if (luggage == null) {
+          if (luggage.Error == 1) {
             return NotFound (new { Id = "Mã hành lý này không tồn tại." });
-          }
-
-          if (_unitOfWork.Luggages.Find(l =>
-                l.LuggageWeight == saveLuggageDTO.LuggageWeight &&
-                l.Id != id)
-                .Count() != 0 ) {
+          } else if (luggage.Error == 2) {
             return BadRequest (new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
           }
 
-          // Mapping: SaveLuggage
-          _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO, luggage);
-          
-          _unitOfWork.Complete();
-
-          return Ok (new { success = true, data = luggage, message = "Sửa thành công." });
+          return Ok (new { success = true, data = luggage.Data, message = "Sửa thành công." });
         }
 
         // POST: api/luggages
@@ -112,18 +66,11 @@ namespace webapi.Controllers
         [HttpPost]
         public ActionResult PostLuggage(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
-          var luggage = _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO);
+          var luggage = _service.PostLuggage(saveLuggageDTO);
 
-          if(_unitOfWork.Luggages.Find(l => 
-                l.LuggageWeight.Equals(luggage.LuggageWeight))
-                .Count() != 0) {
-            return BadRequest(new {
-                LuggageWeight = "Khối lượng hành lý đã được thiết lập"
-            });
+          if (luggage.Error == 1) {
+            return BadRequest(new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
           }
-
-          _unitOfWork.Luggages.Add(luggage);
-          _unitOfWork.Complete();
 
           return Ok (new { success = true, message = "Thêm thành công" });
         }
@@ -132,15 +79,12 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
         public ActionResult DeleteLuggage(int id) {
-          var luggage = _unitOfWork.Luggages.GetBy(id);
+          var luggage = _service.DeleteLuggage(id);
 
-          if (luggage == null) {
+          if (luggage.Error == 1) {
             return NotFound (new { message = "Mã hành lý này không tồn tại." });
           }
-
-          _unitOfWork.Luggages.Remove(luggage);
-          _unitOfWork.Complete();
-
+          
           return Ok (new { success = true, message = "Xóa thành công" });
         }
     }
