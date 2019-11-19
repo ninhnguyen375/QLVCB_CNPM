@@ -11,6 +11,7 @@ using webapi.Services;
 using AutoMapper;
 using webapi.core.DTOs;
 using Microsoft.EntityFrameworkCore;
+using webapi.Interfaces;
 
 namespace webapi.Controllers
 {
@@ -19,84 +20,17 @@ namespace webapi.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-      private readonly IUnitOfWork _unitOfWork;
-      private readonly IMapper _mapper;
+      private readonly IFlightService _service;
 
-      public FlightsController(IUnitOfWork unitOfWork, IMapper mapper) {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
+      public FlightsController(IFlightService flightService) {
+        _service = flightService;
       }
 
       // GET: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
       public ActionResult GetFlights([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
-        // Mapping: Flight
-        var flightsSource = _unitOfWork.Flights.GetAll();
-        _unitOfWork.Airlines.GetAll();
-        _unitOfWork.Airports.GetAll();
-        _unitOfWork.TicketCategories.GetAll();
-        _unitOfWork.Flights.GetFlightTicketCategories();
-        var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(flightsSource);
-
-        // Search by Id:
-        if (search.Id != "") {
-          flights = flights.Where(f =>
-            f.Id.ToLower().Contains(search.Id.ToLower()));
-        }
-
-        // Search by StartTime:
-        if (search.StartTime != null) {
-          flights = flights.Where(f =>
-            f.StartTime == search.StartTime);
-        }
-
-        /// Search by FlightTime:
-        if (search.FlightTime != null) {
-          flights = flights.Where(f =>
-            f.FlightTime == search.FlightTime);
-        }
-
-        // Search by AirportFrom:
-        if (search.AirportFrom != "") {
-          flights = flights.Where(f =>
-            f.AirportFrom.ToLower().Contains(search.AirportFrom.ToLower()));
-        }
-
-        // Search by AirportTo:
-        if (search.AirportTo != "") {
-          flights = flights.Where(f =>
-            f.AirportTo.ToLower().Contains(search.AirportTo.ToLower()));
-        }
-
-        // Search by AirlineName:
-        if (search.AirlineName != "") {
-          var airlines = _unitOfWork.Airlines.GetAll();
-
-          flights = (from f in flights
-                     from a in airlines
-                     where f.AirlineId.Equals(a.Id) && 
-                     a.Name.ToLower().Contains(search.AirlineName.ToLower())
-                     select f);
-        }
-
-        // Search by Status:
-        if (search.Status != null) {
-          flights = flights.Where(f =>
-            f.Status == search.Status);
-        }
-
-        // Sort Asc:
-        if (search.sortAsc != "") {
-          flights = flights.OrderBy(f =>
-            f.GetType().GetProperty(search.sortAsc).GetValue(f));
-        }
-
-        // Sort Desc:
-        if (search.sortDesc != "") {
-          flights = flights.OrderByDescending(f =>
-            f.GetType().GetProperty(search.sortDesc).GetValue(f));
-        }
+        var flights = _service.GetFlights(pagination, search);
 
         return Ok (PaginatedList<FlightDTO>.Create(flights, pagination.current, pagination.pageSize));
       }
@@ -105,13 +39,7 @@ namespace webapi.Controllers
       [AllowAnonymous]
       [HttpGet ("{id}")]
       public ActionResult GetFlight(string id) {
-        // Mapping: Flight
-        var flightSource = _unitOfWork.Flights.GetBy(id);
-        _unitOfWork.Airlines.GetAll();
-        _unitOfWork.Airports.GetAll();
-        _unitOfWork.TicketCategories.GetAll();
-        _unitOfWork.Flights.GetFlightTicketCategories();
-        var flight = _mapper.Map<Flight, FlightDTO>(flightSource);
+        var flight = _service.GetFlight(id);
 
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
@@ -124,44 +52,13 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
       public ActionResult PutFlight(string id, SaveFlightDTO values) {
-        var flight = _unitOfWork.Flights.GetBy(id);
+        var flight = _service.PutFlight(id, values);
 
-        if (flight == null) {
+        if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        }
-
-        if(id != values.Id) {
+        } else if (flight.Error == 2) {
           return BadRequest("Mã chuyến bay không hợp lệ.");
         }
-
-        // Create SaveFlightDTO
-        // SaveFlightDTO saveFlightDTO = new SaveFlightDTO {
-        //   Id = values.Id,
-        //   StartTime = values.StartTime,
-        //   FlightTime = values.FlightTime,
-        //   AirportFrom = values.AirportFrom,
-        //   AirportTo = values.AirportTo,
-        //   SeatsCount = values.SeatsCount,
-        //   AirlineId = values.AirlineId
-        // };
-
-        // Mapping: SaveAirport
-        _mapper.Map<SaveFlightDTO, Flight>(values, flight);
-
-        // Mapping: SaveFlightTicketCategory
-        // foreach (var val in values.FlightTicketCategories) {
-        //   var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-        //     ftc.FlightId == values.Id &&
-        //     ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
-        //   SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
-        //     FlightId = values.Id,
-        //     TicketCategoryId = val.TicketCategoryId,
-        //     Price = val.Price,
-        //   };
-        //   _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(save, flightTicketCategory);
-        // }
-
-        _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Sửa thành công" });
       }
@@ -170,18 +67,11 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public ActionResult PostFlight(SaveFlightDTO saveFlightDTO) {
-        // Mapping: SaveFlightDTO
-        var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
+        var flight = _service.PostFlight(saveFlightDTO);
 
-        var flightTemp = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(flight.Id.ToLower())).SingleOrDefault();
-
-        if (flightTemp != null) {
+        if (flight.Error == 1) {
           return BadRequest (new { Id = "Mã chuyến bay này đã tồn tại." });
         }
-
-        _unitOfWork.Flights.Add(flight);
-        _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Thêm thành công." });
       }
@@ -190,15 +80,11 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
       public ActionResult DeleteFlight(string id) {
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        var flight = _service.DeleteFlight(id);
 
-        if (flight == null) {
+        if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
-
-        _unitOfWork.Flights.Remove(flight);
-        _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Xóa thành công." });
       }
@@ -207,26 +93,13 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflightticketcategory")]
       public ActionResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values) {
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        var flight = _service.PostFlightTicketCategories(id, values);
         
-        if (flight == null) {
+        if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        }
-
-        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
-          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
-
-        if (flightTicketCategory != null) {
+        } else if (flight.Error == 2) {
           return BadRequest (new { Id = "Loại vé của chuyến bay này đã tồn tại." });
         }
-
-        // Mapping: SaveFlightTicketCategory
-        flightTicketCategory = _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(values);
-
-        _unitOfWork.FlightTicketCategories.Add(flightTicketCategory);
-        _unitOfWork.Complete();
 
         return Ok (new { success = true, message = "Thêm loại vé thành công." });
       }
@@ -235,25 +108,14 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}/removeflightticketcategory")]
       public ActionResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values) {
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        var flight = _service.DeleteFlightTicketCategories(id, values);
         
-        if (flight == null) {
+        if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        }
-
-        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
-          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
-
-        if (flightTicketCategory == null) {
+        } else if (flight.Error == 2) {
           return BadRequest (new { Id = "Loại vé của chuyến bay này không tồn tại." });
         }
 
-        _unitOfWork.FlightTicketCategories.Remove(flightTicketCategory);
-        _unitOfWork.Complete();
-
-        
         return Ok (new { success = true, message = "Xóa thành công." });
       }
     }
