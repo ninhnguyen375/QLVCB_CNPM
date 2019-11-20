@@ -142,8 +142,7 @@ namespace webapi.Services
         return order;
       }
 
-      public DataResult AcceptOrder (string id, EditOrder values) { // Sử dụng đỡ truyền UserId từ ngoài
-        // var currentUserId = int.Parse (User.Identity.Name); // Không hoạt động
+      public DataResult AcceptOrder (string id, int UserId) {
         var order = _unitOfWork.Orders.GetBy (id);
 
         if (order == null) {
@@ -172,8 +171,7 @@ namespace webapi.Services
         }
 
         order.Status = 1; // Confirm
-        // order.UserId = currentUserId; // Get User do this // User.Identity.Name không hoạt động
-        order.UserId = values.UserId;
+        order.UserId = UserId;
         customer.BookingCount++;
 
         _unitOfWork.Complete();
@@ -181,8 +179,7 @@ namespace webapi.Services
         return new DataResult { Data = order };
       }
 
-      public DataResult RefuseOrder (string id, EditOrder values) { // Sử dụng đỡ truyền UserId từ ngoài
-        // var currentUserId = int.Parse (User.Identity.Name); /// Không hoạt động
+      public DataResult RefuseOrder (string id, int UserId) {
         var order = _unitOfWork.Orders.GetBy (id);
 
         if (order == null) {
@@ -190,8 +187,7 @@ namespace webapi.Services
         }
 
         order.Status = 2; // Unconfirm
-        // order.UserId = currentUserId; // Get User do this // User.Identity.Name không hoạt động
-        order.UserId = values.UserId;
+        order.UserId = UserId;
         _unitOfWork.Complete();
 
         return new DataResult { Data = order };

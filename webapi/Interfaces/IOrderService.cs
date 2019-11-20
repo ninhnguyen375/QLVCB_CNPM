@@ -8,8 +8,8 @@ namespace webapi.Interfaces
     {
       IEnumerable<OrderDTO> GetOrders (Pagination pagination, SearchOrder search);
       OrderDTO GetOrder (string id);
-      DataResult AcceptOrder (string id, EditOrder values);
-      DataResult RefuseOrder (string id, EditOrder values);
+      DataResult AcceptOrder (string id, int UserId);
+      DataResult RefuseOrder (string id, int UserId);
       DataResult PostOrder (AddOrder values);
     }
 }
