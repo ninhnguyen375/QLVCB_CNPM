@@ -47,8 +47,9 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/accept
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/accept")]
-    public ActionResult AcceptOrder (string id, EditOrder values) {
-      var order = _service.AcceptOrder(id, values);
+    public ActionResult AcceptOrder (string id) {
+      var currentUserId = int.Parse (User.Identity.Name);
+      var order = _service.AcceptOrder(id, currentUserId);
 
       if (order.Error == 1) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
@@ -60,8 +61,9 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/refuse
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/refuse")]
-    public ActionResult RefuseOrder (string id, EditOrder values) {
-      var order = _service.RefuseOrder(id, values);
+    public ActionResult RefuseOrder (string id) {
+      var currentUserId = int.Parse (User.Identity.Name);
+      var order = _service.RefuseOrder(id, currentUserId);
 
       if (order.Error == 1) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
