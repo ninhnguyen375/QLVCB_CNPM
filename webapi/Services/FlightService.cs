@@ -121,7 +121,8 @@ namespace webapi.Services
           AirportFrom = values.AirportFrom,
           AirportTo = values.AirportTo,
           SeatsCount = values.SeatsCount,
-          AirlineId = values.AirlineId
+          AirlineId = values.AirlineId,
+          Status = values.Status
         };
 
         // Mapping: SaveAirport
