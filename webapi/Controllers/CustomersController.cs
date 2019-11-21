@@ -19,7 +19,6 @@ namespace webapi.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerService _service;
-        private readonly IMapper _mapper;
 
         public CustomersController(ICustomerService customerService) {
           _service = customerService;

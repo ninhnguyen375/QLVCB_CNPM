@@ -96,6 +96,7 @@ namespace webapi {
             services.AddScoped<IFlightService, FlightService> ();
             services.AddScoped<ITicketCategoryService, TicketCategoryService> ();
             services.AddScoped<IOrderService, OrderService> ();
+            services.AddScoped<IUserService, UserService> ();
 
 
         }
