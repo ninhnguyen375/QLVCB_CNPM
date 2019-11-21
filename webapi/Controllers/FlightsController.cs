@@ -57,7 +57,7 @@ namespace webapi.Controllers
         if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         } else if (flight.Error == 2) {
-          return BadRequest("Mã chuyến bay không hợp lệ.");
+          return BadRequest( new { id = "Mã chuyến bay không hợp lệ." });
         }
 
         return Ok (new { success = true, message = "Sửa thành công" });
