@@ -1,9 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
-using System.Linq;
-using webapi.core.Interfaces;
-
 namespace webapi.core.DTOs {
     public class UserDTO {
         public int Id { get; set; }

@@ -51,7 +51,9 @@ namespace webapi.core.Mapping
             CreateMap<Ticket, TicketDTO>();
             CreateMap<SaveTicketDTO, Ticket>();
 
+            // 12. User
             CreateMap<User, UserDTO>();
+            CreateMap<SaveUserDTO, User>();
         }
     }
 }

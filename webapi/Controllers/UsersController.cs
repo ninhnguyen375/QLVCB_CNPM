@@ -1,192 +1,80 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using BCrypt;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using webapi.core.Domain.Entities;
-using webapi.core.Interfaces;
+using webapi.core.DTOs;
 using webapi.core.UseCases;
-using webapi.infrastructure.Persistance;
+using webapi.Interfaces;
 using webapi.Services;
+
 namespace webapi.Controllers {
     [Authorize]
     [Route ("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase {
-        private readonly IUnitOfWork _unitOfWork;
+    public class UsersController : CustomeControllerBase {
+        private readonly IUserService _service;
 
-        public UsersController (IUnitOfWork unitOfWork) {
-            _unitOfWork = unitOfWork;
+        public UsersController (IUserService service) {
+            _service = service;
         }
 
         // GET: api/users
         [HttpGet]
         public ActionResult GetUsers ([FromQuery] Pagination pagination, [FromQuery] SearchUser search) {
-            var currentUserId = int.Parse (User.Identity.Name);
-            var usersQuery = _unitOfWork.Users;
-            IEnumerable<User> users = usersQuery.GetAll();
-            // Searching
-            if(search.email != "") {
-                users = users.Where(u => u.Email.Contains(search.email));
-            }
-            if(search.fullname != "") {
-                users = users.Where(u => u.FullName.Contains(search.fullname));
-            }
-            if(search.identifier != "") {
-                users = users.Where(u => u.Identifier.Equals(search.identifier));
-            }
-            if(search.phone != "") {
-                users = users.Where(u => u.Phone.Equals(search.phone));
-            }
-            // Sorting
-            if(search.sortAsc != "") {
-                Console.WriteLine(search.sortAsc);
-                users = users.OrderBy(u => u.GetType().GetProperty(search.sortAsc).GetValue(u, null));
-            }
-            if(search.sortDesc != "") {
-                Console.WriteLine(search.sortDesc);
-                users = users.OrderByDescending(u => u.GetType().GetProperty(search.sortDesc).GetValue(u, null));
-            }
+            var res = _service.GetUsers (pagination, search, User);
             
-            if (User.IsInRole ("ADMIN"))
-                users = users.Where (i => i.Role.Equals ("STAFF"));
-            else
-                return Forbid ();
-
-            return Ok (PaginatedList<User>.Create (users, pagination.current, pagination.pageSize));
+            return this.HandleRes (res);
         }
 
         // GET: api/users/5
         [HttpGet ("{id}")]
         public ActionResult GetUser (int id) {
-            var user = _unitOfWork.Users.GetBy (id);
-            if (user == null) {
-                return NotFound ();
-            }
+            var res = _service.GetUser (id);
 
-            return Ok (new { success = true, user });
+            return this.HandleRes (res);
         }
 
         // PUT: api/users/5/block
         [HttpPut ("{id}/block")]
         public ActionResult BlockUser (int id) {
-            var user = _unitOfWork.Users.GetBy (id);
-            if (user == null) {
-                return NotFound ();
-            }
-            user.Status = 2; // 2: Banned
-            _unitOfWork.Complete();
+            var res = _service.BlockUser (id);
 
-            return Ok (new { success = true, user });
+            return this.HandleRes (res);
         }
 
         // PUT: api/users/5/unblock
         [HttpPut ("{id}/unblock")]
         public ActionResult UnblockUser (int id) {
-            var user = _unitOfWork.Users.GetBy (id);
-            if (user == null) {
-                return NotFound ();
-            }
-            user.Status = 1; // 1: Active
-            _unitOfWork.Complete();
+            var res = _service.UnBlockUser (id);
 
-            return Ok (new { success = true, user });
+            return this.HandleRes (res);
         }
 
         // PUT: api/users/5
         [HttpPut ("{id}")]
         [Authorize (Roles = "ADMIN, STAFF")]
-        public ActionResult PutUser (int id, EditUser values) {
-            var user = _unitOfWork.Users.GetBy (id);
-            if (user == null) {
-                return NotFound ();
-            }
-            // Check exists
-            if(_unitOfWork.Users.Find(
-                u => u.Identifier.Equals(values.identifier) && 
-                u.Id != id
-            ).Count() != 0) {
-                return BadRequest(new {
-                    Identifier = "CMND đã được sử dụng"
-                });
-            }
-            if(_unitOfWork.Users.Find(
-                u => u.Email.Equals(values.email) &&
-                u.Id != id
-            ).Count() != 0) {
-                return BadRequest(new {
-                    Email = "Email đã được sử dụng"
-                });
-            }
-            
-            // Editing
-            if (values.email != "")
-                user.Email = values.email;
-            if (values.phone != "")
-                user.Phone = values.phone;
-            if (values.identifier != "")
-                user.Identifier = values.identifier;
-            if (values.fullName != "")
-                user.FullName = values.fullName;
-            if (values.password != "")
-                user.Password = values.password;
+        public ActionResult PutUser (int id, SaveUserDTO saveUserDTO) {
+            var res = _service.PutUser (id, saveUserDTO);
 
-            _unitOfWork.Complete ();
-
-            return Ok (new { success = true });
+            return this.HandleRes (res);
         }
 
         // POST: api/users
         [HttpPost]
         [Authorize (Roles = "ADMIN")]
-        public ActionResult PostUser ([FromBody] AddUser user) {
-            if(_unitOfWork.Users.Find(u => u.Identifier.Equals(user.Identifier)).Count() != 0) {
-                return BadRequest(new {
-                    Identifier = "CMND đã được sử dụng"
-                });
-            }
-            if(_unitOfWork.Users.Find(u => u.Email.Equals(user.Email)).Count() != 0) {
-                return BadRequest(new {
-                    Email = "Email đã được sử dụng"
-                });
-            }
+        public ActionResult PostUser ([FromBody] SaveUserDTO saveUserDTO) {
+            var res = _service.PostUser (saveUserDTO);
 
-            User newUser = new User {
-                Email = user.Email,
-                FullName = user.FullName,
-                Identifier = user.Identifier,
-                Phone = user.Phone
-            };
-
-            _unitOfWork.Users.Add(newUser);
-            string defaultPassword = "12345678";
-
-            newUser.Password = BCrypt.Net.BCrypt.HashPassword (defaultPassword);
-
-
-            _unitOfWork.Complete ();
-            return Ok (new { success = true, user = user });
+            return this.HandleRes (res);
         }
 
         // DELETE: api/users/5
         [HttpDelete ("{id}")]
         [Authorize (Roles = "ADMIN")]
         public ActionResult DeleteUser (int id) {
-            var user = _unitOfWork.Users.GetBy (id);
+            var res = _service.DeleteUser (id);
 
-            if (user == null) {
-                return NotFound ();
-            }
-
-            _unitOfWork.Users.Remove (user);
-            _unitOfWork.Complete ();
-
-            return Ok (new { success = true });
+            return this.HandleRes (res);
         }
     }
 }
