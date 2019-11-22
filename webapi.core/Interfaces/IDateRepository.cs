@@ -5,7 +5,7 @@ namespace webapi.core.Interfaces
 {
     public interface IDateRepository : IRepository<Date>
     {    
-        public IEnumerable<DateFlight> GetDateFlights();
-        public DateFlight GetDateFlight(int dateId, string flightId);
+        IEnumerable<DateFlight> GetDateFlights();
+        DateFlight GetDateFlight(int dateId, string flightId);
     }
 }

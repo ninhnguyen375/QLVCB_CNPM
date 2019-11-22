@@ -5,6 +5,6 @@ namespace webapi.core.Interfaces
 {
     public interface ICustomerRepository : IRepository<Customer>
     {
-        public IEnumerable<Order> GetOrdersById(string id);
+        IEnumerable<Order> GetOrdersById(string id);
     }
 }
