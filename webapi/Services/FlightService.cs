@@ -109,7 +109,7 @@ namespace webapi.Services
           return new DataResult { Error = 1 };
         }
 
-        if(id != values.Id) {
+        if (id != values.Id) {
           return new DataResult { Error = 2 };
         }
 
@@ -130,9 +130,10 @@ namespace webapi.Services
 
         // Mapping: SaveFlightTicketCategory
         foreach (var val in values.FlightTicketCategories) {
-          var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-            ftc.FlightId == values.Id &&
-            ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
+          var flightTicketCategory = _unitOfWork.Flights
+            .GetFlightTicketCategoriesById(values.Id)
+            .Where(ftc => ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
+
           SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
             FlightId = values.Id,
             TicketCategoryId = val.TicketCategoryId,
@@ -150,6 +151,7 @@ namespace webapi.Services
         // Mapping: SaveFlightDTO
         var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
 
+        // Kiểm tra mã chuyến bay đã tồn tại hay chưa
         var flightTemp = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(flight.Id.ToLower())).SingleOrDefault();
 
@@ -164,6 +166,7 @@ namespace webapi.Services
       }
 
       public DataResult DeleteFlight(string id) {
+        // Kiểm tra mã chuyến bay
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
 
@@ -178,6 +181,7 @@ namespace webapi.Services
       }
 
       public DataResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values) {
+        // Kiểm tra mã chuyến bay
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
         
@@ -185,9 +189,10 @@ namespace webapi.Services
           return new DataResult { Error = 1 };
         }
 
-        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
-          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
+        // Kiểm tra mã loại vé đã tồn tại hay chưa
+        var flightTicketCategory = _unitOfWork.Flights
+          .GetFlightTicketCategoriesById(id)
+          .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory != null) {
           return new DataResult { Error = 2 };
@@ -203,6 +208,7 @@ namespace webapi.Services
       }
 
       public DataResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values) {
+        // Kiểm tra mã chuyến bay
         var flight = _unitOfWork.Flights.Find(f =>
           f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
         
@@ -210,9 +216,10 @@ namespace webapi.Services
           return new DataResult { Error = 1 };
         }
 
-        var flightTicketCategory = _unitOfWork.FlightTicketCategories.Find(ftc =>
-          ftc.FlightId.ToLower().Equals(id.ToLower()) &&
-          ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
+        // Kiểm tra mã loại vé
+        var flightTicketCategory = _unitOfWork.Flights
+          .GetFlightTicketCategoriesById(id)
+          .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory == null) {
           return new DataResult { Error = 2 };
