@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace webapi.core.Interfaces {
     public interface IUnitOfWork : IDisposable {
@@ -14,6 +15,6 @@ namespace webapi.core.Interfaces {
         ITicketCategoryRepository TicketCategories { get; }
         IFlightTicketCategoryRepository FlightTicketCategories { get; }
         ITicketRepository Tickets { get; }
-        int Complete ();
+        Task<int> CompleteAsync ();
     }
 }

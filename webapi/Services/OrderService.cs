@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
@@ -20,12 +21,12 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public IEnumerable<OrderDTO> GetOrders (Pagination pagination, SearchOrder search) {
+      public async Task<IEnumerable<OrderDTO>> GetOrdersAsync (Pagination pagination, SearchOrder search) {
         // Mapping: Order
-        var ordersSource = _unitOfWork.Orders.GetAll ();
-        _unitOfWork.Customers.GetAll();
-        _unitOfWork.Users.GetAll();
-        _unitOfWork.Dates.GetAll();
+        var ordersSource = await _unitOfWork.Orders.GetAllAsync ();
+        await _unitOfWork.Customers.GetAllAsync();
+        await _unitOfWork.Users.GetAllAsync();
+        await _unitOfWork.Dates.GetAllAsync();
         var orders = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(ordersSource);
         
         // Search by Id:
@@ -117,41 +118,45 @@ namespace webapi.Services
         return orders;
       }
 
-      public OrderDTO GetOrder (string id) {
+      public async Task<OrderDTO> GetOrderAsync (string id) {
         // Mapping: Order
-        var orderSource = _unitOfWork.Orders.GetBy(id);
-        _unitOfWork.Customers.GetAll();
-        _unitOfWork.Luggages.GetAll();
-        _unitOfWork.TicketCategories.GetAll();
-        _unitOfWork.Airports.GetAll();
-        _unitOfWork.Airlines.GetAll();
-        _unitOfWork.Flights.GetAll();
-        _unitOfWork.Dates.GetAll();
-        _unitOfWork.Users.GetAll();
+        var orderSource = await _unitOfWork.Orders.GetByAsync(id);
+        await _unitOfWork.Customers.GetAllAsync();
+        await _unitOfWork.Luggages.GetAllAsync();
+        await _unitOfWork.TicketCategories.GetAllAsync();
+        await _unitOfWork.Airports.GetAllAsync();
+        await _unitOfWork.Airlines.GetAllAsync();
+        await _unitOfWork.Flights.GetAllAsync();
+        await _unitOfWork.Dates.GetAllAsync();
+        await _unitOfWork.Users.GetAllAsync();
 
         var order = _mapper.Map<Order, OrderDTO>(orderSource);     
 
+        // Check order exists
         if (order == null) {
           return order;
         }
 
-        var ticketsSource = _unitOfWork.Orders.GetTicketsById(order.Id);
+        // Mapping để lấy thông tin
+        var ticketsSource = await _unitOfWork.Orders.GetTicketsByIdAsync(order.Id);
         var tickets = _mapper.Map<IEnumerable<Ticket>, IEnumerable<TicketDTO>>(ticketsSource);
+
         order.Tickets = (ICollection<TicketDTO>)tickets;
 
         return order;
       }
 
-      public DataResult AcceptOrder (string id, int UserId) {
-        var order = _unitOfWork.Orders.GetBy (id);
+      public async Task<DataResult> AcceptOrderAsync (string id, int UserId) {
+        // Check order exists
+        var order = await _unitOfWork.Orders.GetByAsync (id);
 
         if (order == null) {
           return new DataResult { Error = 1 };
         }
         
-        var customer = _unitOfWork.Customers.GetBy(order.CustomerId);
-        var dateFlights = _unitOfWork.DateFlights.GetAll();
-        var tickets = _unitOfWork.Tickets.GetAll();
+        var customer = await _unitOfWork.Customers.GetByAsync(order.CustomerId);
+        var dateFlights = await _unitOfWork.DateFlights.GetAllAsync();
+        var tickets = await _unitOfWork.Tickets.GetAllAsync();
 
         // Departure Date Flight:
         var dateFlight = (
@@ -174,13 +179,13 @@ namespace webapi.Services
         order.UserId = UserId;
         customer.BookingCount++;
 
-        _unitOfWork.Complete();
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { Data = order };
       }
 
-      public DataResult RefuseOrder (string id, int UserId) {
-        var order = _unitOfWork.Orders.GetBy (id);
+      public async Task<DataResult> RefuseOrderAsync (string id, int UserId) {
+        var order = await _unitOfWork.Orders.GetByAsync (id);
 
         if (order == null) {
           return new DataResult { Error = 1 };
@@ -188,14 +193,14 @@ namespace webapi.Services
 
         order.Status = 2; // Unconfirm
         order.UserId = UserId;
-        _unitOfWork.Complete();
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { Data = order };
       }
 
-      public DataResult PostOrder (AddOrder values) {
+      public async Task<DataResult> PostOrderAsync (AddOrder values) {
         // Check Customer existence
-        var customer = _unitOfWork.Customers.GetBy (values.CustomerId);
+        var customer = await _unitOfWork.Customers.GetByAsync (values.CustomerId);
 
         if (customer == null) // Nếu không tồn tại khách hàng này trong db
         {
@@ -208,17 +213,19 @@ namespace webapi.Services
 
           // Mapping: SaveCustomer
           customer = _mapper.Map<SaveCustomerDTO, Customer>(saveCustomerDTO);
-          _unitOfWork.Customers.Add (customer);
+          await _unitOfWork.Customers.AddAsync (customer);
         }
 
         // Lấy DepartureDate Id
-        var departureDateId = _unitOfWork.Dates.Find(d =>
-            d.DepartureDate == Convert.ToDateTime(values.DepartureDateName))
+        var departureDateIdAsync = await _unitOfWork.Dates.FindAsync(d =>
+            d.DepartureDate == Convert.ToDateTime(values.DepartureDateName));
+
+        var departureDateId = departureDateIdAsync    
             .Select(d => d.Id).SingleOrDefault();
 
         // Add Order
         SaveOrderDTO saveOrderDTO = new SaveOrderDTO {
-          Id = this.autoOrderId (),
+          Id = await this.autoOrderIdAsync (),
           TicketCount = values.TicketCount,
           TotalPrice = values.TotalPrice,
           CreateAt = DateTime.Now, // Lấy thời điểm đặt vé
@@ -231,14 +238,16 @@ namespace webapi.Services
 
         // Lấy ReturnDate Id
         if (values.ReturnDateName != "") {
-          saveOrderDTO.ReturnDateId = _unitOfWork.Dates.Find(d =>
-            d.DepartureDate == Convert.ToDateTime(values.ReturnDateName))
+          var returnDateIdAsync = await _unitOfWork.Dates.FindAsync(d =>
+            d.DepartureDate == Convert.ToDateTime(values.ReturnDateName));
+
+          saveOrderDTO.ReturnDateId = returnDateIdAsync
             .Select(d => d.Id).SingleOrDefault();
         }
         
         // Mapping: SaveOrder
         var order = _mapper.Map<SaveOrderDTO, Order>(saveOrderDTO);
-        _unitOfWork.Orders.Add (order);
+        await _unitOfWork.Orders.AddAsync (order);
 
         IList<Ticket> tickets = new List<Ticket>(); // Dòng này để kiểm tra dữ liệu tạm thời (xóa sau)
         
@@ -246,19 +255,17 @@ namespace webapi.Services
         for (int i = 0; i < values.FlightIds.Count; i++) {
           for (int j = 0; j < values.Passengers.Count; j++) {
             // Luggage Price
-            decimal luggagePrice = Convert.ToDecimal(
-              _unitOfWork.Luggages.Find(l =>
-                l.Id == values.Passengers.ElementAt(j).LuggageIds.ElementAt(i)
-              ).ElementAt(0).Price
-            );
+            var luggageAsync = await _unitOfWork.Luggages.FindAsync(l =>
+              l.Id == values.Passengers.ElementAt(j).LuggageIds.ElementAt(i));
+
+            decimal luggagePrice = Convert.ToDecimal(luggageAsync.SingleOrDefault().Price);
 
             // Ticket Price
-            decimal ticketPrice = Convert.ToDecimal(
-              _unitOfWork.FlightTicketCategories.Find(ft => 
-                ft.TicketCategoryId == values.Passengers.ElementAt(j).TicketCategoryId && 
-                ft.FlightId == values.FlightIds.ElementAt(i)
-              ).ElementAt(0).Price
-            );
+            var ticketAsync = await _unitOfWork.FlightTicketCategories.FindAsync(ft => 
+              ft.TicketCategoryId == values.Passengers.ElementAt(j).TicketCategoryId && 
+              ft.FlightId == values.FlightIds.ElementAt(i));
+
+            decimal ticketPrice = Convert.ToDecimal(ticketAsync.SingleOrDefault().Price);
 
             // Lấy ngày bay, i = 0 là của chiều đi, i = 1 là của chiều về
             int dateId = 0;
@@ -269,7 +276,7 @@ namespace webapi.Services
             }
 
             var saveTicketDTO = new SaveTicketDTO {
-              Id = this.autoTicketId(),
+              Id = await this.autoTicketIdAsync(),
               PassengerName = values.Passengers.ElementAt(j).PassengerName,
               PassengerGender = values.Passengers.ElementAt(j).PassengerGender,
               LuggageId = values.Passengers.ElementAt(j).LuggageIds.ElementAt(i),
@@ -284,8 +291,8 @@ namespace webapi.Services
             var ticket = _mapper.Map<SaveTicketDTO, Ticket>(saveTicketDTO);
 
             tickets.Add(ticket); // Xóa sau
-            _unitOfWork.Tickets.Add (ticket);
-            _unitOfWork.Complete ();         
+            await _unitOfWork.Tickets.AddAsync (ticket);
+            await _unitOfWork.CompleteAsync ();         
           }
         }
 
@@ -306,9 +313,9 @@ namespace webapi.Services
       }
 
       // 1. Tự động sinh OrderId
-      private string autoOrderId () {
+      private async Task<string> autoOrderIdAsync () {
         string orderId = "";
-        var orders = _unitOfWork.Orders.GetAll ();
+        var orders = await _unitOfWork.Orders.GetAllAsync ();
 
         if (orders.Any ()) {
           int orderIdNum = Int32.Parse (orders.Last ().Id) + 1; // Lấy mã đơn hàng cũ chuyển qua kiểu int và + 1
@@ -335,9 +342,9 @@ namespace webapi.Services
       }
       
       // 2. Tự động sinh TicketId
-      private string autoTicketId () {
+      private async Task<string> autoTicketIdAsync () {
         string ticketId = "";
-        var tickets = _unitOfWork.Tickets.GetAll ();
+        var tickets = await _unitOfWork.Tickets.GetAllAsync ();
 
         if (tickets.Any ()) {
           int ticketIdNum = Int32.Parse (tickets.Last ().Id) + 1; // Lấy mã đơn hàng cũ chuyển qua kiểu int và + 1

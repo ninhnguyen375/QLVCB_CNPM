@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,8 @@ namespace webapi.Controllers
         // GET: api/airports (GET all airports)
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult GetAirports ([FromQuery] Pagination pagination, [FromQuery] SearchAirport search) {
-          var airports = _service.GetAirports(pagination, search);
+        public async Task<ActionResult> GetAirportsAsync ([FromQuery] Pagination pagination, [FromQuery] SearchAirport search) {
+          var airports = await _service.GetAirportsAsync(pagination, search);
 
           return Ok (PaginatedList<AirportDTO>.Create (airports, pagination.current, pagination.pageSize));
         }
@@ -35,8 +36,8 @@ namespace webapi.Controllers
         // GET: api/airports/id (GET airport by Id)
         [AllowAnonymous]
         [HttpGet ("{id}")]
-        public ActionResult GetAirport (string id) {
-          var airport = _service.GetAirport(id);
+        public async Task<ActionResult> GetAirportAsync (string id) {
+          var airport = await _service.GetAirportAsync(id);
 
           if (airport == null) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
@@ -48,8 +49,8 @@ namespace webapi.Controllers
         // PUT: api/airports/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutAirport (string id, SaveAirportDTO saveAirportDTO) {
-          var airport = _service.PutAirport(id, saveAirportDTO);
+        public async Task<ActionResult> PutAirportAsync (string id, SaveAirportDTO saveAirportDTO) {
+          var airport = await _service.PutAirportAsync(id, saveAirportDTO);
 
           if (airport.Error == 1) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
@@ -63,8 +64,8 @@ namespace webapi.Controllers
         // POST: api/airports
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostAirport (SaveAirportDTO saveAirportDTO) {
-          var airport = _service.PostAirport(saveAirportDTO);
+        public async Task<ActionResult> PostAirportAsync (SaveAirportDTO saveAirportDTO) {
+          var airport = await _service.PostAirportAsync(saveAirportDTO);
 
           if (airport.Error == 1) {
             return BadRequest(new { Id = "Mã sân bay này đã tồn tại." });
@@ -78,8 +79,8 @@ namespace webapi.Controllers
         // DELETE: api/airports/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")] 
-        public ActionResult DeleteAirport (string id) {
-          var airport = _service.DeleteAirport(id);
+        public async Task<ActionResult> DeleteAirportAsync (string id) {
+          var airport = await _service.DeleteAirportAsync(id);
 
           if (airport.Error == 1) {
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });

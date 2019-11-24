@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
@@ -20,10 +21,10 @@ namespace webapi.Services
           _mapper = mapper;
         }
 
-        public IEnumerable<DateDTO> GetDates(Pagination pagination, SearchDate search) {
+        public async Task<IEnumerable<DateDTO>> GetDatesAsync(Pagination pagination, SearchDate search) {
           // Mapping: Date
-          var datesSource = _unitOfWork.Dates.GetAll();
-          _unitOfWork.Dates.GetDateFlights();
+          var datesSource = await _unitOfWork.Dates.GetAllAsync();
+          await _unitOfWork.Dates.GetDateFlightsAsync();
           var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(datesSource);
 
           // Search by DepartureDate
@@ -53,51 +54,56 @@ namespace webapi.Services
           return dates;
         }
         
-        public DateDTO GetDate(int id) {
+        public async Task<DateDTO> GetDateAsync(int id) {
           // Mapping: Date
-          var dateSource = _unitOfWork.Dates.GetBy(id);
-          _unitOfWork.Dates.GetDateFlights();
+          var dateSource = await _unitOfWork.Dates.GetByAsync(id);
+          await _unitOfWork.Dates.GetDateFlightsAsync();
           var date = _mapper.Map<Date, DateDTO>(dateSource);
 
           return date;
         }
-        public DataResult PutDate(int id, SaveDateDTO saveDateDTO) {
-          var date = _unitOfWork.Dates.GetBy(id);
+        public async Task<DataResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
+          var date = await _unitOfWork.Dates.GetByAsync(id);
 
+          // Check date exists
           if (date == null) {
             return new DataResult { Error = 1 };
           }
 
-          if (_unitOfWork.Dates.Find(d =>
-                d.DepartureDate == Convert.ToDateTime(saveDateDTO.DepartureDate) &&
-                d.Id != id)
-                .Count() != 0 ) {
+          // Check departureDate of date exists except self
+          var dateExist = await _unitOfWork.Dates.FindAsync(d =>
+            d.DepartureDate == Convert.ToDateTime(saveDateDTO.DepartureDate) &&
+            d.Id != id);
+
+          if (dateExist.Count() != 0 ) {
             return new DataResult { Error = 2 };
           }
 
           // Mapping: SaveDate
           _mapper.Map<SaveDateDTO, Date>(saveDateDTO, date);
 
-          _unitOfWork.Complete();
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { Data = date };
         }
 
-        public DataResult PostDate(SaveDateDTO saveDateDTO) {
+        public async Task<DataResult> PostDateAsync(SaveDateDTO saveDateDTO) {
           // Mapping: SaveDate
           var date = _mapper.Map<SaveDateDTO, Date>(saveDateDTO);
           
           DateTime departureDate = Convert.ToDateTime(date.DepartureDate);
 
-          var dateTemp = _unitOfWork.Dates.Find(d =>
+          // Check date exists
+          var dateTemp = await _unitOfWork.Dates.FindAsync(d =>
             d.DepartureDate == departureDate);
 
           if (dateTemp.Count() > 0) {
             return new DataResult { Error = 1 };
           }
 
+          // Nếu có thêm các chuyến bay cho ngày
           if (date.DateFlights != null) {
-            var flights = _unitOfWork.Flights.GetAll();
+            var flights = await _unitOfWork.Flights.GetAllAsync();
 
             // Thêm ghế còn lại và trạng thái cho chuyến bay
             foreach (var dateFlight in date.DateFlights) {
@@ -109,45 +115,47 @@ namespace webapi.Services
             }
           }
 
-          _unitOfWork.Dates.Add(date);
-          _unitOfWork.Complete();
+          await _unitOfWork.Dates.AddAsync(date);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
 
-        public DataResult DeleteDate(int id) {
-          var date = _unitOfWork.Dates.GetBy(id);
+        public async Task<DataResult> DeleteDateAsync(int id) {
+          var date = await _unitOfWork.Dates.GetByAsync(id);
 
+          // Check date exists
           if (date == null) {
             return new DataResult { Error = 1 };
           }
         
           // Xóa các chuyến bay trong ngày bị xóa
-          var dateFlights = _unitOfWork.DateFlights.GetAll();
+          var dateFlights = await _unitOfWork.DateFlights.GetAllAsync();
           foreach (var dateFlight in dateFlights) {
             if (dateFlight.DateId == id) {
-              _unitOfWork.DateFlights.Remove(dateFlight);
+              await _unitOfWork.DateFlights.RemoveAsync(dateFlight);
             }
           }
 
-          _unitOfWork.Dates.Remove(date);
-          _unitOfWork.Complete();
+          await _unitOfWork.Dates.RemoveAsync(date);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
 
-        public DataResult PostFlight(int id, AddDateFlight values) {
-          var date = _unitOfWork.Dates.GetBy(id);
+        public async Task<DataResult> PostFlightAsync(int id, AddDateFlight values) {
+          var date = await _unitOfWork.Dates.GetByAsync(id);
 
+          // Check date exists
           if (date == null) {
             return new DataResult { Error = 1 };
           }
 
-          var flights = _unitOfWork.Flights.GetAll();
+          var flights = await _unitOfWork.Flights.GetAllAsync();
 
           // Thêm thông tin cho chuyến bay: gồm ngày, ghế còn lại, trạng thái
           foreach (var dateFlight in values.DateFlights) {
-            if(_unitOfWork.Dates.GetDateFlight(id, dateFlight.FlightId) == null) {
+            if(await _unitOfWork.Dates.GetDateFlightAsync(id, dateFlight.FlightId) == null) {
               // Mapping: SaveDateFlight
               SaveDateFlightDTO saveDateFlightDTO = new SaveDateFlightDTO {
                 FlightId = dateFlight.FlightId,
@@ -159,72 +167,82 @@ namespace webapi.Services
                 Status = 1, // Còn chỗ
               };
               var dateFlight1 = _mapper.Map<SaveDateFlightDTO, DateFlight>(saveDateFlightDTO);
-              _unitOfWork.DateFlights.Add(dateFlight1);
+              await _unitOfWork.DateFlights.AddAsync(dateFlight1);
             } else {
+              // Nếu chuyến bay đã tồn tại trong ngày thì báo tồn tại
               return new DataResult { Error = 2 };
             }
           }
 
-          _unitOfWork.Complete();
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
 
-        public DataResult DeleteFlight(int id, RemoveFlight values) {
-          var date = _unitOfWork.Dates.GetBy(id);
+        public async Task<DataResult> DeleteFlightAsync(int id, RemoveFlight values) {
+          var date = await _unitOfWork.Dates.GetByAsync(id);
 
+          // Check date exists
           if (date == null) {
             return new DataResult { Error = 1 };
           }
         
-          var flight = _unitOfWork.Flights.Find(a =>
-              a.Id.ToLower().Equals(values.FlightId.ToLower()))
-              .SingleOrDefault();
-
+          var flightAsync = await _unitOfWork.Flights.FindAsync(a =>
+              a.Id.ToLower().Equals(values.FlightId.ToLower()));
+          
           // Kiểm tra chuyến bay có tồn tại hay không
+          var flight = flightAsync.SingleOrDefault();
+
           if (flight == null) {
             return new DataResult { Error = 2 };
           }
 
           // Kiểm tra chuyến bay này trong ngày đã được bán chưa
-          var seatsCount = _unitOfWork.Flights.Find(f =>
-            f.Id.ToLower().Equals(values.FlightId.ToLower()))
-            .Select(f => f.SeatsCount).SingleOrDefault();
-          var flightTemp = _unitOfWork.DateFlights.Find(df =>
+          var seatsCountAsync = await _unitOfWork.Flights.FindAsync(f =>
+            f.Id.ToLower().Equals(values.FlightId.ToLower()));
+
+          var seatsCount = seatsCountAsync.Select(f => f.SeatsCount).SingleOrDefault();
+
+          var flightTempAsync = await _unitOfWork.DateFlights.FindAsync(df =>
             df.DateId == id &&
             df.FlightId.ToLower().Equals(values.FlightId.ToLower()) &&
-            df.SeatsLeft == seatsCount).SingleOrDefault(); // Chưa bán vé nào
+            df.SeatsLeft == seatsCount); // Chưa bán vé nào
           
+          var flightTemp = flightTempAsync.SingleOrDefault();
+
           if (flightTemp == null) {
             return new DataResult { Error = 3 };
           }
 
           // Xóa chuyến bay được chọn
-          var dateFlight = _unitOfWork.DateFlights.Find(df =>
+          var dateFlightAsync = await _unitOfWork.DateFlights.FindAsync(df =>
             df.DateId == id &&
-            df.FlightId.ToLower().Equals(values.FlightId.ToLower())).SingleOrDefault();
+            df.FlightId.ToLower().Equals(values.FlightId.ToLower()));
+          
+          var dateFlight = dateFlightAsync.SingleOrDefault();
 
-          _unitOfWork.DateFlights.Remove(dateFlight);
-          _unitOfWork.Complete();
+          await _unitOfWork.DateFlights.RemoveAsync(dateFlight);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
 
-        public DataResult SearchFlights(SearchFlightFE values) {
+        public async Task<DataResult> SearchFlightsAsync(SearchFlightFE values) {
           var departureDate = Convert.ToDateTime(values.DepartureDate);
 
+          // Mapping để lấy thông tin
           // Flights:
-          _unitOfWork.Airlines.GetAll();
-          _unitOfWork.Airports.GetAll();
-          _unitOfWork.TicketCategories.GetAll();
-          _unitOfWork.Flights.GetFlightTicketCategories();
-          var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(_unitOfWork.Flights.GetAll());
+          await _unitOfWork.Airlines.GetAllAsync();
+          await _unitOfWork.Airports.GetAllAsync();
+          await _unitOfWork.TicketCategories.GetAllAsync();
+          await _unitOfWork.Flights.GetFlightTicketCategoriesAsync();
+          var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(await _unitOfWork.Flights.GetAllAsync());
 
           // DateFlights:
-          var dateFlights = _mapper.Map<IEnumerable<DateFlight>, IEnumerable<DateFlightDTO>>(_unitOfWork.DateFlights.GetAll());
+          var dateFlights = _mapper.Map<IEnumerable<DateFlight>, IEnumerable<DateFlightDTO>>(await _unitOfWork.DateFlights.GetAllAsync());
 
           // Dates:
-          var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(_unitOfWork.Dates.GetAll());
+          var dates = _mapper.Map<IEnumerable<Date>, IEnumerable<DateDTO>>(await _unitOfWork.Dates.GetAllAsync());
 
           // Total Passengers:
           int totalSeats= 0;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,8 @@ namespace webapi.Controllers
         // GET: api/luggages
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult GetLuggages([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
-          var luggages = _service.GetLuggages(pagination, search);
+        public async Task<ActionResult> GetLuggagesAsync([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
+          var luggages = await _service.GetLuggagesAsync(pagination, search);
 
           return Ok (PaginatedList<LuggageDTO>.Create(luggages, pagination.current, pagination.pageSize));
         }
@@ -36,8 +37,8 @@ namespace webapi.Controllers
         // GET: api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
-        public ActionResult GetLuggage(int id) {
-          var luggage = _service.GetLuggage(id);
+        public async Task<ActionResult> GetLuggageAsync(int id) {
+          var luggage = await _service.GetLuggageAsync(id);
 
           if (luggage == null) {
             return NotFound (new { Id = "Mã hành lý này không tồn tại." });
@@ -49,8 +50,8 @@ namespace webapi.Controllers
         // PUT: api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutLuggage(int id, SaveLuggageDTO saveLuggageDTO) {
-          var luggage = _service.PutLuggage(id, saveLuggageDTO);
+        public async Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
+          var luggage = await _service.PutLuggageAsync(id, saveLuggageDTO);
 
           if (luggage.Error == 1) {
             return NotFound (new { Id = "Mã hành lý này không tồn tại." });
@@ -64,9 +65,9 @@ namespace webapi.Controllers
         // POST: api/luggages
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostLuggage(SaveLuggageDTO saveLuggageDTO) {
+        public async Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
-          var luggage = _service.PostLuggage(saveLuggageDTO);
+          var luggage = await _service.PostLuggageAsync(saveLuggageDTO);
 
           if (luggage.Error == 1) {
             return BadRequest(new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
@@ -78,8 +79,8 @@ namespace webapi.Controllers
         // DELETE : api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
-        public ActionResult DeleteLuggage(int id) {
-          var luggage = _service.DeleteLuggage(id);
+        public async Task<ActionResult> DeleteLuggageAsync(int id) {
+          var luggage = await _service.DeleteLuggageAsync(id);
 
           if (luggage.Error == 1) {
             return NotFound (new { message = "Mã hành lý này không tồn tại." });

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
@@ -7,10 +8,10 @@ namespace webapi.Interfaces
 {
     public interface ITicketCategoryService
     {
-      IEnumerable<TicketCategoryDTO> GetTicketCategories(Pagination pagination, SearchTicketCategory search);
-      TicketCategoryDTO  GetTicketCategory(int id);
-      DataResult PutTicketCategory(int id, SaveTicketCategoryDTO saveTicketCategoryDTO);
-      DataResult PostTicketCategory(SaveTicketCategoryDTO saveTicketCategoryDTO);
-      DataResult DeleteTicketCategory(int id);
+      Task<IEnumerable<TicketCategoryDTO>> GetTicketCategoriesAsync(Pagination pagination, SearchTicketCategory search);
+      Task<TicketCategoryDTO>  GetTicketCategoryAsync(int id);
+      Task<DataResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO);
+      Task<DataResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO);
+      Task<DataResult> DeleteTicketCategoryAsync(int id);
     }
 }

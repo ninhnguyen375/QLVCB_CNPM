@@ -69,7 +69,7 @@ namespace webapi {
                         OnTokenValidated = context => {
                             var _unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork> ();
                             var userId = int.Parse (context.Principal.Identity.Name);
-                            var user = _unitOfWork.Users.GetBy (userId);
+                            var user = _unitOfWork.Users.GetByAsync (userId);
                             if (user == null) {
                                 // return unauthorized if user no longer exists
                                 context.Fail ("Unauthorized");
