@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using webapi.core.Interfaces;
 using webapi.infrastructure.Persistance.Repositories;
 
@@ -33,8 +34,8 @@ namespace webapi.infrastructure.Persistance {
             Tickets = new TicketRepository(context);
             _context = context;
         }
-        public int Complete () {
-            return _context.SaveChanges ();
+        public async Task<int> CompleteAsync () {
+            return await _context.SaveChangesAsync ();
         }
 
         public void Dispose () {

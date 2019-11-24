@@ -10,6 +10,7 @@ using webapi.core.UseCases;
 using webapi.Services;
 using AutoMapper;
 using webapi.Interfaces;
+using System.Threading.Tasks;
 
 namespace webapi.Controllers {
   [Authorize]
@@ -25,8 +26,8 @@ namespace webapi.Controllers {
     // GET: api/orders
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet]
-    public ActionResult GetOrders ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
-      var orders = _service.GetOrders(pagination, search);
+    public async Task<ActionResult> GetOrdersAsync ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
+      var orders = await _service.GetOrdersAsync(pagination, search);
       
       return Ok (PaginatedList<OrderDTO>.Create(orders, pagination.current, pagination.pageSize));
     }
@@ -34,8 +35,8 @@ namespace webapi.Controllers {
     // GET: api/orders/id
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet ("{id}")]
-    public ActionResult GetOrder (string id) {
-      var order= _service.GetOrder(id);  
+    public async Task<ActionResult> GetOrderAsync (string id) {
+      var order= await _service.GetOrderAsync(id);  
 
       if (order == null) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
@@ -47,9 +48,9 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/accept
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/accept")]
-    public ActionResult AcceptOrder (string id) {
+    public async Task<ActionResult> AcceptOrderAsync (string id) {
       var currentUserId = int.Parse (User.Identity.Name);
-      var order = _service.AcceptOrder(id, currentUserId);
+      var order = await _service.AcceptOrderAsync(id, currentUserId);
 
       if (order.Error == 1) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
@@ -61,9 +62,9 @@ namespace webapi.Controllers {
     // PUT: api/orders/id/refuse
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpPut ("{id}/refuse")]
-    public ActionResult RefuseOrder (string id) {
+    public async Task<ActionResult> RefuseOrderAsync (string id) {
       var currentUserId = int.Parse (User.Identity.Name);
-      var order = _service.RefuseOrder(id, currentUserId);
+      var order = await _service.RefuseOrderAsync(id, currentUserId);
 
       if (order.Error == 1) {
         return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
@@ -75,8 +76,8 @@ namespace webapi.Controllers {
     // POST: api/orders
     [AllowAnonymous]
     [HttpPost]
-    public ActionResult PostOrder (AddOrder values) {
-      var tickets = _service.PostOrder(values);
+    public async Task<ActionResult> PostOrderAsync (AddOrder values) {
+      var tickets = await _service.PostOrderAsync(values);
         
       return Ok (new { success = true, message = "Thêm thành công.", data = tickets.Data });
     }

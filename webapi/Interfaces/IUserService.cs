@@ -6,17 +6,18 @@ using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
 using webapi.Models.Response;
+using System.Threading.Tasks;
 
 namespace webapi.Interfaces
 {
     public interface IUserService
     {
-        ResponseData GetUsers(Pagination pagination, SearchUser search, ClaimsPrincipal currentUser);
-        ResponseData GetUser(int id);
-        ResponseData PutUser(int id, SaveUserDTO saveUserDTO);
-        ResponseData BlockUser(int id);
-        ResponseData UnBlockUser(int id);
-        ResponseData PostUser(SaveUserDTO saveUserDTO); 
-        ResponseData DeleteUser(int id);
+        Task<ResponseData> GetUsersAsync(Pagination pagination, SearchUser search, ClaimsPrincipal currentUser);
+        Task<ResponseData> GetUserAsync(int id);
+        Task<ResponseData> PutUserAsync(int id, SaveUserDTO saveUserDTO);
+        Task<ResponseData> BlockUserAsync(int id);
+        Task<ResponseData> UnBlockUserAsync(int id);
+        Task<ResponseData> PostUserAsync(SaveUserDTO saveUserDTO); 
+        Task<ResponseData> DeleteUserAsync(int id);
     }
 }

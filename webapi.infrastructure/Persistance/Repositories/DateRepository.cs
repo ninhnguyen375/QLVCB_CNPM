@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.infrastructure.Persistance.Repositories
 {
@@ -11,12 +13,12 @@ namespace webapi.infrastructure.Persistance.Repositories
       {
       }
     
-      public IEnumerable<DateFlight> GetDateFlights() {
-        return AppDbContext.DateFlights.ToList();
+      public async Task<IEnumerable<DateFlight>> GetDateFlightsAsync() {
+        return await AppDbContext.DateFlights.ToListAsync();
       }
 
-      public DateFlight GetDateFlight(int dateId, string flightId){
-        return AppDbContext.DateFlights.SingleOrDefault(
+      public async Task<DateFlight> GetDateFlightAsync(int dateId, string flightId){
+        return await AppDbContext.DateFlights.SingleOrDefaultAsync(
           df => df.DateId.Equals(dateId) && 
           df.FlightId.Equals(flightId)
         );

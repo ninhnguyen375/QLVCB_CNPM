@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
@@ -19,9 +20,9 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public IEnumerable<TicketCategoryDTO> GetTicketCategories(Pagination pagination, SearchTicketCategory search) {
+      public async Task<IEnumerable<TicketCategoryDTO>> GetTicketCategoriesAsync(Pagination pagination, SearchTicketCategory search) {
         // Mapping: TicketCategory
-        var ticketCategoriesSource = _unitOfWork.TicketCategories.GetAll();
+        var ticketCategoriesSource = await _unitOfWork.TicketCategories.GetAllAsync();
         var ticketCategories = _mapper.Map<IEnumerable<TicketCategory>, IEnumerable<TicketCategoryDTO>>(ticketCategoriesSource);
 
         // Search by Name:
@@ -45,63 +46,68 @@ namespace webapi.Services
         return ticketCategories;
       }
 
-      public TicketCategoryDTO  GetTicketCategory(int id) {
+      public async Task<TicketCategoryDTO>  GetTicketCategoryAsync(int id) {
         // Mapping: TicketCategory
-        var ticketCategorySource = _unitOfWork.TicketCategories.GetBy(id);
+        var ticketCategorySource = await _unitOfWork.TicketCategories.GetByAsync(id);
         var ticketCategory = _mapper.Map<TicketCategory, TicketCategoryDTO>(ticketCategorySource);
 
         return ticketCategory;
       }
 
-      public DataResult PutTicketCategory(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
-        var ticketCategory = _unitOfWork.TicketCategories.GetBy(id);
+      public async Task<DataResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
+        // Check ticketCategory exists
+        var ticketCategory = await _unitOfWork.TicketCategories.GetByAsync(id);
 
         if (ticketCategory == null) {
           return new DataResult { Error = 1 };
         }
 
-        if (_unitOfWork.TicketCategories.Find(tc =>
-              tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()) &&
-              tc.Id != id)
-              .Count() != 0) {
+        // Check name of ticketCategory exists except self
+        var ticketCategoryExist = await _unitOfWork.TicketCategories.FindAsync(tc =>
+          tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()) &&
+          tc.Id != id);
+
+        if (ticketCategoryExist.Count() != 0) {
           return new DataResult { Error = 2 };
         }
 
         // Mapping: SaveTicketCategory
         _mapper.Map<SaveTicketCategoryDTO, TicketCategory>(saveTicketCategoryDTO, ticketCategory);
 
-        _unitOfWork.Complete();
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { Data = ticketCategory };
       }
 
-      public DataResult PostTicketCategory(SaveTicketCategoryDTO saveTicketCategoryDTO) {
-        if (_unitOfWork.TicketCategories.Find(tc => 
-              tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()))
-              .Count() != 0) {
+      public async Task<DataResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
+        // Check ticketCategory exists
+        var ticketCategoryExist = await _unitOfWork.TicketCategories.FindAsync(tc => 
+              tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()));
+
+        if (ticketCategoryExist.Count() != 0) {
           return new DataResult { Error = 1 };
         }
 
         // Mapping: SaveTicketCategory
         var ticketCategory = _mapper.Map<SaveTicketCategoryDTO, TicketCategory>(saveTicketCategoryDTO);
 
-        _unitOfWork.TicketCategories.Add(ticketCategory);
-        _unitOfWork.Complete();
+        await _unitOfWork.TicketCategories.AddAsync(ticketCategory);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
 
-      public DataResult DeleteTicketCategory(int id) {
-        var ticketCategory = _unitOfWork.TicketCategories.GetBy(id);
+      public async Task<DataResult> DeleteTicketCategoryAsync(int id) {
+        var ticketCategory = await _unitOfWork.TicketCategories.GetByAsync(id);
 
         if (ticketCategory == null) {
           return new DataResult { Error = 1 };
         }
 
-        _unitOfWork.TicketCategories.Remove(ticketCategory);
-        _unitOfWork.Complete();
+        await _unitOfWork.TicketCategories.RemoveAsync(ticketCategory);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
-    }
+  }
 }

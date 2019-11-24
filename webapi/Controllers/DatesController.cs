@@ -11,6 +11,7 @@ using webapi.Services;
 using AutoMapper;
 using webapi.core.DTOs;
 using webapi.Interfaces;
+using System.Threading.Tasks;
 
 namespace webapi.Controllers
 {
@@ -28,8 +29,8 @@ namespace webapi.Controllers
       // GET: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
-      public ActionResult GetDates([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
-        var dates = _service.GetDates(pagination, search);
+      public async Task<ActionResult> GetDatesAsync([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
+        var dates = await _service.GetDatesAsync(pagination, search);
 
         return Ok (PaginatedList<DateDTO>.Create(dates, pagination.current, pagination.pageSize));
       }
@@ -37,8 +38,8 @@ namespace webapi.Controllers
       // GET: api/dates/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet ("{id}")]
-      public ActionResult GetDate(int id) {
-        var date = _service.GetDate(id);
+      public async Task<ActionResult> GetDateAsync(int id) {
+        var date = await _service.GetDateAsync(id);
 
         if (date == null) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -50,8 +51,8 @@ namespace webapi.Controllers
       // PUT: api/dates/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutDate(int id, SaveDateDTO saveDateDTO) {
-        var date = _service.PutDate(id, saveDateDTO);
+      public async Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
+        var date = await _service.PutDateAsync(id, saveDateDTO);
 
         if (date.Error == 1) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -65,8 +66,8 @@ namespace webapi.Controllers
       // POST: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
-      public ActionResult PostDate(SaveDateDTO saveDateDTO) {
-        var date = _service.PostDate(saveDateDTO);
+      public async Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO) {
+        var date = await _service.PostDateAsync(saveDateDTO);
 
         if (date.Error == 1) {
           return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });
@@ -78,8 +79,8 @@ namespace webapi.Controllers
       // DELETE: api/dates/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
-      public ActionResult DeleteDate(int id) {
-        var date = _service.DeleteDate(id);
+      public async Task<ActionResult> DeleteDateAsync(int id) {
+        var date = await _service.DeleteDateAsync(id);
 
         if (date.Error == 1) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -91,8 +92,8 @@ namespace webapi.Controllers
       // POST: api/dates/id/addflights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflights")]
-      public ActionResult PostFlight(int id, AddDateFlight values) {
-        var date = _service.PostFlight(id, values);
+      public async Task<ActionResult> PostFlightAsync(int id, AddDateFlight values) {
+        var date = await _service.PostFlightAsync(id, values);
 
         if (date.Error == 1) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -106,8 +107,8 @@ namespace webapi.Controllers
       // DELETE: api/dates/id/removeflight
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}/removeflight")]
-      public ActionResult DeleteFlight(int id, RemoveFlight values) {
-        var date = _service.DeleteFlight(id, values);
+      public async Task<ActionResult> DeleteFlightAsync(int id, RemoveFlight values) {
+        var date = await _service.DeleteFlightAsync(id, values);
 
         if (date.Error == 1) {
           return NotFound (new  { Id = "Mã ngày này không tồn tại." });
@@ -123,8 +124,8 @@ namespace webapi.Controllers
       // GET: api/dates/searchflights
       [AllowAnonymous]
       [HttpGet ("/api/searchflights")]
-      public ActionResult SearchFlights([FromQuery] SearchFlightFE values) {
-        var flights = _service.SearchFlights(values);
+      public async Task<ActionResult> SearchFlightsAsync([FromQuery] SearchFlightFE values) {
+        var flights = await _service.SearchFlightsAsync(values);
         var departureFlights = flights.DepartureFlights;
         var returnFlights = flights.ReturnFlights;
 

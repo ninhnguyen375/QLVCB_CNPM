@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
 
@@ -6,12 +7,12 @@ namespace webapi.Interfaces
 {
     public interface IFlightService
     {
-      IEnumerable<FlightDTO> GetFlights(Pagination pagination, SearchFlight search);
-      FlightDTO GetFlight(string id);
-      DataResult PutFlight(string id, SaveFlightDTO values);
-      DataResult PostFlight(SaveFlightDTO saveFlightDTO);
-      DataResult DeleteFlight(string id);
-      DataResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values);
-      DataResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values);
+      Task<IEnumerable<FlightDTO>> GetFlightsAsync(Pagination pagination, SearchFlight search);
+      Task<FlightDTO> GetFlightAsync(string id);
+      Task<DataResult> PutFlightAsync(string id, SaveFlightDTO values);
+      Task<DataResult> PostFlightAsync(SaveFlightDTO saveFlightDTO);
+      Task<DataResult> DeleteFlightAsync(string id);
+      Task<DataResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values);
+      Task<DataResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values);
     }
 }

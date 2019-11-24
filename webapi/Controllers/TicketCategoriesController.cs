@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,8 @@ namespace webapi.Controllers
         // GET: api/ticketcategories
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult GetTicketCategories([FromQuery] Pagination pagination, [FromQuery] SearchTicketCategory search) {
-          var ticketCategories = _service.GetTicketCategories(pagination, search);
+        public async Task<ActionResult> GetTicketCategoriesAsync([FromQuery] Pagination pagination, [FromQuery] SearchTicketCategory search) {
+          var ticketCategories = await _service.GetTicketCategoriesAsync(pagination, search);
 
           return Ok (PaginatedList<TicketCategoryDTO>.Create(ticketCategories, pagination.current, pagination.pageSize));
         }
@@ -35,8 +36,8 @@ namespace webapi.Controllers
         // GET: api/ticketcategories/id
         [AllowAnonymous]
         [HttpGet ("{id}")]
-        public ActionResult GetTicketCategory(int id) {
-          var ticketCategory = _service.GetTicketCategory(id);
+        public async Task<ActionResult> GetTicketCategoryAsync(int id) {
+          var ticketCategory = await _service.GetTicketCategoryAsync(id);
 
           if (ticketCategory == null) {
             return NotFound (new { Id = "Mã loại vé này không tồn tại." });
@@ -48,8 +49,8 @@ namespace webapi.Controllers
         // PUT: api/ticketcategories/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutTicketCategory(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
-          var ticketCategory = _service.PutTicketCategory(id, saveTicketCategoryDTO);
+        public async Task<ActionResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
+          var ticketCategory = await _service.PutTicketCategoryAsync(id, saveTicketCategoryDTO);
 
           if (ticketCategory.Error == 1) {
             return NotFound (new { Id = "Mã loại vé này không tồn tại." });
@@ -63,8 +64,8 @@ namespace webapi.Controllers
         // POST: api/ticketcategories
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostTicketCategory(SaveTicketCategoryDTO saveTicketCategoryDTO) {
-          var ticketCategory = _service.PostTicketCategory(saveTicketCategoryDTO);
+        public async Task<ActionResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
+          var ticketCategory = await _service.PostTicketCategoryAsync(saveTicketCategoryDTO);
           if (ticketCategory.Error == 1) {
             return BadRequest (new { Name = "Loại vé này đã tồn tại." });
           }
@@ -75,8 +76,8 @@ namespace webapi.Controllers
         // DELETE: api/ticketcategories/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
-        public ActionResult DeleteTicketCategory(int id) {
-          var ticketCategory = _service.DeleteTicketCategory(id);
+        public async Task<ActionResult> DeleteTicketCategoryAsync(int id) {
+          var ticketCategory = await _service.DeleteTicketCategoryAsync(id);
 
           if (ticketCategory.Error == 1) {
             return NotFound (new { Id = "Mã loại vé này không tồn tại." });

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
@@ -19,13 +20,13 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public IEnumerable<FlightDTO> GetFlights(Pagination pagination, SearchFlight search) {
+      public async Task<IEnumerable<FlightDTO>> GetFlightsAsync(Pagination pagination, SearchFlight search) {
         // Mapping: Flight
-        var flightsSource = _unitOfWork.Flights.GetAll();
-        _unitOfWork.Airlines.GetAll();
-        _unitOfWork.Airports.GetAll();
-        _unitOfWork.TicketCategories.GetAll();
-        _unitOfWork.Flights.GetFlightTicketCategories();
+        var flightsSource = await _unitOfWork.Flights.GetAllAsync();
+        await _unitOfWork.Airlines.GetAllAsync();
+        await _unitOfWork.Airports.GetAllAsync();
+        await _unitOfWork.TicketCategories.GetAllAsync();
+        await _unitOfWork.Flights.GetFlightTicketCategoriesAsync();
         var flights = _mapper.Map<IEnumerable<Flight>, IEnumerable<FlightDTO>>(flightsSource);
 
         // Search by Id:
@@ -60,7 +61,7 @@ namespace webapi.Services
 
         // Search by AirlineName:
         if (search.AirlineName != "") {
-          var airlines = _unitOfWork.Airlines.GetAll();
+          var airlines = await _unitOfWork.Airlines.GetAllAsync();
 
           flights = (from f in flights
                      from a in airlines
@@ -90,25 +91,27 @@ namespace webapi.Services
         return flights;
       }
 
-      public FlightDTO GetFlight(string id) {
+      public async Task<FlightDTO> GetFlightAsync(string id) {
         // Mapping: Flight
-        var flightSource = _unitOfWork.Flights.GetBy(id);
-        _unitOfWork.Airlines.GetAll();
-        _unitOfWork.Airports.GetAll();
-        _unitOfWork.TicketCategories.GetAll();
-        _unitOfWork.Flights.GetFlightTicketCategories();
+        var flightSource = await _unitOfWork.Flights.GetByAsync(id);
+        await _unitOfWork.Airlines.GetAllAsync();
+        await _unitOfWork.Airports.GetAllAsync();
+        await _unitOfWork.TicketCategories.GetAllAsync();
+        await _unitOfWork.Flights.GetFlightTicketCategoriesAsync();
         var flight = _mapper.Map<Flight, FlightDTO>(flightSource);
 
         return flight;
       }
 
-      public DataResult PutFlight(string id, SaveFlightDTO values) {
-        var flight = _unitOfWork.Flights.GetBy(id);
+      public async Task<DataResult> PutFlightAsync(string id, SaveFlightDTO values) {
+        var flight = await _unitOfWork.Flights.GetByAsync(id);
 
+        // Check flight exists
         if (flight == null) {
           return new DataResult { Error = 1 };
         }
 
+        // Check id of flight
         if (id != values.Id) {
           return new DataResult { Error = 2 };
         }
@@ -130,8 +133,10 @@ namespace webapi.Services
 
         // Mapping: SaveFlightTicketCategory
         foreach (var val in values.FlightTicketCategories) {
-          var flightTicketCategory = _unitOfWork.Flights
-            .GetFlightTicketCategoriesById(values.Id)
+          var flightTicketCategoryAsync = await _unitOfWork.Flights
+            .GetFlightTicketCategoriesByIdAsync(values.Id);
+
+          var flightTicketCategory = flightTicketCategoryAsync
             .Where(ftc => ftc.TicketCategoryId == val.TicketCategoryId).SingleOrDefault();
 
           SaveFlightTicketCategoryDTO save = new SaveFlightTicketCategoryDTO {
@@ -142,56 +147,64 @@ namespace webapi.Services
           _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(save, flightTicketCategory);
         }
 
-        _unitOfWork.Complete();
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
 
-      public DataResult PostFlight(SaveFlightDTO saveFlightDTO) {
+      public async Task<DataResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
         // Mapping: SaveFlightDTO
         var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
 
+        var flightTempAsync = await _unitOfWork.Flights.FindAsync(f =>
+          f.Id.ToLower().Equals(flight.Id.ToLower()));
+
         // Kiểm tra mã chuyến bay đã tồn tại hay chưa
-        var flightTemp = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(flight.Id.ToLower())).SingleOrDefault();
+        var flightTemp = flightTempAsync.SingleOrDefault();
 
         if (flightTemp != null) {
           return new DataResult { Error = 1 };
         }
 
-        _unitOfWork.Flights.Add(flight);
-        _unitOfWork.Complete();
+        await _unitOfWork.Flights.AddAsync(flight);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
 
-      public DataResult DeleteFlight(string id) {
+      public async Task<DataResult> DeleteFlightAsync(string id) {
+        var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
+          f.Id.ToLower().Equals(id.ToLower()));
+
         // Kiểm tra mã chuyến bay
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        var flight = flightAsync.SingleOrDefault();
 
         if (flight == null) {
           return new DataResult { Error = 1 };
         }
 
-        _unitOfWork.Flights.Remove(flight);
-        _unitOfWork.Complete();
+        await _unitOfWork.Flights.RemoveAsync(flight);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
 
-      public DataResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values) {
-        // Kiểm tra mã chuyến bay
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+      public async Task<DataResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
+        var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
+          f.Id.ToLower().Equals(id.ToLower()));
         
+        // Kiểm tra mã chuyến bay
+        var flight = flightAsync.SingleOrDefault();
+
         if (flight == null) {
           return new DataResult { Error = 1 };
         }
 
+        var flightTicketCategoryAsync = await _unitOfWork.Flights
+          .GetFlightTicketCategoriesByIdAsync(id);
+        
         // Kiểm tra mã loại vé đã tồn tại hay chưa
-        var flightTicketCategory = _unitOfWork.Flights
-          .GetFlightTicketCategoriesById(id)
+        var flightTicketCategory = flightTicketCategoryAsync
           .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory != null) {
@@ -201,32 +214,36 @@ namespace webapi.Services
         // Mapping: SaveFlightTicketCategory
         flightTicketCategory = _mapper.Map<SaveFlightTicketCategoryDTO, FlightTicketCategory>(values);
 
-        _unitOfWork.FlightTicketCategories.Add(flightTicketCategory);
-        _unitOfWork.Complete();
+        await _unitOfWork.FlightTicketCategories.AddAsync(flightTicketCategory);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }
 
-      public DataResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values) {
-        // Kiểm tra mã chuyến bay
-        var flight = _unitOfWork.Flights.Find(f =>
-          f.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+      public async Task<DataResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values) {
+        var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
+          f.Id.ToLower().Equals(id.ToLower()));
         
+        // Kiểm tra mã chuyến bay
+        var flight = flightAsync.SingleOrDefault();
+
         if (flight == null) {
           return new DataResult { Error = 1 };
         }
 
+        var flightTicketCategoryAsync = await _unitOfWork.Flights
+          .GetFlightTicketCategoriesByIdAsync(id);
+
         // Kiểm tra mã loại vé
-        var flightTicketCategory = _unitOfWork.Flights
-          .GetFlightTicketCategoriesById(id)
+        var flightTicketCategory = flightTicketCategoryAsync
           .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory == null) {
           return new DataResult { Error = 2 };
         }
 
-        _unitOfWork.FlightTicketCategories.Remove(flightTicketCategory);
-        _unitOfWork.Complete();
+        await _unitOfWork.FlightTicketCategories.RemoveAsync(flightTicketCategory);
+        await _unitOfWork.CompleteAsync();
 
         return new DataResult { };
       }

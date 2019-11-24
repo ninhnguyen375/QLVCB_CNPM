@@ -12,6 +12,7 @@ using AutoMapper;
 using webapi.core.DTOs;
 using Microsoft.EntityFrameworkCore;
 using webapi.Interfaces;
+using System.Threading.Tasks;
 
 namespace webapi.Controllers
 {
@@ -29,8 +30,8 @@ namespace webapi.Controllers
       // GET: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpGet]
-      public ActionResult GetFlights([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
-        var flights = _service.GetFlights(pagination, search);
+      public async Task<ActionResult> GetFlightsAsync([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
+        var flights = await _service.GetFlightsAsync(pagination, search);
 
         return Ok (PaginatedList<FlightDTO>.Create(flights, pagination.current, pagination.pageSize));
       }
@@ -38,8 +39,8 @@ namespace webapi.Controllers
       // GET: api/flights/id
       [AllowAnonymous]
       [HttpGet ("{id}")]
-      public ActionResult GetFlight(string id) {
-        var flight = _service.GetFlight(id);
+      public async Task<ActionResult> GetFlightAsync(string id) {
+        var flight = await _service.GetFlightAsync(id);
 
         if (flight == null) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
@@ -51,8 +52,8 @@ namespace webapi.Controllers
       // PUT: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
-      public ActionResult PutFlight(string id, SaveFlightDTO values) {
-        var flight = _service.PutFlight(id, values);
+      public async Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values) {
+        var flight = await _service.PutFlightAsync(id, values);
 
         if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
@@ -66,8 +67,8 @@ namespace webapi.Controllers
       // POST: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
-      public ActionResult PostFlight(SaveFlightDTO saveFlightDTO) {
-        var flight = _service.PostFlight(saveFlightDTO);
+      public async Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
+        var flight = await _service.PostFlightAsync(saveFlightDTO);
 
         if (flight.Error == 1) {
           return BadRequest (new { Id = "Mã chuyến bay này đã tồn tại." });
@@ -79,8 +80,8 @@ namespace webapi.Controllers
       // DELETE: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
-      public ActionResult DeleteFlight(string id) {
-        var flight = _service.DeleteFlight(id);
+      public async Task<ActionResult> DeleteFlightAsync(string id) {
+        var flight = await _service.DeleteFlightAsync(id);
 
         if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
@@ -92,8 +93,8 @@ namespace webapi.Controllers
       // POST: api/flights/id/addflightticketcategory
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflightticketcategory")]
-      public ActionResult PostFlightTicketCategories(string id, SaveFlightTicketCategoryDTO values) {
-        var flight = _service.PostFlightTicketCategories(id, values);
+      public async Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
+        var flight = await _service.PostFlightTicketCategoriesAsync(id, values);
         
         if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
@@ -107,8 +108,8 @@ namespace webapi.Controllers
       // DELETE: api/flights/id/removeflightticketcategory
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}/removeflightticketcategory")]
-      public ActionResult DeleteFlightTicketCategories(string id, RemoveFlightTicketCategory values) {
-        var flight = _service.DeleteFlightTicketCategories(id, values);
+      public async Task<ActionResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values) {
+        var flight = await _service.DeleteFlightTicketCategoriesAsync(id, values);
         
         if (flight.Error == 1) {
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
