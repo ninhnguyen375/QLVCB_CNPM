@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
 
@@ -6,10 +7,10 @@ namespace webapi.Interfaces
 {
     public interface IOrderService
     {
-      IEnumerable<OrderDTO> GetOrders (Pagination pagination, SearchOrder search);
-      OrderDTO GetOrder (string id);
-      DataResult AcceptOrder (string id, int UserId);
-      DataResult RefuseOrder (string id, int UserId);
-      DataResult PostOrder (AddOrder values);
+      Task<IEnumerable<OrderDTO>> GetOrdersAsync (Pagination pagination, SearchOrder search);
+      Task<OrderDTO> GetOrderAsync (string id);
+      Task<DataResult> AcceptOrderAsync (string id, int UserId);
+      Task<DataResult> RefuseOrderAsync (string id, int UserId);
+      Task<DataResult> PostOrderAsync (AddOrder values);
     }
 }

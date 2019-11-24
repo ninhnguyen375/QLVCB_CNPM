@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
@@ -21,9 +22,9 @@ namespace webapi.Services
           _mapper = mapper;
         }
         
-        public IEnumerable<AirlineDTO> GetAirlines([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
+        public async Task<IEnumerable<AirlineDTO>> GetAirlinesAsync([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
           // Mapping: Airline
-          var airlinesSource = _unitOfWork.Airlines.GetAll();
+          var airlinesSource = await _unitOfWork.Airlines.GetAllAsync();
           var airlines = _mapper.Map<IEnumerable<Airline>, IEnumerable<AirlineDTO>>(airlinesSource);
 
           // Search by Id:
@@ -53,72 +54,82 @@ namespace webapi.Services
           return airlines;
         }
 
-        public AirlineDTO GetAirline(string id) {
+        public async Task<AirlineDTO> GetAirlineAsync(string id) {
           // Mapping: Airline
-          var airlineSource = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
-          var airline = _mapper.Map<Airline, AirlineDTO>(airlineSource);
+          var airlineSource = await _unitOfWork.Airlines.FindAsync(a =>
+            a.Id.ToLower().Equals(id.ToLower()));
+          var airline = _mapper.Map<Airline, AirlineDTO>(airlineSource.SingleOrDefault());
 
           return airline;
         }
 
-        public DataResult PutAirline(string id, SaveAirlineDTO saveAirlineDTO) {
-          var airline = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        public async Task<DataResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
+          var airlineAsync = await _unitOfWork.Airlines.FindAsync(a =>
+            a.Id.ToLower().Equals(id.ToLower()));
+
+          // Check airline exists
+          var airline = airlineAsync.SingleOrDefault();
 
           if (airline == null) {
             return new DataResult { Error = 1 };
           }
           
-          if (_unitOfWork.Airlines.Find(a =>
-                a.Name.ToLower().Equals(saveAirlineDTO.Name.ToLower()) &&
-                !a.Id.ToLower().Equals(id.ToLower()))
-                .Count() != 0) {
+          // Check name of airline exists except self
+          var airlineExist = await _unitOfWork.Airlines.FindAsync(a =>
+            a.Name.ToLower().Equals(saveAirlineDTO.Name.ToLower()) &&
+            !a.Id.ToLower().Equals(id.ToLower()));
+
+          if (airlineExist.Count() != 0) {
             return new DataResult { Error = 2 };
           }
 
           // Mapping: SaveAirline
           _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO, airline);
 
-          _unitOfWork.Complete();
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { Data = airline };
         }
 
-        public DataResult PostAirline(SaveAirlineDTO saveAirlineDTO) {
+        public async Task<DataResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
           // Mapping: SaveAirline
           var airline = _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO);
 
           // Check id đã tồn tại trong Database chưa
-          if(_unitOfWork.Airlines.Find(a => 
-              a.Id.ToLower().Equals(airline.Id.ToLower()))
-              .Count() != 0) {
+          var airlineExist = await _unitOfWork.Airlines.FindAsync(a => 
+            a.Id.ToLower().Equals(airline.Id.ToLower()));
+
+          if(airlineExist.Count() != 0) {
             return new DataResult { Error = 1 };
           }
 
           // Check name đã tồn tại trong Database chưa
-          if(_unitOfWork.Airlines.Find(a => 
-              a.Name.ToLower().Equals(airline.Name.ToLower()))
-              .Count() != 0) {
+          airlineExist = await _unitOfWork.Airlines.FindAsync(a => 
+            a.Name.ToLower().Equals(airline.Name.ToLower()));
+
+          if(airlineExist.Count() != 0) {
             return new DataResult { Error = 2 };
           }
 
-          _unitOfWork.Airlines.Add(airline);
-          _unitOfWork.Complete();
+          await _unitOfWork.Airlines.AddAsync(airline);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
 
-        public DataResult DeleteAirline(string id) {
-          var airline = _unitOfWork.Airlines.Find(a =>
-            a.Id.ToLower().Equals(id.ToLower())).SingleOrDefault();
+        public async Task<DataResult> DeleteAirlineAsync(string id) {
+          var airlineAsync = await _unitOfWork.Airlines.FindAsync(a =>
+            a.Id.ToLower().Equals(id.ToLower()));
+
+          // Check airline exists
+          var airline = airlineAsync.SingleOrDefault();
 
           if (airline == null) {
             return new DataResult { Error = 1 };
           }
 
-          _unitOfWork.Airlines.Remove(airline);
-          _unitOfWork.Complete();
+          await _unitOfWork.Airlines.RemoveAsync(airline);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }

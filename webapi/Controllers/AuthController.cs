@@ -11,6 +11,7 @@ using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace webapi.Controllers {
   [Authorize]
@@ -28,13 +29,15 @@ namespace webapi.Controllers {
     [Route ("/api/auth/login")]
     [AllowAnonymous]
     [HttpPost]
-    public ActionResult Login ([FromBody] Login data) {
+    public async Task<ActionResult> Login ([FromBody] Login data) {
       var query = _unitOfWork.Users;
       string email = data.email;
       string password = data.password;
 
       /** find user valid with email */
-      User user = query.Find (i => i.Email.Equals (email)).SingleOrDefault ();
+      // User user = query.Find (i => i.Email.Equals (email)).SingleOrDefault ();
+      var userAsync = await query.FindAsync (i => i.Email.Equals (email));
+      User user = userAsync.SingleOrDefault ();
 
       if (user == null) {
         return BadRequest (new { success = false, message = "Tên tài khoản hoặc mật khẩu không chính xác" });
@@ -67,9 +70,9 @@ namespace webapi.Controllers {
     // POST: api/user/me
     [Route ("/api/auth/me")]
     [HttpPost]
-    public ActionResult GetMe () {
+    public async Task<ActionResult> GetMeAsync () {
       var currentUserId = int.Parse (User.Identity.Name);
-      User user = _unitOfWork.Users.GetBy(currentUserId);
+      User user = await _unitOfWork.Users.GetByAsync(currentUserId);
       if(user == null)
         return Forbid();
 

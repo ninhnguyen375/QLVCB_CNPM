@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
@@ -21,45 +22,48 @@ namespace webapi.Services {
       _mapper = mapper;
     }
 
-    public ResponseData GetUsers (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
+    public async Task<ResponseData> GetUsersAsync (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
       var usersQuery = _unitOfWork.Users;
-      var users = usersQuery.GetAll ();
+      var users = await usersQuery.GetAllAsync ();
+      
+      var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
+
       // Searching
       if (search.email != "") {
-        users = users.Where (u => u.Email.Contains (search.email));
+        mapped = mapped.Where (u => u.Email.Contains (search.email));
       }
       if (search.fullname != "") {
-        users = users.Where (u => u.FullName.Contains (search.fullname));
+        mapped = mapped.Where (u => u.FullName.Contains (search.fullname));
       }
       if (search.identifier != "") {
-        users = users.Where (u => u.Identifier.Equals (search.identifier));
+        mapped = mapped.Where (u => u.Identifier.Equals (search.identifier));
       }
       if (search.phone != "") {
-        users = users.Where (u => u.Phone.Equals (search.phone));
+        mapped = mapped.Where (u => u.Phone.Equals (search.phone));
       }
       // Sorting
       if (search.sortAsc != "") {
         Console.WriteLine (search.sortAsc);
-        users = users.OrderBy (u => u.GetType ().GetProperty (search.sortAsc).GetValue (u, null));
+        mapped = mapped.OrderBy (u => u.GetType ().GetProperty (search.sortAsc).GetValue (u, null));
       }
       if (search.sortDesc != "") {
         Console.WriteLine (search.sortDesc);
-        users = users.OrderByDescending (u => u.GetType ().GetProperty (search.sortDesc).GetValue (u, null));
+        mapped = mapped.OrderByDescending (u => u.GetType ().GetProperty (search.sortDesc).GetValue (u, null));
       }
 
       if (currentUser.IsInRole ("ADMIN"))
-        users = users.Where (i => i.Role.Equals ("STAFF"));
+        mapped = mapped.Where (i => i.Role.Equals ("STAFF"));
       else
         return new ResponseData { Forbid = "Quyền truy cập bị từ chối." };
 
-      var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
+      // var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
       var paginatedList = PaginatedList<UserDTO>.Create (mapped, pagination.current, pagination.pageSize);
 
       return new ResponseData { Data = paginatedList };
     }
 
-    public ResponseData GetUser (int id) {
-      var user = _unitOfWork.Users.GetBy (id);
+    public async Task<ResponseData> GetUserAsync (int id) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
         return new ResponseData { NotFound = "Nhân viên không tồn tại." };
@@ -69,24 +73,27 @@ namespace webapi.Services {
       return new ResponseData { Data = new { data } };
     }
 
-    public ResponseData PutUser (int id, SaveUserDTO saveUserDTO) {
-      var user = _unitOfWork.Users.GetBy (id);
+    public async Task<ResponseData> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
 
       // Check exists
-      if (_unitOfWork.Users.Find (
-          u => u.Identifier.Equals (saveUserDTO.Identifier) &&
-          u.Id != id
-        ).Count () != 0) {
+      var userAsync = await _unitOfWork.Users.FindAsync (
+        u => u.Identifier.Equals (saveUserDTO.Identifier) &&
+        u.Id != id);
+
+      if (userAsync.Count () != 0) {
         return (new ResponseData {
           BadRequest = new {
             Identifier = "CMND đã được sử dụng"
           }
         });
       }
-      if (_unitOfWork.Users.Find (
+
+      userAsync = await _unitOfWork.Users.FindAsync (
           u => u.Email.Equals (saveUserDTO.Email) &&
-          u.Id != id
-        ).Count () != 0) {
+          u.Id != id);
+
+      if (userAsync.Count () != 0) {
         return (new ResponseData {
           BadRequest = new {
             Email = "Email đã được sử dụng"
@@ -97,46 +104,53 @@ namespace webapi.Services {
       // Mapping: SaveUser
       _mapper.Map<SaveUserDTO, User> (saveUserDTO, user);
 
-      _unitOfWork.Complete ();
+      await _unitOfWork.CompleteAsync ();
 
       return new ResponseData { };
     }
 
-    public ResponseData BlockUser (int id) {
-      var user = _unitOfWork.Users.GetBy (id);
+    public async Task<ResponseData> BlockUserAsync (int id) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
         return new ResponseData { NotFound = "Nhân viên không tồn tại." };
       }
 
       user.Status = 2; // 2: Banned
-      _unitOfWork.Complete ();
+      await _unitOfWork.CompleteAsync ();
 
       return new ResponseData { };
     }
 
-    public ResponseData UnBlockUser (int id) {
-      var user = _unitOfWork.Users.GetBy (id);
+    public async Task<ResponseData> UnBlockUserAsync (int id) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
         return new ResponseData { NotFound = "Nhân viên không tồn tại." };
       }
 
       user.Status = 1; // 1: Active
-      _unitOfWork.Complete ();
+      await _unitOfWork.CompleteAsync ();
 
       return new ResponseData { };
     }
 
-    public ResponseData PostUser (SaveUserDTO saveUserDTO) {
-      if (_unitOfWork.Users.Find (u => u.Identifier.Equals (saveUserDTO.Identifier)).Count () != 0) {
+    public async Task<ResponseData> PostUserAsync (SaveUserDTO saveUserDTO) {
+      var userAsync = await _unitOfWork.Users.FindAsync (u => 
+        u.Identifier.Equals (saveUserDTO.Identifier));
+
+      if (userAsync.Count () != 0) {
         return (new ResponseData {
           BadRequest = (new {
             Identifier = "CMND đã được sử dụng"
           })
         });
       }
-      if (_unitOfWork.Users.Find (u => u.Email.Equals (saveUserDTO.Email)).Count () != 0) {
+
+      userAsync = await _unitOfWork.Users.FindAsync (u => 
+        u.Email.Equals (saveUserDTO.Email));
+
+      if (userAsync.Count () != 0) {
         return (new ResponseData {
           BadRequest = (new {
             Email = "Email đã được sử dụng"
@@ -149,21 +163,21 @@ namespace webapi.Services {
       saveUserDTO.Password = BCrypt.Net.BCrypt.HashPassword (defaultPassword);
 
       var user = _mapper.Map<SaveUserDTO, User> (saveUserDTO);
-      _unitOfWork.Users.Add (user);
-      _unitOfWork.Complete ();
+      await _unitOfWork.Users.AddAsync (user);
+      await _unitOfWork.CompleteAsync ();
 
       return new ResponseData { };
     }
 
-    public ResponseData DeleteUser (int id) {
-      var user = _unitOfWork.Users.GetBy (id);
+    public async Task<ResponseData> DeleteUserAsync (int id) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
         return new ResponseData { NotFound = "Nhân viên không tồn tại." };
       }
 
-      _unitOfWork.Users.Remove (user);
-      _unitOfWork.Complete ();
+      await _unitOfWork.Users.RemoveAsync (user);
+      await _unitOfWork.CompleteAsync ();
 
       return new ResponseData { };
     }

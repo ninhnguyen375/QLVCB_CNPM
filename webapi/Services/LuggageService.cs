@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
@@ -19,9 +20,9 @@ namespace webapi.Services
           _mapper = mapper;
         }
 
-        public IEnumerable<LuggageDTO> GetLuggages(Pagination pagination, SearchLuggage search) {
+        public async Task<IEnumerable<LuggageDTO>> GetLuggagesAsync(Pagination pagination, SearchLuggage search) {
           // Mapping: Luggage
-          var luggagesSource = _unitOfWork.Luggages.GetAll();
+          var luggagesSource = await _unitOfWork.Luggages.GetAllAsync();
           var luggages = _mapper.Map<IEnumerable<Luggage>, IEnumerable<LuggageDTO>>(luggagesSource);
           
           // Search by LuggageWeight:
@@ -58,61 +59,67 @@ namespace webapi.Services
           return luggages;
         }
 
-        public LuggageDTO GetLuggage(int id) {
+        public async Task<LuggageDTO> GetLuggageAsync(int id) {
           // Mapping: Luggage
-          var luggageSource = _unitOfWork.Luggages.GetBy(id);
+          var luggageSource = await _unitOfWork.Luggages.GetByAsync(id);
           var luggage = _mapper.Map<Luggage, LuggageDTO>(luggageSource);
 
           return luggage;
         }
 
-        public DataResult PutLuggage(int id, SaveLuggageDTO saveLuggageDTO) {
-          var luggage = _unitOfWork.Luggages.GetBy(id);
+        public async Task<DataResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
+          var luggage = await _unitOfWork.Luggages.GetByAsync(id);
 
+          // Check luggage exists
           if (luggage == null) {
             return new DataResult { Error = 1 };
           }
 
-          if (_unitOfWork.Luggages.Find(l =>
-                l.LuggageWeight == saveLuggageDTO.LuggageWeight &&
-                l.Id != id)
-                .Count() != 0 ) {
+          // Check weight of luggage exists except self
+          var luggageExist = await _unitOfWork.Luggages.FindAsync(l =>
+            l.LuggageWeight == saveLuggageDTO.LuggageWeight &&
+            l.Id != id);
+
+          if (luggageExist.Count() != 0 ) {
             return new DataResult { Error = 2 };
           }
 
           // Mapping: SaveLuggage
           _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO, luggage);
           
-          _unitOfWork.Complete();
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { Data = luggage };
         }
 
-        public DataResult PostLuggage(SaveLuggageDTO saveLuggageDTO) {
+        public async Task<DataResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
           var luggage = _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO);
 
-          if(_unitOfWork.Luggages.Find(l => 
-                l.LuggageWeight.Equals(luggage.LuggageWeight))
-                .Count() != 0) {
+          // Check weight of luggage exists
+          var luggageExist = await _unitOfWork.Luggages.FindAsync(l => 
+                l.LuggageWeight.Equals(luggage.LuggageWeight));
+
+          if(luggageExist.Count() != 0) {
             return new DataResult { Error = 1 };
           }
 
-          _unitOfWork.Luggages.Add(luggage);
-          _unitOfWork.Complete();
+          await _unitOfWork.Luggages.AddAsync(luggage);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }
         
-        public DataResult DeleteLuggage(int id) {
-          var luggage = _unitOfWork.Luggages.GetBy(id);
+        public async Task<DataResult> DeleteLuggageAsync(int id) {
+          var luggage = await _unitOfWork.Luggages.GetByAsync(id);
 
+          // Check luggage exists
           if (luggage == null) {
             return new DataResult { Error = 1 };
           }
 
-          _unitOfWork.Luggages.Remove(luggage);
-          _unitOfWork.Complete();
+          await _unitOfWork.Luggages.RemoveAsync(luggage);
+          await _unitOfWork.CompleteAsync();
 
           return new DataResult { };
         }

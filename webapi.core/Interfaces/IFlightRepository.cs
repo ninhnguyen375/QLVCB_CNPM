@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using webapi.core.Domain.Entities;
 
 namespace webapi.core.Interfaces
 {
     public interface IFlightRepository : IRepository<Flight>
     {  
-        IEnumerable<FlightTicketCategory> GetFlightTicketCategories ();
+        Task<IEnumerable<FlightTicketCategory>> GetFlightTicketCategoriesAsync ();
 
-        IEnumerable<FlightTicketCategory> GetFlightTicketCategoriesById (string id);
+        Task<IEnumerable<FlightTicketCategory>> GetFlightTicketCategoriesByIdAsync (string id);
     }
 }

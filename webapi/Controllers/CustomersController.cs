@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,8 @@ namespace webapi.Controllers
         // GET: api/customers/
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet]
-        public ActionResult GetCustomers([FromQuery] Pagination pagination, [FromQuery] SearchCustomer search) {
-          var customers = _service.GetCustomers(pagination, search);
+        public async Task<ActionResult> GetCustomersAsync([FromQuery] Pagination pagination, [FromQuery] SearchCustomer search) {
+          var customers = await _service.GetCustomersAsync(pagination, search);
 
           return Ok (PaginatedList<CustomerDTO>.Create(customers, pagination.current, pagination.pageSize));
         }
@@ -36,8 +37,8 @@ namespace webapi.Controllers
         // GET: api/customers/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpGet ("{id}")]
-        public ActionResult GetCustomer(string id) {
-          var customer = _service.GetCustomer(id);
+        public async Task<ActionResult> GetCustomerAsync(string id) {
+          var customer = await _service.GetCustomerAsync(id);
          
           if (customer == null) {
             return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
@@ -49,8 +50,8 @@ namespace webapi.Controllers
         // PUT: api/customers/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutCustomer(string id, SaveCustomerDTO saveCustomerDTO) {
-          var customer = _service.PutCustomer(id, saveCustomerDTO);
+        public async Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
+          var customer = await _service.PutCustomerAsync(id, saveCustomerDTO);
           
           if (customer.Error == 1) {
             return NotFound (new { Id = "Mã khách hàng này không tồn tại." });

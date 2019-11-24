@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using webapi.core.Domain.Entities;
 using webapi.core.Interfaces;
 
@@ -14,10 +16,10 @@ namespace webapi.infrastructure.Persistance.Repositories
         get { return Context as AppDbContext; }
       }
 
-      public IEnumerable<Order> GetOrdersById(string id) {
+      public async Task<IEnumerable<Order>> GetOrdersByIdAsync(string id) {
         return (
-          Context.Orders.Where(o =>
-            o.CustomerId.Equals(id))
+          await Context.Orders.Where(o =>
+            o.CustomerId.Equals(id)).ToListAsync()
         );
       }
     }

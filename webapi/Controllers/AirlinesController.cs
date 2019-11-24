@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,8 @@ namespace webapi.Controllers
         // GET: api/airlines
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult GetAirlines([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
-          var airlines = _service.GetAirlines(pagination, search);
+        public async Task<ActionResult> GetAirlinesAsync([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
+          var airlines = await _service.GetAirlinesAsync(pagination, search);
 
           return Ok (PaginatedList<AirlineDTO>.Create(airlines, pagination.current, pagination.pageSize));
         }
@@ -35,8 +36,8 @@ namespace webapi.Controllers
         // GET: api/airlines/id
         [AllowAnonymous]
         [HttpGet ("{id}")]
-        public ActionResult GetAirline(string id) {
-          var airline = _service.GetAirline(id);
+        public async Task<ActionResult> GetAirlineAsync(string id) {
+          var airline = await _service.GetAirlineAsync(id);
 
           if (airline == null) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
@@ -48,8 +49,8 @@ namespace webapi.Controllers
         // PUT: api/airlines/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
-        public ActionResult PutAirline(string id, SaveAirlineDTO saveAirlineDTO) {
-          var airline = _service.PutAirline(id, saveAirlineDTO);
+        public async Task<ActionResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
+          var airline = await _service.PutAirlineAsync(id, saveAirlineDTO);
 
           if (airline.Error == 1) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
@@ -63,8 +64,8 @@ namespace webapi.Controllers
         // POST: api/airlines
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
-        public ActionResult PostAirline(SaveAirlineDTO saveAirlineDTO) {
-          var airline = _service.PostAirline(saveAirlineDTO);
+        public async Task<ActionResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
+          var airline = await _service.PostAirlineAsync(saveAirlineDTO);
 
           if(airline.Error == 1) {
             return BadRequest (new { Id = "Mã hãng hàng không này đã tồn tại." });
@@ -78,8 +79,8 @@ namespace webapi.Controllers
         // DELETE: api/airlines/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
-        public ActionResult DeleteAirline(string id) {
-          var airline = _service.DeleteAirline(id);
+        public async Task<ActionResult> DeleteAirlineAsync(string id) {
+          var airline = await _service.DeleteAirlineAsync(id);
 
           if (airline.Error == 1) {
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
