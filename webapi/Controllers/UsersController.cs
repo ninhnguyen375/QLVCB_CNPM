@@ -1,18 +1,15 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
-using webapi.core.DTOs;
 using webapi.core.UseCases;
 using webapi.Interfaces;
-using webapi.Services;
 
 namespace webapi.Controllers {
     [Authorize]
     [Route ("api/[controller]")]
     [ApiController]
-    public class UsersController : CustomeControllerBase {
+    public class UsersController : ControllerBase {
         private readonly IUserService _service;
 
         public UsersController (IUserService service) {
@@ -24,7 +21,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> GetUsersAsync ([FromQuery] Pagination pagination, [FromQuery] SearchUser search) {
             var res = await _service.GetUsersAsync (pagination, search, User);
             
-            return this.HandleRes (res);
+            return res;
         }
 
         // GET: api/users/5
@@ -32,7 +29,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> GetUserAsync (int id) {
             var res = await _service.GetUserAsync (id);
 
-            return this.HandleRes (res);
+            return res;
         }
 
         // PUT: api/users/5/block
@@ -40,7 +37,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> BlockUserAsync (int id) {
             var res = await _service.BlockUserAsync (id);
 
-            return this.HandleRes (res);
+            return res;
         }
 
         // PUT: api/users/5/unblock
@@ -48,7 +45,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> UnblockUserAsync (int id) {
             var res = await _service.UnBlockUserAsync (id);
 
-            return this.HandleRes (res);
+            return res;
         }
 
         // PUT: api/users/5
@@ -57,7 +54,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
             var res = await _service.PutUserAsync (id, saveUserDTO);
 
-            return this.HandleRes (res);
+            return res;
         }
 
         // POST: api/users
@@ -66,7 +63,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> PostUserAsync ([FromBody] SaveUserDTO saveUserDTO) {
             var res = await _service.PostUserAsync (saveUserDTO);
 
-            return this.HandleRes (res);
+            return res;
         }
 
         // DELETE: api/users/5
@@ -75,7 +72,7 @@ namespace webapi.Controllers {
         public async Task<ActionResult> DeleteUserAsync (int id) {
             var res = await _service.DeleteUserAsync (id);
 
-            return this.HandleRes (res);
+            return res;
         }
     }
 }
