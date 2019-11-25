@@ -18,6 +18,7 @@ namespace webapi.Controllers {
 
         // GET: api/users
         [HttpGet]
+        [Authorize (Roles = "ADMIN, STAFF")]
         public async Task<ActionResult> GetUsersAsync ([FromQuery] Pagination pagination, [FromQuery] SearchUser search) {
             var res = await _service.GetUsersAsync (pagination, search, User);
             
@@ -25,6 +26,7 @@ namespace webapi.Controllers {
         }
 
         // GET: api/users/5
+        [Authorize (Roles = "ADMIN, STAFF")]
         [HttpGet ("{id}")]
         public async Task<ActionResult> GetUserAsync (int id) {
             var res = await _service.GetUserAsync (id);
@@ -33,6 +35,7 @@ namespace webapi.Controllers {
         }
 
         // PUT: api/users/5/block
+        [Authorize (Roles = "ADMIN")]
         [HttpPut ("{id}/block")]
         public async Task<ActionResult> BlockUserAsync (int id) {
             var res = await _service.BlockUserAsync (id);
@@ -41,6 +44,7 @@ namespace webapi.Controllers {
         }
 
         // PUT: api/users/5/unblock
+        [Authorize (Roles = "ADMIN")]
         [HttpPut ("{id}/unblock")]
         public async Task<ActionResult> UnblockUserAsync (int id) {
             var res = await _service.UnBlockUserAsync (id);

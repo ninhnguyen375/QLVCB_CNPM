@@ -64,19 +64,7 @@ namespace webapi {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer (x => {
-                    x.Events = new JwtBearerEvents {
-                        OnTokenValidated = context => {
-                            var _unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork> ();
-                            var userId = int.Parse (context.Principal.Identity.Name);
-                            var user = _unitOfWork.Users.GetByAsync (userId);
-                            if (user == null) {
-                                // return unauthorized if user no longer exists
-                                context.Fail ("Unauthorized");
-                            }
-                            return Task.CompletedTask;
-                        }
-                    };
+                .AddJwtBearer (x => {;
                     x.RequireHttpsMetadata = false;
                     x.SaveToken = true;
                     x.TokenValidationParameters = new TokenValidationParameters {
@@ -97,6 +85,7 @@ namespace webapi {
             services.AddScoped<ITicketCategoryService, TicketCategoryService> ();
             services.AddScoped<IOrderService, OrderService> ();
             services.AddScoped<IUserService, UserService> ();
+            services.AddScoped<IAuthService, AuthService> ();
 
 
         }

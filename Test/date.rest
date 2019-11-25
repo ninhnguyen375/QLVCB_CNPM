@@ -1,5 +1,6 @@
 GET http://localhost:5000/api/dates HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc0NjkzMjc1LCJleHAiOjE1NzUyOTgwNzUsImlhdCI6MTU3NDY5MzI3NX0.O3flu3dHGfwN89KPvJ03NsjKc3wkl5A2RwzmA8UFDzI
 
 ###
 POST http://localhost:5000/api/dates HTTP/1.1

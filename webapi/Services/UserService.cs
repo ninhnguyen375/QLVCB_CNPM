@@ -25,7 +25,7 @@ namespace webapi.Services {
     public async Task<ActionResult> GetUsersAsync (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
       var usersQuery = _unitOfWork.Users;
       var users = await usersQuery.GetAllAsync ();
-      
+
       var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
 
       // Searching
@@ -54,12 +54,12 @@ namespace webapi.Services {
       if (currentUser.IsInRole ("ADMIN"))
         mapped = mapped.Where (i => i.Role.Equals ("STAFF"));
       else
-        return Forbid ("Quyền truy cập bị từ chối.");
+        return Forbid ();
 
       // var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
       var paginatedList = PaginatedList<UserDTO>.Create (mapped, pagination.current, pagination.pageSize);
 
-      return Ok ( paginatedList );
+      return Ok (paginatedList);
     }
 
     public async Task<ActionResult> GetUserAsync (int id) {
@@ -82,19 +82,19 @@ namespace webapi.Services {
         u.Id != id);
 
       if (userAsync.Count () != 0) {
-        return BadRequest(new {
-            Identifier = "CMND đã được sử dụng"
-          });
+        return BadRequest (new {
+          Identifier = "CMND đã được sử dụng"
+        });
       }
 
       userAsync = await _unitOfWork.Users.FindAsync (
-          u => u.Email.Equals (saveUserDTO.Email) &&
-          u.Id != id);
+        u => u.Email.Equals (saveUserDTO.Email) &&
+        u.Id != id);
 
       if (userAsync.Count () != 0) {
-        return BadRequest(new {
-            Email = "Email đã được sử dụng"
-          });
+        return BadRequest (new {
+          Email = "Email đã được sử dụng"
+        });
       }
 
       // Mapping: SaveUser
@@ -102,52 +102,52 @@ namespace webapi.Services {
 
       await _unitOfWork.CompleteAsync ();
 
-      return Ok();
+      return Ok ();
     }
 
     public async Task<ActionResult> BlockUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return NotFound("Nhân viên không tồn tại.");
+        return NotFound ("Nhân viên không tồn tại.");
       }
 
       user.Status = 2; // 2: Banned
       await _unitOfWork.CompleteAsync ();
 
-      return Ok();
+      return Ok ();
     }
 
     public async Task<ActionResult> UnBlockUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return NotFound("Nhân viên không tồn tại.");
+        return NotFound ("Nhân viên không tồn tại.");
       }
 
       user.Status = 1; // 1: Active
       await _unitOfWork.CompleteAsync ();
 
-      return Ok();
+      return Ok ();
     }
 
     public async Task<ActionResult> PostUserAsync (SaveUserDTO saveUserDTO) {
-      var userAsync = await _unitOfWork.Users.FindAsync (u => 
+      var userAsync = await _unitOfWork.Users.FindAsync (u =>
         u.Identifier.Equals (saveUserDTO.Identifier));
 
       if (userAsync.Count () != 0) {
-        return BadRequest(new {
-            Identifier = "CMND đã được sử dụng"
-          });
+        return BadRequest (new {
+          Identifier = "CMND đã được sử dụng"
+        });
       }
 
-      userAsync = await _unitOfWork.Users.FindAsync (u => 
+      userAsync = await _unitOfWork.Users.FindAsync (u =>
         u.Email.Equals (saveUserDTO.Email));
 
       if (userAsync.Count () != 0) {
-        return BadRequest(new {
-            Email = "Email đã được sử dụng"
-          });
+        return BadRequest (new {
+          Email = "Email đã được sử dụng"
+        });
       }
 
       string defaultPassword = "12345678";
@@ -158,20 +158,26 @@ namespace webapi.Services {
       await _unitOfWork.Users.AddAsync (user);
       await _unitOfWork.CompleteAsync ();
 
-      return Ok();
+      return Ok ();
     }
 
     public async Task<ActionResult> DeleteUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return NotFound("Nhân viên không tồn tại.");
+        return NotFound ("Nhân viên không tồn tại.");
       }
 
-      await _unitOfWork.Users.RemoveAsync (user);
-      await _unitOfWork.CompleteAsync ();
+      try {
+        await _unitOfWork.Users.RemoveAsync (user);
+        await _unitOfWork.CompleteAsync ();
 
-      return Ok();
+        return Ok ();
+      } catch (System.Exception) {
+        return BadRequest (new { message = "Xóa không thành công" });
+
+        throw;
+      }
     }
   }
 }

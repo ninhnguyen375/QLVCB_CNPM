@@ -21,7 +21,7 @@ namespace webapi.core.Domain.Entities {
         [EmailAddress]
         public string Email { get; set; }
 
-        // 1: active, 2: banned, 3: deleted
+        // 1: active, 2: banned, 3: deleted, 4: new
         [Required]
         public int Status { get; set; } = 1;
 
