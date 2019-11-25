@@ -13,7 +13,7 @@ using webapi.Interfaces;
 using webapi.Models.Response;
 
 namespace webapi.Services {
-  public class UserService : IUserService {
+  public class UserService : ControllerBase, IUserService {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
@@ -22,7 +22,7 @@ namespace webapi.Services {
       _mapper = mapper;
     }
 
-    public async Task<ResponseData> GetUsersAsync (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
+    public async Task<ActionResult> GetUsersAsync (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
       var usersQuery = _unitOfWork.Users;
       var users = await usersQuery.GetAllAsync ();
       
@@ -54,26 +54,26 @@ namespace webapi.Services {
       if (currentUser.IsInRole ("ADMIN"))
         mapped = mapped.Where (i => i.Role.Equals ("STAFF"));
       else
-        return new ResponseData { Forbid = "Quyền truy cập bị từ chối." };
+        return Forbid ("Quyền truy cập bị từ chối.");
 
       // var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
       var paginatedList = PaginatedList<UserDTO>.Create (mapped, pagination.current, pagination.pageSize);
 
-      return new ResponseData { Data = paginatedList };
+      return Ok ( paginatedList );
     }
 
-    public async Task<ResponseData> GetUserAsync (int id) {
+    public async Task<ActionResult> GetUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return new ResponseData { NotFound = "Nhân viên không tồn tại." };
+        return NotFound ("Nhân viên không tồn tại.");
       }
 
       var data = _mapper.Map<User, UserDTO> (user);
-      return new ResponseData { Data = new { data } };
+      return Ok (new { data });
     }
 
-    public async Task<ResponseData> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
+    public async Task<ActionResult> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       // Check exists
@@ -82,11 +82,9 @@ namespace webapi.Services {
         u.Id != id);
 
       if (userAsync.Count () != 0) {
-        return (new ResponseData {
-          BadRequest = new {
+        return BadRequest(new {
             Identifier = "CMND đã được sử dụng"
-          }
-        });
+          });
       }
 
       userAsync = await _unitOfWork.Users.FindAsync (
@@ -94,11 +92,9 @@ namespace webapi.Services {
           u.Id != id);
 
       if (userAsync.Count () != 0) {
-        return (new ResponseData {
-          BadRequest = new {
+        return BadRequest(new {
             Email = "Email đã được sử dụng"
-          }
-        });
+          });
       }
 
       // Mapping: SaveUser
@@ -106,56 +102,52 @@ namespace webapi.Services {
 
       await _unitOfWork.CompleteAsync ();
 
-      return new ResponseData { };
+      return Ok();
     }
 
-    public async Task<ResponseData> BlockUserAsync (int id) {
+    public async Task<ActionResult> BlockUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return new ResponseData { NotFound = "Nhân viên không tồn tại." };
+        return NotFound("Nhân viên không tồn tại.");
       }
 
       user.Status = 2; // 2: Banned
       await _unitOfWork.CompleteAsync ();
 
-      return new ResponseData { };
+      return Ok();
     }
 
-    public async Task<ResponseData> UnBlockUserAsync (int id) {
+    public async Task<ActionResult> UnBlockUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return new ResponseData { NotFound = "Nhân viên không tồn tại." };
+        return NotFound("Nhân viên không tồn tại.");
       }
 
       user.Status = 1; // 1: Active
       await _unitOfWork.CompleteAsync ();
 
-      return new ResponseData { };
+      return Ok();
     }
 
-    public async Task<ResponseData> PostUserAsync (SaveUserDTO saveUserDTO) {
+    public async Task<ActionResult> PostUserAsync (SaveUserDTO saveUserDTO) {
       var userAsync = await _unitOfWork.Users.FindAsync (u => 
         u.Identifier.Equals (saveUserDTO.Identifier));
 
       if (userAsync.Count () != 0) {
-        return (new ResponseData {
-          BadRequest = (new {
+        return BadRequest(new {
             Identifier = "CMND đã được sử dụng"
-          })
-        });
+          });
       }
 
       userAsync = await _unitOfWork.Users.FindAsync (u => 
         u.Email.Equals (saveUserDTO.Email));
 
       if (userAsync.Count () != 0) {
-        return (new ResponseData {
-          BadRequest = (new {
+        return BadRequest(new {
             Email = "Email đã được sử dụng"
-          })
-        });
+          });
       }
 
       string defaultPassword = "12345678";
@@ -166,20 +158,20 @@ namespace webapi.Services {
       await _unitOfWork.Users.AddAsync (user);
       await _unitOfWork.CompleteAsync ();
 
-      return new ResponseData { };
+      return Ok();
     }
 
-    public async Task<ResponseData> DeleteUserAsync (int id) {
+    public async Task<ActionResult> DeleteUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       if (user == null) {
-        return new ResponseData { NotFound = "Nhân viên không tồn tại." };
+        return NotFound("Nhân viên không tồn tại.");
       }
 
       await _unitOfWork.Users.RemoveAsync (user);
       await _unitOfWork.CompleteAsync ();
 
-      return new ResponseData { };
+      return Ok();
     }
   }
 }
