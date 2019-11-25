@@ -189,7 +189,10 @@ namespace webapi.infrastructure.Migrations
                     b.Property<string>("CustomerId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("DateId")
+                    b.Property<int>("DepartureDateId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ReturnDateId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
@@ -208,7 +211,9 @@ namespace webapi.infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("DateId");
+                    b.HasIndex("DepartureDateId");
+
+                    b.HasIndex("ReturnDateId");
 
                     b.HasIndex("UserId");
 
@@ -219,6 +224,9 @@ namespace webapi.infrastructure.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("DateId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FlightId")
                         .HasColumnType("TEXT");
@@ -243,6 +251,8 @@ namespace webapi.infrastructure.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DateId");
 
                     b.HasIndex("FlightId");
 
@@ -362,11 +372,15 @@ namespace webapi.infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("webapi.core.Domain.Entities.Date", "Date")
+                    b.HasOne("webapi.core.Domain.Entities.Date", "DepartureDate")
                         .WithMany()
-                        .HasForeignKey("DateId")
+                        .HasForeignKey("DepartureDateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("webapi.core.Domain.Entities.Date", "ReturnDate")
+                        .WithMany()
+                        .HasForeignKey("ReturnDateId");
 
                     b.HasOne("webapi.core.Domain.Entities.User", "User")
                         .WithMany()
@@ -375,6 +389,12 @@ namespace webapi.infrastructure.Migrations
 
             modelBuilder.Entity("webapi.core.Domain.Entities.Ticket", b =>
                 {
+                    b.HasOne("webapi.core.Domain.Entities.Date", "Date")
+                        .WithMany()
+                        .HasForeignKey("DateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("webapi.core.Domain.Entities.Flight", "Flight")
                         .WithMany()
                         .HasForeignKey("FlightId");

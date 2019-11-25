@@ -12,12 +12,12 @@ namespace webapi.Interfaces
 {
     public interface IUserService
     {
-        Task<ResponseData> GetUsersAsync(Pagination pagination, SearchUser search, ClaimsPrincipal currentUser);
-        Task<ResponseData> GetUserAsync(int id);
-        Task<ResponseData> PutUserAsync(int id, SaveUserDTO saveUserDTO);
-        Task<ResponseData> BlockUserAsync(int id);
-        Task<ResponseData> UnBlockUserAsync(int id);
-        Task<ResponseData> PostUserAsync(SaveUserDTO saveUserDTO); 
-        Task<ResponseData> DeleteUserAsync(int id);
+        Task<ActionResult> GetUsersAsync(Pagination pagination, SearchUser search, ClaimsPrincipal currentUser);
+        Task<ActionResult> GetUserAsync(int id);
+        Task<ActionResult> PutUserAsync(int id, SaveUserDTO saveUserDTO);
+        Task<ActionResult> BlockUserAsync(int id);
+        Task<ActionResult> UnBlockUserAsync(int id);
+        Task<ActionResult> PostUserAsync(SaveUserDTO saveUserDTO); 
+        Task<ActionResult> DeleteUserAsync(int id);
     }
 }
