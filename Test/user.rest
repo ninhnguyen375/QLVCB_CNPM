@@ -21,13 +21,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6I
     "identifier": "02039291",
     "password": "12345678"
 }
+### change password
+POST http://localhost:5000/api/auth/changepassword HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc0Njk0Nzg5LCJleHAiOjE1NzUyOTk1ODksImlhdCI6MTU3NDY5NDc4OX0._rzwpRW-C2cQCPbor3CGpbJGt0Vs7dRNL7BGAOIpeek
+
+{
+    "oldPassword": "12345678",
+    "newPassword": "88888888"
+}
+
 ### Login
 POST http://localhost:5000/api/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
     "email": "ninh2@ninh.com",
-    "password": "12345678"
+    "password": "88888888"
 }
 ### 
 POST http://localhost:5000/api/auth/me HTTP/1.1
