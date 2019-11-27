@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -10,7 +11,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class FlightService : IFlightService
+    public class FlightService : ControllerBase, IFlightService
     {
       private readonly IUnitOfWork _unitOfWork;
       private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public async Task<IEnumerable<FlightDTO>> GetFlightsAsync(Pagination pagination, SearchFlight search) {
+      public async Task<ActionResult> GetFlightsAsync(Pagination pagination, SearchFlight search) {
         // Mapping: Flight
         var flightsSource = await _unitOfWork.Flights.GetAllAsync();
         await _unitOfWork.Airlines.GetAllAsync();
@@ -88,10 +89,10 @@ namespace webapi.Services
             f.GetType().GetProperty(search.sortDesc).GetValue(f));
         }
 
-        return flights;
+        return Ok (PaginatedList<FlightDTO>.Create(flights, pagination.current, pagination.pageSize));
       }
 
-      public async Task<FlightDTO> GetFlightAsync(string id) {
+      public async Task<ActionResult> GetFlightAsync(string id) {
         // Mapping: Flight
         var flightSource = await _unitOfWork.Flights.GetByAsync(id);
         await _unitOfWork.Airlines.GetAllAsync();
@@ -100,20 +101,24 @@ namespace webapi.Services
         await _unitOfWork.Flights.GetFlightTicketCategoriesAsync();
         var flight = _mapper.Map<Flight, FlightDTO>(flightSource);
 
-        return flight;
+        if (flight == null) {
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
+        }
+
+        return Ok (new { success = true, data = flight });
       }
 
-      public async Task<DataResult> PutFlightAsync(string id, SaveFlightDTO values) {
+      public async Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values) {
         var flight = await _unitOfWork.Flights.GetByAsync(id);
 
         // Check flight exists
         if (flight == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
         // Check id of flight
         if (id != values.Id) {
-          return new DataResult { Error = 2 };
+          return BadRequest( new { id = "Mã chuyến bay không hợp lệ." });
         }
 
         // Create SaveFlightDTO
@@ -149,10 +154,10 @@ namespace webapi.Services
 
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Sửa thành công" });
       }
 
-      public async Task<DataResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
+      public async Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
         // Mapping: SaveFlightDTO
         var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
 
@@ -163,16 +168,16 @@ namespace webapi.Services
         var flightTemp = flightTempAsync.SingleOrDefault();
 
         if (flightTemp != null) {
-          return new DataResult { Error = 1 };
+          return BadRequest (new { Id = "Mã chuyến bay này đã tồn tại." });
         }
 
         await _unitOfWork.Flights.AddAsync(flight);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Thêm thành công." });
       }
 
-      public async Task<DataResult> DeleteFlightAsync(string id) {
+      public async Task<ActionResult> DeleteFlightAsync(string id) {
         var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
           f.Id.ToLower().Equals(id.ToLower()));
 
@@ -180,16 +185,16 @@ namespace webapi.Services
         var flight = flightAsync.SingleOrDefault();
 
         if (flight == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
         await _unitOfWork.Flights.RemoveAsync(flight);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Xóa thành công." });
       }
 
-      public async Task<DataResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
+      public async Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
         var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
           f.Id.ToLower().Equals(id.ToLower()));
         
@@ -197,7 +202,7 @@ namespace webapi.Services
         var flight = flightAsync.SingleOrDefault();
 
         if (flight == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
         var flightTicketCategoryAsync = await _unitOfWork.Flights
@@ -208,7 +213,7 @@ namespace webapi.Services
           .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory != null) {
-          return new DataResult { Error = 2 };
+          return BadRequest (new { Id = "Loại vé của chuyến bay này đã tồn tại." });
         }
 
         // Mapping: SaveFlightTicketCategory
@@ -217,10 +222,10 @@ namespace webapi.Services
         await _unitOfWork.FlightTicketCategories.AddAsync(flightTicketCategory);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Thêm loại vé thành công." });
       }
 
-      public async Task<DataResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values) {
+      public async Task<ActionResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values) {
         var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
           f.Id.ToLower().Equals(id.ToLower()));
         
@@ -228,7 +233,7 @@ namespace webapi.Services
         var flight = flightAsync.SingleOrDefault();
 
         if (flight == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
         var flightTicketCategoryAsync = await _unitOfWork.Flights
@@ -239,13 +244,13 @@ namespace webapi.Services
           .Where(ftc => ftc.TicketCategoryId == values.TicketCategoryId).SingleOrDefault();
 
         if (flightTicketCategory == null) {
-          return new DataResult { Error = 2 };
+          return BadRequest (new { Id = "Loại vé của chuyến bay này không tồn tại." });
         }
 
         await _unitOfWork.FlightTicketCategories.RemoveAsync(flightTicketCategory);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Xóa thành công." });
       }
     }
 }

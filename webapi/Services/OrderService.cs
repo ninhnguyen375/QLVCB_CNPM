@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -11,7 +12,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class OrderService : IOrderService
+    public class OrderService : ControllerBase, IOrderService
     {
       private readonly IUnitOfWork _unitOfWork;
       private readonly IMapper _mapper;
@@ -21,7 +22,7 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public async Task<IEnumerable<OrderDTO>> GetOrdersAsync (Pagination pagination, SearchOrder search) {
+      public async Task<ActionResult> GetOrdersAsync (Pagination pagination, SearchOrder search) {
         // Mapping: Order
         var ordersSource = await _unitOfWork.Orders.GetAllAsync ();
         await _unitOfWork.Customers.GetAllAsync();
@@ -115,10 +116,10 @@ namespace webapi.Services
             o.GetType().GetProperty(search.sortDesc).GetValue(o));
         }
 
-        return orders;
+        return Ok (PaginatedList<OrderDTO>.Create(orders, pagination.current, pagination.pageSize));
       }
 
-      public async Task<OrderDTO> GetOrderAsync (string id) {
+      public async Task<ActionResult> GetOrderAsync (string id) {
         // Mapping: Order
         var orderSource = await _unitOfWork.Orders.GetByAsync(id);
         await _unitOfWork.Customers.GetAllAsync();
@@ -134,7 +135,7 @@ namespace webapi.Services
 
         // Check order exists
         if (order == null) {
-          return order;
+          return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
         }
 
         // Mapping để lấy thông tin
@@ -143,15 +144,15 @@ namespace webapi.Services
 
         order.Tickets = (ICollection<TicketDTO>)tickets;
 
-        return order;
+        return Ok (new { success = true, data = order });
       }
 
-      public async Task<DataResult> AcceptOrderAsync (string id, int UserId) {
+      public async Task<ActionResult> AcceptOrderAsync (string id, int UserId) {
         // Check order exists
         var order = await _unitOfWork.Orders.GetByAsync (id);
 
         if (order == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
         }
         
         var customer = await _unitOfWork.Customers.GetByAsync(order.CustomerId);
@@ -181,24 +182,24 @@ namespace webapi.Services
 
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { Data = order };
+        return Ok (new { success = true, data = order, message = "Xác nhận hóa đơn thành công." });
       }
 
-      public async Task<DataResult> RefuseOrderAsync (string id, int UserId) {
+      public async Task<ActionResult> RefuseOrderAsync (string id, int UserId) {
         var order = await _unitOfWork.Orders.GetByAsync (id);
 
         if (order == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
         }
 
         order.Status = 2; // Unconfirm
         order.UserId = UserId;
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { Data = order };
+      return Ok (new { success = true, data = order, message = "Từ chối hóa đơn thành công." });
       }
 
-      public async Task<DataResult> PostOrderAsync (AddOrder values) {
+      public async Task<ActionResult> PostOrderAsync (AddOrder values) {
         // Check Customer existence
         var customer = await _unitOfWork.Customers.GetByAsync (values.CustomerId);
 
@@ -296,7 +297,7 @@ namespace webapi.Services
           }
         }
 
-        return new DataResult { Data = tickets }; 
+        return Ok (new { success = true, message = "Thêm thành công.", data = tickets });
       }
 
       // Hàm phát sinh:

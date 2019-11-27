@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -10,7 +11,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class CustomerService : ICustomerService
+    public class CustomerService : ControllerBase, ICustomerService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ namespace webapi.Services
           _mapper = mapper;
         }
 
-        public async Task<IEnumerable<CustomerDTO>> GetCustomersAsync (Pagination pagination, SearchCustomer search) {
+        public async Task<ActionResult> GetCustomersAsync (Pagination pagination, SearchCustomer search) {
           // Mapping: Customer
           var customersSource = await _unitOfWork.Customers.GetAllAsync();
           var customers = _mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerDTO>>(customersSource);
@@ -55,10 +56,10 @@ namespace webapi.Services
               c.GetType().GetProperty(search.sortDesc).GetValue(c));
           }
 
-          return customers;
+          return Ok (PaginatedList<CustomerDTO>.Create(customers, pagination.current, pagination.pageSize));
         }
 
-        public async Task<CustomerDTO> GetCustomerAsync(string id) {
+        public async Task<ActionResult> GetCustomerAsync(string id) {
           // Mapping: Customer
           var customerSource = await _unitOfWork.Customers.FindAsync(c =>
             c.Id.Equals(id));
@@ -66,7 +67,7 @@ namespace webapi.Services
           
           // Check customer exists
           if (customer == null) {
-            return customer;
+            return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
           }
 
           // Mapping Order để lấy thông tin 
@@ -76,10 +77,10 @@ namespace webapi.Services
 
           customer.Orders = (ICollection<OrderDTO>) orders;
 
-          return customer;
+          return Ok (new { success = true, data = customer });
         }
 
-        public async Task<DataResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
+        public async Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
           var customerAsync = await _unitOfWork.Customers.FindAsync(c =>
             c.Id.Equals(id));
 
@@ -87,8 +88,7 @@ namespace webapi.Services
           var customer = customerAsync.SingleOrDefault();
           
           if (customer == null) {
-            return new DataResult { Error = 1 };
-            
+            return NotFound (new { Id = "Mã khách hàng này không tồn tại." }); 
           }
 
           // Check phone of customer exists except self
@@ -97,7 +97,7 @@ namespace webapi.Services
             !c.Id.Equals(id));
 
           if (customerExist.Count() != 0) {
-            return new DataResult { Error = 2 };
+            return BadRequest (new { Phone = "Số điện thoại này đã tồn tại." });
           }
 
           // Mapping: SaveCustomer
@@ -105,7 +105,7 @@ namespace webapi.Services
 
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { Data = customer };
+          return Ok (new { success = true, data = customer, message = "Sửa thành công." });
         }
     }
 }

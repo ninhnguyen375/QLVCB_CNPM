@@ -12,7 +12,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class AirlineService : IAirlineService
+    public class AirlineService : ControllerBase, IAirlineService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -22,7 +22,7 @@ namespace webapi.Services
           _mapper = mapper;
         }
         
-        public async Task<IEnumerable<AirlineDTO>> GetAirlinesAsync([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
+        public async Task<ActionResult> GetAirlinesAsync([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
           // Mapping: Airline
           var airlinesSource = await _unitOfWork.Airlines.GetAllAsync();
           var airlines = _mapper.Map<IEnumerable<Airline>, IEnumerable<AirlineDTO>>(airlinesSource);
@@ -51,19 +51,23 @@ namespace webapi.Services
               a.GetType().GetProperty(search.sortDesc).GetValue(a));
           }
 
-          return airlines;
+          return Ok (PaginatedList<AirlineDTO>.Create(airlines, pagination.current, pagination.pageSize));
         }
 
-        public async Task<AirlineDTO> GetAirlineAsync(string id) {
+        public async Task<ActionResult> GetAirlineAsync(string id) {
           // Mapping: Airline
           var airlineSource = await _unitOfWork.Airlines.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
           var airline = _mapper.Map<Airline, AirlineDTO>(airlineSource.SingleOrDefault());
 
-          return airline;
+          if (airline == null) {
+            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
+          }
+
+          return Ok (new { success = true, data = airline });
         }
 
-        public async Task<DataResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
+        public async Task<ActionResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
           var airlineAsync = await _unitOfWork.Airlines.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
 
@@ -71,7 +75,7 @@ namespace webapi.Services
           var airline = airlineAsync.SingleOrDefault();
 
           if (airline == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
           }
           
           // Check name of airline exists except self
@@ -80,7 +84,7 @@ namespace webapi.Services
             !a.Id.ToLower().Equals(id.ToLower()));
 
           if (airlineExist.Count() != 0) {
-            return new DataResult { Error = 2 };
+            return BadRequest (new { Name = "Tên hãng hàng không này đã tồn tại." });
           }
 
           // Mapping: SaveAirline
@@ -88,10 +92,10 @@ namespace webapi.Services
 
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { Data = airline };
+          return Ok (new { success = true, data = airline, message = "Sửa thành công." });
         }
 
-        public async Task<DataResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
+        public async Task<ActionResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
           // Mapping: SaveAirline
           var airline = _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO);
 
@@ -100,7 +104,7 @@ namespace webapi.Services
             a.Id.ToLower().Equals(airline.Id.ToLower()));
 
           if(airlineExist.Count() != 0) {
-            return new DataResult { Error = 1 };
+            return BadRequest (new { Id = "Mã hãng hàng không này đã tồn tại." });
           }
 
           // Check name đã tồn tại trong Database chưa
@@ -108,16 +112,16 @@ namespace webapi.Services
             a.Name.ToLower().Equals(airline.Name.ToLower()));
 
           if(airlineExist.Count() != 0) {
-            return new DataResult { Error = 2 };
+            return BadRequest(new { Name = "Tên hãng hàng không này đã tồn tại." });
           }
 
           await _unitOfWork.Airlines.AddAsync(airline);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { sucess = true, message = "Thêm thành công." });
         }
 
-        public async Task<DataResult> DeleteAirlineAsync(string id) {
+        public async Task<ActionResult> DeleteAirlineAsync(string id) {
           var airlineAsync = await _unitOfWork.Airlines.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
 
@@ -125,13 +129,13 @@ namespace webapi.Services
           var airline = airlineAsync.SingleOrDefault();
 
           if (airline == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
           }
 
           await _unitOfWork.Airlines.RemoveAsync(airline);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Xóa thành công" });
         }
     }
 }

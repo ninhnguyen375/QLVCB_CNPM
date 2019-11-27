@@ -31,7 +31,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetLuggagesAsync([FromQuery] Pagination pagination, [FromQuery] SearchLuggage search) {
           var luggages = await _service.GetLuggagesAsync(pagination, search);
 
-          return Ok (PaginatedList<LuggageDTO>.Create(luggages, pagination.current, pagination.pageSize));
+          return luggages;
         }
 
         // GET: api/luggages/1
@@ -40,11 +40,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetLuggageAsync(int id) {
           var luggage = await _service.GetLuggageAsync(id);
 
-          if (luggage == null) {
-            return NotFound (new { Id = "Mã hành lý này không tồn tại." });
-          }
-
-          return Ok (new { success = true, data = luggage });
+          return luggage;
         }
 
         // PUT: api/luggages/1
@@ -53,13 +49,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
           var luggage = await _service.PutLuggageAsync(id, saveLuggageDTO);
 
-          if (luggage.Error == 1) {
-            return NotFound (new { Id = "Mã hành lý này không tồn tại." });
-          } else if (luggage.Error == 2) {
-            return BadRequest (new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
-          }
-
-          return Ok (new { success = true, data = luggage.Data, message = "Sửa thành công." });
+          return luggage;
         }
 
         // POST: api/luggages
@@ -67,26 +57,18 @@ namespace webapi.Controllers
         [HttpPost]
         public async Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
-          var luggage = await _service.PostLuggageAsync(saveLuggageDTO);
+          var res = await _service.PostLuggageAsync(saveLuggageDTO);
 
-          if (luggage.Error == 1) {
-            return BadRequest(new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
-          }
-
-          return Ok (new { success = true, message = "Thêm thành công" });
+          return res;
         }
 
         // DELETE : api/luggages/1
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
         public async Task<ActionResult> DeleteLuggageAsync(int id) {
-          var luggage = await _service.DeleteLuggageAsync(id);
+          var res = await _service.DeleteLuggageAsync(id);
 
-          if (luggage.Error == 1) {
-            return NotFound (new { message = "Mã hành lý này không tồn tại." });
-          }
-          
-          return Ok (new { success = true, message = "Xóa thành công" });
+          return res;
         }
     }
 }
