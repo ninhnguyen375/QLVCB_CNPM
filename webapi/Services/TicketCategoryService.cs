@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -10,7 +11,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class TicketCategoryService : ITicketCategoryService
+    public class TicketCategoryService : ControllerBase, ITicketCategoryService
     {
       private readonly IUnitOfWork _unitOfWork;
       private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ namespace webapi.Services
         _mapper = mapper;
       }
 
-      public async Task<IEnumerable<TicketCategoryDTO>> GetTicketCategoriesAsync(Pagination pagination, SearchTicketCategory search) {
+      public async Task<ActionResult> GetTicketCategoriesAsync(Pagination pagination, SearchTicketCategory search) {
         // Mapping: TicketCategory
         var ticketCategoriesSource = await _unitOfWork.TicketCategories.GetAllAsync();
         var ticketCategories = _mapper.Map<IEnumerable<TicketCategory>, IEnumerable<TicketCategoryDTO>>(ticketCategoriesSource);
@@ -43,23 +44,27 @@ namespace webapi.Services
             tc.GetType().GetProperty(search.sortDesc).GetValue(tc));
         }
 
-        return ticketCategories;
+        return Ok (PaginatedList<TicketCategoryDTO>.Create(ticketCategories, pagination.current, pagination.pageSize));
       }
 
-      public async Task<TicketCategoryDTO>  GetTicketCategoryAsync(int id) {
+      public async Task<ActionResult>  GetTicketCategoryAsync(int id) {
         // Mapping: TicketCategory
         var ticketCategorySource = await _unitOfWork.TicketCategories.GetByAsync(id);
         var ticketCategory = _mapper.Map<TicketCategory, TicketCategoryDTO>(ticketCategorySource);
 
-        return ticketCategory;
+        if (ticketCategory == null) {
+            return NotFound (new { Id = "Mã loại vé này không tồn tại." });
+          }
+
+        return Ok (new { success = true, data = ticketCategory });
       }
 
-      public async Task<DataResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
+      public async Task<ActionResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
         // Check ticketCategory exists
         var ticketCategory = await _unitOfWork.TicketCategories.GetByAsync(id);
 
         if (ticketCategory == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã loại vé này không tồn tại." });
         }
 
         // Check name of ticketCategory exists except self
@@ -68,7 +73,7 @@ namespace webapi.Services
           tc.Id != id);
 
         if (ticketCategoryExist.Count() != 0) {
-          return new DataResult { Error = 2 };
+          return BadRequest (new { Name = "Loại vé này đã tồn tại." });
         }
 
         // Mapping: SaveTicketCategory
@@ -76,16 +81,16 @@ namespace webapi.Services
 
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { Data = ticketCategory };
+        return Ok (new { success = true, data = ticketCategory, message = "Sửa thành công." });
       }
 
-      public async Task<DataResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
+      public async Task<ActionResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
         // Check ticketCategory exists
         var ticketCategoryExist = await _unitOfWork.TicketCategories.FindAsync(tc => 
               tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()));
 
         if (ticketCategoryExist.Count() != 0) {
-          return new DataResult { Error = 1 };
+          return BadRequest (new { Name = "Loại vé này đã tồn tại." });
         }
 
         // Mapping: SaveTicketCategory
@@ -94,20 +99,20 @@ namespace webapi.Services
         await _unitOfWork.TicketCategories.AddAsync(ticketCategory);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Thêm thành công." });
       }
 
-      public async Task<DataResult> DeleteTicketCategoryAsync(int id) {
+      public async Task<ActionResult> DeleteTicketCategoryAsync(int id) {
         var ticketCategory = await _unitOfWork.TicketCategories.GetByAsync(id);
 
         if (ticketCategory == null) {
-          return new DataResult { Error = 1 };
+          return NotFound (new { Id = "Mã loại vé này không tồn tại." });
         }
 
         await _unitOfWork.TicketCategories.RemoveAsync(ticketCategory);
         await _unitOfWork.CompleteAsync();
 
-        return new DataResult { };
+        return Ok (new { success = true, message = "Xóa thành công" });
       }
   }
 }

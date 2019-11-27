@@ -29,20 +29,16 @@ namespace webapi.Controllers {
     public async Task<ActionResult> GetOrdersAsync ([FromQuery] Pagination pagination, [FromQuery] SearchOrder search) {
       var orders = await _service.GetOrdersAsync(pagination, search);
       
-      return Ok (PaginatedList<OrderDTO>.Create(orders, pagination.current, pagination.pageSize));
+      return orders;
     }
 
     // GET: api/orders/id
     [Authorize (Roles = "STAFF, ADMIN")]
     [HttpGet ("{id}")]
     public async Task<ActionResult> GetOrderAsync (string id) {
-      var order= await _service.GetOrderAsync(id);  
+      var order = await _service.GetOrderAsync(id);  
 
-      if (order == null) {
-        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
-      }
-
-      return Ok (new { success = true, data = order });
+      return order;
     }
 
     // PUT: api/orders/id/accept
@@ -52,11 +48,7 @@ namespace webapi.Controllers {
       var currentUserId = int.Parse (User.Identity.Name);
       var order = await _service.AcceptOrderAsync(id, currentUserId);
 
-      if (order.Error == 1) {
-        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
-      }
-
-      return Ok (new { success = true, data = order.Data, message = "Xác nhận hóa đơn thành công." });
+      return order;
     }
   
     // PUT: api/orders/id/refuse
@@ -66,20 +58,16 @@ namespace webapi.Controllers {
       var currentUserId = int.Parse (User.Identity.Name);
       var order = await _service.RefuseOrderAsync(id, currentUserId);
 
-      if (order.Error == 1) {
-        return NotFound (new { Id = "Mã hóa đơn không tồn tại." });
-      }
-
-      return Ok (new { success = true, data = order.Data, message = "Từ chối hóa đơn thành công." });
+      return order;
     }
 
     // POST: api/orders
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> PostOrderAsync (AddOrder values) {
-      var tickets = await _service.PostOrderAsync(values);
+      var res = await _service.PostOrderAsync(values);
         
-      return Ok (new { success = true, message = "Thêm thành công.", data = tickets.Data });
+      return res;
     }
   }
 }

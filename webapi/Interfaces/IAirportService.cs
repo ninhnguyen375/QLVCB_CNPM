@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
 
@@ -7,10 +8,10 @@ namespace webapi.Interfaces
 {
     public interface IAirportService
     {
-        Task<IEnumerable<AirportDTO>> GetAirportsAsync(Pagination pagination, SearchAirport search);
-        Task<AirportDTO> GetAirportAsync(string id);
-        Task<DataResult> PutAirportAsync(string id, SaveAirportDTO saveAirportDTO);
-        Task<DataResult> PostAirportAsync(SaveAirportDTO saveAirportDTO); 
-        Task<DataResult> DeleteAirportAsync(string id);
+        Task<ActionResult> GetAirportsAsync(Pagination pagination, SearchAirport search);
+        Task<ActionResult> GetAirportAsync(string id);
+        Task<ActionResult> PutAirportAsync(string id, SaveAirportDTO saveAirportDTO);
+        Task<ActionResult> PostAirportAsync(SaveAirportDTO saveAirportDTO); 
+        Task<ActionResult> DeleteAirportAsync(string id);
     }
 }

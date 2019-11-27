@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -10,7 +11,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class LuggageService : ILuggageService
+    public class LuggageService : ControllerBase, ILuggageService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ namespace webapi.Services
           _mapper = mapper;
         }
 
-        public async Task<IEnumerable<LuggageDTO>> GetLuggagesAsync(Pagination pagination, SearchLuggage search) {
+        public async Task<ActionResult> GetLuggagesAsync(Pagination pagination, SearchLuggage search) {
           // Mapping: Luggage
           var luggagesSource = await _unitOfWork.Luggages.GetAllAsync();
           var luggages = _mapper.Map<IEnumerable<Luggage>, IEnumerable<LuggageDTO>>(luggagesSource);
@@ -56,23 +57,27 @@ namespace webapi.Services
               l.GetType().GetProperty(search.sortDesc).GetValue(l));
           }
 
-          return luggages;
+           return Ok (PaginatedList<LuggageDTO>.Create(luggages, pagination.current, pagination.pageSize));
         }
 
-        public async Task<LuggageDTO> GetLuggageAsync(int id) {
+        public async Task<ActionResult> GetLuggageAsync(int id) {
           // Mapping: Luggage
           var luggageSource = await _unitOfWork.Luggages.GetByAsync(id);
           var luggage = _mapper.Map<Luggage, LuggageDTO>(luggageSource);
 
-          return luggage;
+          if (luggage == null) {
+            return NotFound (new { Id = "Mã hành lý này không tồn tại." });
+          }
+
+          return Ok (new { success = true, data = luggage });
         }
 
-        public async Task<DataResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
+        public async Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
           var luggage = await _unitOfWork.Luggages.GetByAsync(id);
 
           // Check luggage exists
           if (luggage == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { Id = "Mã hành lý này không tồn tại." });
           }
 
           // Check weight of luggage exists except self
@@ -81,7 +86,7 @@ namespace webapi.Services
             l.Id != id);
 
           if (luggageExist.Count() != 0 ) {
-            return new DataResult { Error = 2 };
+            return BadRequest (new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
           }
 
           // Mapping: SaveLuggage
@@ -89,10 +94,10 @@ namespace webapi.Services
           
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { Data = luggage };
+          return Ok (new { success = true, data = luggage, message = "Sửa thành công." });
         }
 
-        public async Task<DataResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
+        public async Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
           var luggage = _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO);
 
@@ -101,27 +106,27 @@ namespace webapi.Services
                 l.LuggageWeight.Equals(luggage.LuggageWeight));
 
           if(luggageExist.Count() != 0) {
-            return new DataResult { Error = 1 };
+            return BadRequest(new { LuggageWeight = "Khối lượng hành lý đã được thiết lập" });
           }
 
           await _unitOfWork.Luggages.AddAsync(luggage);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Thêm thành công" });
         }
         
-        public async Task<DataResult> DeleteLuggageAsync(int id) {
+        public async Task<ActionResult> DeleteLuggageAsync(int id) {
           var luggage = await _unitOfWork.Luggages.GetByAsync(id);
 
           // Check luggage exists
           if (luggage == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { message = "Mã hành lý này không tồn tại." });
           }
 
           await _unitOfWork.Luggages.RemoveAsync(luggage);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Xóa thành công" });
         }
     }
 }

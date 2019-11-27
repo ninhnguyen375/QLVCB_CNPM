@@ -30,7 +30,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetTicketCategoriesAsync([FromQuery] Pagination pagination, [FromQuery] SearchTicketCategory search) {
           var ticketCategories = await _service.GetTicketCategoriesAsync(pagination, search);
 
-          return Ok (PaginatedList<TicketCategoryDTO>.Create(ticketCategories, pagination.current, pagination.pageSize));
+          return ticketCategories;
         }
 
         // GET: api/ticketcategories/id
@@ -39,11 +39,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetTicketCategoryAsync(int id) {
           var ticketCategory = await _service.GetTicketCategoryAsync(id);
 
-          if (ticketCategory == null) {
-            return NotFound (new { Id = "Mã loại vé này không tồn tại." });
-          }
-
-          return Ok (new { success = true, data = ticketCategory });
+          return ticketCategory;
         }
 
         // PUT: api/ticketcategories/id
@@ -52,38 +48,25 @@ namespace webapi.Controllers
         public async Task<ActionResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
           var ticketCategory = await _service.PutTicketCategoryAsync(id, saveTicketCategoryDTO);
 
-          if (ticketCategory.Error == 1) {
-            return NotFound (new { Id = "Mã loại vé này không tồn tại." });
-          } else if (ticketCategory.Error == 2) {
-            return BadRequest (new { Name = "Loại vé này đã tồn tại." });
-          }
-
-          return Ok (new { success = true, data = ticketCategory.Data, message = "Sửa thành công." });
+          return ticketCategory;
         }
 
         // POST: api/ticketcategories
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public async Task<ActionResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
-          var ticketCategory = await _service.PostTicketCategoryAsync(saveTicketCategoryDTO);
-          if (ticketCategory.Error == 1) {
-            return BadRequest (new { Name = "Loại vé này đã tồn tại." });
-          }
-
-          return Ok (new { success = true, message = "Thêm thành công." });
+          var res = await _service.PostTicketCategoryAsync(saveTicketCategoryDTO);
+          
+          return res;
         }
 
         // DELETE: api/ticketcategories/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
         public async Task<ActionResult> DeleteTicketCategoryAsync(int id) {
-          var ticketCategory = await _service.DeleteTicketCategoryAsync(id);
+          var res = await _service.DeleteTicketCategoryAsync(id);
 
-          if (ticketCategory.Error == 1) {
-            return NotFound (new { Id = "Mã loại vé này không tồn tại." });
-          }
-
-          return Ok (new { success = true, message = "Xóa thành công" });
+          return res;
         }
     }
 }

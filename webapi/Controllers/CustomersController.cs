@@ -31,7 +31,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetCustomersAsync([FromQuery] Pagination pagination, [FromQuery] SearchCustomer search) {
           var customers = await _service.GetCustomersAsync(pagination, search);
 
-          return Ok (PaginatedList<CustomerDTO>.Create(customers, pagination.current, pagination.pageSize));
+          return customers;
         }
 
         // GET: api/customers/id
@@ -40,11 +40,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetCustomerAsync(string id) {
           var customer = await _service.GetCustomerAsync(id);
          
-          if (customer == null) {
-            return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
-          }
-
-          return Ok (new { success = true, data = customer });
+          return customer;
         }
 
         // PUT: api/customers/id
@@ -53,13 +49,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
           var customer = await _service.PutCustomerAsync(id, saveCustomerDTO);
           
-          if (customer.Error == 1) {
-            return NotFound (new { Id = "Mã khách hàng này không tồn tại." });
-          } else if (customer.Error == 2) {
-            return BadRequest (new { Phone = "Số điện thoại này đã tồn tại." });
-          }
-
-          return Ok (new { success = true, data = customer.Data, message = "Sửa thành công." });
+          return customer;
         }
     }
 }
