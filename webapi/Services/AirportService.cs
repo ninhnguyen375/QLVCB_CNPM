@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -10,7 +11,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class AirportService : IAirportService
+    public class AirportService : ControllerBase, IAirportService
     {
 
         private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +22,7 @@ namespace webapi.Services
           _mapper = mapper;
         }
         
-        public async Task<IEnumerable<AirportDTO>> GetAirportsAsync(Pagination pagination, SearchAirport search) {
+        public async Task<ActionResult> GetAirportsAsync(Pagination pagination, SearchAirport search) {
           // Mapping: Airport
           var airportsSource = await _unitOfWork.Airports.GetAllAsync();
           var airports = _mapper.Map<IEnumerable<Airport>, IEnumerable<AirportDTO>>(airportsSource);
@@ -56,19 +57,23 @@ namespace webapi.Services
               a.GetType().GetProperty(search.sortDesc).GetValue(a));
           }
 
-          return airports;
+          return Ok (PaginatedList<AirportDTO>.Create (airports, pagination.current, pagination.pageSize));
         }
 
-        public async Task<AirportDTO> GetAirportAsync(string id) {
+        public async Task<ActionResult> GetAirportAsync(string id) {
           // Mapping: Airport
           var airportSource = await _unitOfWork.Airports.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
           var airport = _mapper.Map<Airport, AirportDTO>(airportSource.SingleOrDefault());
 
-          return airport;
+          if (airport == null) {
+            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
+          }
+
+          return Ok (new { success = true, data = airport });
         }
 
-        public async Task<DataResult> PutAirportAsync(string id, SaveAirportDTO saveAirportDTO) {
+        public async Task<ActionResult> PutAirportAsync(string id, SaveAirportDTO saveAirportDTO) {
           var airportAsync = await _unitOfWork.Airports.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
 
@@ -76,7 +81,7 @@ namespace webapi.Services
           var airport = airportAsync.SingleOrDefault();
 
           if (airport == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
           }
           
           // Check name of airport exists except self
@@ -85,7 +90,7 @@ namespace webapi.Services
             !a.Id.ToLower().Equals(id.ToLower()));
 
           if (airportExist.Count() != 0) {
-            return new DataResult { Error = 2 };
+            return BadRequest (new  { Name = "Tên sân bay này đã tồn tại." });
           }
 
           // Mapping: SaveAirport
@@ -93,10 +98,10 @@ namespace webapi.Services
 
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { Data = airport };
+          return Ok (new { success = true, data = airport, message = "Sửa thành công." });
         }
 
-        public async Task<DataResult> PostAirportAsync(SaveAirportDTO saveAirportDTO) {
+        public async Task<ActionResult> PostAirportAsync(SaveAirportDTO saveAirportDTO) {
           // Mapping: SaveAirport
           var airport = _mapper.Map<SaveAirportDTO, Airport>(saveAirportDTO);
 
@@ -105,7 +110,7 @@ namespace webapi.Services
               a.Id.ToLower().Equals(airport.Id.ToLower()));
 
           if(airlineExist.Count() != 0) {
-            return new DataResult { Error = 1 };
+            return BadRequest(new { Id = "Mã sân bay này đã tồn tại." });
           }
 
           // Check name đã tồn tại trong Database chưa
@@ -113,16 +118,16 @@ namespace webapi.Services
               a.Name.ToLower().Equals(airport.Name.ToLower()));
 
           if(airlineExist.Count() != 0) {
-            return new DataResult { Error = 2 };
+            return BadRequest(new { Name = "Tên sân bay này đã tồn tại." });
           }
 
           await _unitOfWork.Airports.AddAsync(airport);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { sucess = true, message = "Thêm thành công." });
         }
 
-        public async Task<DataResult> DeleteAirportAsync(string id) {
+        public async Task<ActionResult> DeleteAirportAsync(string id) {
           var airportAsync = await _unitOfWork.Airports.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
 
@@ -130,13 +135,13 @@ namespace webapi.Services
           var airport = airportAsync.SingleOrDefault();
 
           if (airport == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
           }
 
           await _unitOfWork.Airports.RemoveAsync(airport);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Xóa thành công" });
         }
     }
 }

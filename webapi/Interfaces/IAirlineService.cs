@@ -10,10 +10,10 @@ namespace webapi.Interfaces
 {
     public interface IAirlineService
     {
-        Task<IEnumerable<AirlineDTO>> GetAirlinesAsync(Pagination pagination, SearchAirline search);
-        Task<AirlineDTO> GetAirlineAsync(string id);
-        Task<DataResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO);
-        Task<DataResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO); 
-        Task<DataResult> DeleteAirlineAsync(string id);
+        Task<ActionResult> GetAirlinesAsync(Pagination pagination, SearchAirline search);
+        Task<ActionResult> GetAirlineAsync(string id);
+        Task<ActionResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO);
+        Task<ActionResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO); 
+        Task<ActionResult> DeleteAirlineAsync(string id);
     }
 }

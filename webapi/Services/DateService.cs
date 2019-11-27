@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
@@ -11,7 +12,7 @@ using webapi.Interfaces;
 
 namespace webapi.Services
 {
-    public class DateService : IDateService
+    public class DateService : ControllerBase, IDateService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -21,7 +22,7 @@ namespace webapi.Services
           _mapper = mapper;
         }
 
-        public async Task<IEnumerable<DateDTO>> GetDatesAsync(Pagination pagination, SearchDate search) {
+        public async Task<ActionResult> GetDatesAsync(Pagination pagination, SearchDate search) {
           // Mapping: Date
           var datesSource = await _unitOfWork.Dates.GetAllAsync();
           await _unitOfWork.Dates.GetDateFlightsAsync();
@@ -51,23 +52,27 @@ namespace webapi.Services
           dates = dates.OrderByDescending(d =>
               d.DepartureDate);
           
-          return dates;
+          return Ok (PaginatedList<DateDTO>.Create(dates, pagination.current, pagination.pageSize));
         }
         
-        public async Task<DateDTO> GetDateAsync(int id) {
+        public async Task<ActionResult> GetDateAsync(int id) {
           // Mapping: Date
           var dateSource = await _unitOfWork.Dates.GetByAsync(id);
           await _unitOfWork.Dates.GetDateFlightsAsync();
           var date = _mapper.Map<Date, DateDTO>(dateSource);
 
-          return date;
+          if (date == null) {
+            return NotFound (new  { Id = "Mã ngày này không tồn tại." });
+          }
+
+          return Ok (new { success = true, data = date });
         }
-        public async Task<DataResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
+        public async Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists
           if (date == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new  { Id = "Mã ngày này không tồn tại." });
           }
 
           // Check departureDate of date exists except self
@@ -76,7 +81,7 @@ namespace webapi.Services
             d.Id != id);
 
           if (dateExist.Count() != 0 ) {
-            return new DataResult { Error = 2 };
+            return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." }); 
           }
 
           // Mapping: SaveDate
@@ -84,10 +89,10 @@ namespace webapi.Services
 
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { Data = date };
+          return Ok (new { success = true, data = date, message = "Sửa thành công" });
         }
 
-        public async Task<DataResult> PostDateAsync(SaveDateDTO saveDateDTO) {
+        public async Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO) {
           // Mapping: SaveDate
           var date = _mapper.Map<SaveDateDTO, Date>(saveDateDTO);
           
@@ -98,7 +103,7 @@ namespace webapi.Services
             d.DepartureDate == departureDate);
 
           if (dateTemp.Count() > 0) {
-            return new DataResult { Error = 1 };
+            return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });
           }
 
           // Nếu có thêm các chuyến bay cho ngày
@@ -118,15 +123,15 @@ namespace webapi.Services
           await _unitOfWork.Dates.AddAsync(date);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Thêm thành công." });
         }
 
-        public async Task<DataResult> DeleteDateAsync(int id) {
+        public async Task<ActionResult> DeleteDateAsync(int id) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists
           if (date == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new  { Id = "Mã ngày này không tồn tại." });
           }
         
           // Xóa các chuyến bay trong ngày bị xóa
@@ -140,15 +145,15 @@ namespace webapi.Services
           await _unitOfWork.Dates.RemoveAsync(date);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Xóa thành công" });
         }
 
-        public async Task<DataResult> PostFlightAsync(int id, AddDateFlight values) {
+        public async Task<ActionResult> PostFlightAsync(int id, AddDateFlight values) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists
           if (date == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new  { Id = "Mã ngày này không tồn tại." });
           }
 
           var flights = await _unitOfWork.Flights.GetAllAsync();
@@ -170,21 +175,21 @@ namespace webapi.Services
               await _unitOfWork.DateFlights.AddAsync(dateFlight1);
             } else {
               // Nếu chuyến bay đã tồn tại trong ngày thì báo tồn tại
-              return new DataResult { Error = 2 };
+              return BadRequest(new { success = false, message = "Chuyến bay đã tồn tại trong ngày." });
             }
           }
 
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Thêm thành công." });
         }
 
-        public async Task<DataResult> DeleteFlightAsync(int id, RemoveFlight values) {
+        public async Task<ActionResult> DeleteFlightAsync(int id, RemoveFlight values) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists
           if (date == null) {
-            return new DataResult { Error = 1 };
+            return NotFound (new  { Id = "Mã ngày này không tồn tại." });
           }
         
           var flightAsync = await _unitOfWork.Flights.FindAsync(a =>
@@ -194,7 +199,7 @@ namespace webapi.Services
           var flight = flightAsync.SingleOrDefault();
 
           if (flight == null) {
-            return new DataResult { Error = 2 };
+            return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
           }
 
           // Kiểm tra chuyến bay này trong ngày đã được bán chưa
@@ -211,7 +216,7 @@ namespace webapi.Services
           var flightTemp = flightTempAsync.SingleOrDefault();
 
           if (flightTemp == null) {
-            return new DataResult { Error = 3 };
+            return BadRequest (new { SeatsLeft = "Không thể xóa vì loại vé của chuyến bay này đã được bán." });
           }
 
           // Xóa chuyến bay được chọn
@@ -224,10 +229,10 @@ namespace webapi.Services
           await _unitOfWork.DateFlights.RemoveAsync(dateFlight);
           await _unitOfWork.CompleteAsync();
 
-          return new DataResult { };
+          return Ok (new { success = true, message = "Xóa thành công" });
         }
 
-        public async Task<DataResult> SearchFlightsAsync(SearchFlightFE values) {
+        public async Task<ActionResult> SearchFlightsAsync(SearchFlightFE values) {
           var departureDate = Convert.ToDateTime(values.DepartureDate);
 
           // Mapping để lấy thông tin
@@ -285,10 +290,10 @@ namespace webapi.Services
               select f
             );
           } else {
-            return new DataResult { DepartureFlights = departureFlights };
+            return Ok (new { success = true, departureFlights = departureFlights });
           }
 
-          return new DataResult { DepartureFlights = departureFlights, ReturnFlights = returnFlights };
+          return Ok (new { success = true, DepartureFlights = departureFlights, ReturnFlights = returnFlights });
         }
     }
 }

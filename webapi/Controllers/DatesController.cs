@@ -32,7 +32,7 @@ namespace webapi.Controllers
       public async Task<ActionResult> GetDatesAsync([FromQuery] Pagination pagination, [FromQuery] SearchDate search) {
         var dates = await _service.GetDatesAsync(pagination, search);
 
-        return Ok (PaginatedList<DateDTO>.Create(dates, pagination.current, pagination.pageSize));
+        return dates;
       }
 
       // GET: api/dates/id
@@ -41,11 +41,7 @@ namespace webapi.Controllers
       public async Task<ActionResult> GetDateAsync(int id) {
         var date = await _service.GetDateAsync(id);
 
-        if (date == null) {
-          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
-        }
-
-        return Ok (new { success = true, data = date });
+        return date;
       }
 
       // PUT: api/dates/id
@@ -54,71 +50,43 @@ namespace webapi.Controllers
       public async Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
         var date = await _service.PutDateAsync(id, saveDateDTO);
 
-        if (date.Error == 1) {
-          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
-        } else if (date.Error == 2) {
-          return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });        
-        }
-
-        return Ok (new { success = true, data = date.Data, message = "Sửa thành công" });
+        return date;
       }
 
       // POST: api/dates
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public async Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO) {
-        var date = await _service.PostDateAsync(saveDateDTO);
+        var res = await _service.PostDateAsync(saveDateDTO);
 
-        if (date.Error == 1) {
-          return BadRequest (new { DepartureDate = "Ngày khởi hành này đã tồn tại." });
-        }
-
-        return Ok (new { success = true, message = "Thêm thành công." });
+        return res;
       }
 
       // DELETE: api/dates/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
       public async Task<ActionResult> DeleteDateAsync(int id) {
-        var date = await _service.DeleteDateAsync(id);
+        var res = await _service.DeleteDateAsync(id);
 
-        if (date.Error == 1) {
-          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
-        } 
-
-        return Ok (new { success = true, message = "Xóa thành công" });
+        return res;
       }
 
       // POST: api/dates/id/addflights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflights")]
       public async Task<ActionResult> PostFlightAsync(int id, AddDateFlight values) {
-        var date = await _service.PostFlightAsync(id, values);
+        var res = await _service.PostFlightAsync(id, values);
 
-        if (date.Error == 1) {
-          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
-        } else if (date.Error == 2) {
-          return BadRequest(new { success = false, message = "Chuyến bay đã tồn tại trong ngày." });
-        }
-
-        return Ok (new { success = true, message = "Thêm thành công." });
+        return res;
       }
 
       // DELETE: api/dates/id/removeflight
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}/removeflight")]
       public async Task<ActionResult> DeleteFlightAsync(int id, RemoveFlight values) {
-        var date = await _service.DeleteFlightAsync(id, values);
+        var res = await _service.DeleteFlightAsync(id, values);
 
-        if (date.Error == 1) {
-          return NotFound (new  { Id = "Mã ngày này không tồn tại." });
-        } else if (date.Error == 2) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        } else if (date.Error == 3) {
-          return BadRequest (new { SeatsLeft = "Không thể xóa vì loại vé của chuyến bay này đã được bán." });
-        }
-
-        return Ok (new { success = true, message = "Xóa thành công" });
+        return res;
       }
 
       // GET: api/dates/searchflights
@@ -126,10 +94,8 @@ namespace webapi.Controllers
       [HttpGet ("/api/searchflights")]
       public async Task<ActionResult> SearchFlightsAsync([FromQuery] SearchFlightFE values) {
         var flights = await _service.SearchFlightsAsync(values);
-        var departureFlights = flights.DepartureFlights;
-        var returnFlights = flights.ReturnFlights;
-
-        return Ok (new { success = true, DepartureFlights = departureFlights, ReturnFlights = returnFlights });
+        
+        return flights;
       }
     }
 }

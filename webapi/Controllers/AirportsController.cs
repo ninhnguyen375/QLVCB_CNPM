@@ -30,7 +30,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetAirportsAsync ([FromQuery] Pagination pagination, [FromQuery] SearchAirport search) {
           var airports = await _service.GetAirportsAsync(pagination, search);
 
-          return Ok (PaginatedList<AirportDTO>.Create (airports, pagination.current, pagination.pageSize));
+          return airports;
         }
 
         // GET: api/airports/id (GET airport by Id)
@@ -39,11 +39,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetAirportAsync (string id) {
           var airport = await _service.GetAirportAsync(id);
 
-          if (airport == null) {
-            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
-          }
-
-          return Ok (new { success = true, data = airport });
+          return airport;
         }
 
         // PUT: api/airports/id
@@ -52,41 +48,25 @@ namespace webapi.Controllers
         public async Task<ActionResult> PutAirportAsync (string id, SaveAirportDTO saveAirportDTO) {
           var airport = await _service.PutAirportAsync(id, saveAirportDTO);
 
-          if (airport.Error == 1) {
-            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
-          } else if (airport.Error == 2) {
-            return BadRequest (new  { Name = "Tên sân bay này đã tồn tại." });
-          }
-
-          return Ok (new { success = true, data = airport.Data, message = "Sửa thành công." });
+          return airport;
         }
 
         // POST: api/airports
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public async Task<ActionResult> PostAirportAsync (SaveAirportDTO saveAirportDTO) {
-          var airport = await _service.PostAirportAsync(saveAirportDTO);
+          var res = await _service.PostAirportAsync(saveAirportDTO);
 
-          if (airport.Error == 1) {
-            return BadRequest(new { Id = "Mã sân bay này đã tồn tại." });
-          } else if (airport.Error == 2) {
-            return BadRequest(new { Name = "Tên sân bay này đã tồn tại." });
-          }
-
-          return Ok (new { sucess = true, message = "Thêm thành công." });
+          return res;          
         }
 
         // DELETE: api/airports/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")] 
         public async Task<ActionResult> DeleteAirportAsync (string id) {
-          var airport = await _service.DeleteAirportAsync(id);
+          var res = await _service.DeleteAirportAsync(id);
 
-          if (airport.Error == 1) {
-            return NotFound (new { Id = "Mã sân bay này không tồn tại." });
-          }
-
-          return Ok (new { success = true, message = "Xóa thành công" });
+          return res;
         }
     }
 }

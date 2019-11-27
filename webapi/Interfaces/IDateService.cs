@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
 
@@ -7,13 +8,13 @@ namespace webapi.Interfaces
 {
     public interface IDateService
     {
-      Task<IEnumerable<DateDTO>> GetDatesAsync(Pagination pagination, SearchDate search);
-      Task<DateDTO> GetDateAsync(int id);
-      Task<DataResult> PutDateAsync(int id, SaveDateDTO saveDateDTO);
-      Task<DataResult> PostDateAsync(SaveDateDTO saveDateDTO);
-      Task<DataResult> DeleteDateAsync(int id);
-      Task<DataResult> PostFlightAsync(int id, AddDateFlight values);
-      Task<DataResult> DeleteFlightAsync(int id, RemoveFlight values);
-      Task<DataResult> SearchFlightsAsync(SearchFlightFE values);
+      Task<ActionResult> GetDatesAsync(Pagination pagination, SearchDate search);
+      Task<ActionResult> GetDateAsync(int id);
+      Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO);
+      Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO);
+      Task<ActionResult> DeleteDateAsync(int id);
+      Task<ActionResult> PostFlightAsync(int id, AddDateFlight values);
+      Task<ActionResult> DeleteFlightAsync(int id, RemoveFlight values);
+      Task<ActionResult> SearchFlightsAsync(SearchFlightFE values);
     }
 }

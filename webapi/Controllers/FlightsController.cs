@@ -33,7 +33,7 @@ namespace webapi.Controllers
       public async Task<ActionResult> GetFlightsAsync([FromQuery] Pagination pagination, [FromQuery] SearchFlight search) {
         var flights = await _service.GetFlightsAsync(pagination, search);
 
-        return Ok (PaginatedList<FlightDTO>.Create(flights, pagination.current, pagination.pageSize));
+        return flights;
       }
 
       // GET: api/flights/id
@@ -42,11 +42,7 @@ namespace webapi.Controllers
       public async Task<ActionResult> GetFlightAsync(string id) {
         var flight = await _service.GetFlightAsync(id);
 
-        if (flight == null) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        }
-
-        return Ok (new { success = true, data = flight });
+        return flight;
       }
 
       // PUT: api/flights/id
@@ -55,69 +51,43 @@ namespace webapi.Controllers
       public async Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values) {
         var flight = await _service.PutFlightAsync(id, values);
 
-        if (flight.Error == 1) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        } else if (flight.Error == 2) {
-          return BadRequest( new { id = "Mã chuyến bay không hợp lệ." });
-        }
-
-        return Ok (new { success = true, message = "Sửa thành công" });
+        return flight;
       }
 
       // POST: api/flights
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public async Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
-        var flight = await _service.PostFlightAsync(saveFlightDTO);
+        var res = await _service.PostFlightAsync(saveFlightDTO);
 
-        if (flight.Error == 1) {
-          return BadRequest (new { Id = "Mã chuyến bay này đã tồn tại." });
-        }
-
-        return Ok (new { success = true, message = "Thêm thành công." });
+        return res;
       }
 
       // DELETE: api/flights/id
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}")]
       public async Task<ActionResult> DeleteFlightAsync(string id) {
-        var flight = await _service.DeleteFlightAsync(id);
+        var res = await _service.DeleteFlightAsync(id);
 
-        if (flight.Error == 1) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        }
-
-        return Ok (new { success = true, message = "Xóa thành công." });
+        return res;
       }
 
       // POST: api/flights/id/addflightticketcategory
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflightticketcategory")]
       public async Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
-        var flight = await _service.PostFlightTicketCategoriesAsync(id, values);
+        var res = await _service.PostFlightTicketCategoriesAsync(id, values);
         
-        if (flight.Error == 1) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        } else if (flight.Error == 2) {
-          return BadRequest (new { Id = "Loại vé của chuyến bay này đã tồn tại." });
-        }
-
-        return Ok (new { success = true, message = "Thêm loại vé thành công." });
+        return res;
       }
 
       // DELETE: api/flights/id/removeflightticketcategory
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpDelete ("{id}/removeflightticketcategory")]
       public async Task<ActionResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values) {
-        var flight = await _service.DeleteFlightTicketCategoriesAsync(id, values);
+        var res = await _service.DeleteFlightTicketCategoriesAsync(id, values);
         
-        if (flight.Error == 1) {
-          return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
-        } else if (flight.Error == 2) {
-          return BadRequest (new { Id = "Loại vé của chuyến bay này không tồn tại." });
-        }
-
-        return Ok (new { success = true, message = "Xóa thành công." });
+        return res;
       }
     }
 }

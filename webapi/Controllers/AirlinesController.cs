@@ -30,7 +30,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetAirlinesAsync([FromQuery] Pagination pagination, [FromQuery] SearchAirline search) {
           var airlines = await _service.GetAirlinesAsync(pagination, search);
 
-          return Ok (PaginatedList<AirlineDTO>.Create(airlines, pagination.current, pagination.pageSize));
+          return airlines;
         }
 
         // GET: api/airlines/id
@@ -39,11 +39,7 @@ namespace webapi.Controllers
         public async Task<ActionResult> GetAirlineAsync(string id) {
           var airline = await _service.GetAirlineAsync(id);
 
-          if (airline == null) {
-            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
-          }
-
-          return Ok (new { success = true, data = airline });
+          return airline;
         }
 
         // PUT: api/airlines/id
@@ -52,41 +48,25 @@ namespace webapi.Controllers
         public async Task<ActionResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
           var airline = await _service.PutAirlineAsync(id, saveAirlineDTO);
 
-          if (airline.Error == 1) {
-            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
-          } else if (airline.Error == 2) {
-            return BadRequest (new { Name = "Tên hãng hàng không này đã tồn tại." });
-          }
-          
-          return Ok (new { success = true, data = airline.Data, message = "Sửa thành công." });
+          return airline;
         }
 
         // POST: api/airlines
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public async Task<ActionResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
-          var airline = await _service.PostAirlineAsync(saveAirlineDTO);
+          var res = await _service.PostAirlineAsync(saveAirlineDTO);
 
-          if(airline.Error == 1) {
-            return BadRequest (new { Id = "Mã hãng hàng không này đã tồn tại." });
-          } else if (airline.Error == 2) {
-            return BadRequest(new { Name = "Tên hãng hàng không này đã tồn tại." });
-          }
-
-          return Ok (new { sucess = true, message = "Thêm thành công." });
+          return res;
         }
 
         // DELETE: api/airlines/id
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpDelete ("{id}")]
         public async Task<ActionResult> DeleteAirlineAsync(string id) {
-          var airline = await _service.DeleteAirlineAsync(id);
+          var res = await _service.DeleteAirlineAsync(id);
 
-          if (airline.Error == 1) {
-            return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
-          }
-
-          return Ok (new { success = true, message = "Xóa thành công" });
+          return res;
         }
     }
 }

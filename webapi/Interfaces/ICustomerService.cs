@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
@@ -8,8 +9,8 @@ namespace webapi.Interfaces
 {
     public interface ICustomerService
     {
-        Task<IEnumerable<CustomerDTO>> GetCustomersAsync (Pagination pagination, SearchCustomer search);
-        Task<CustomerDTO> GetCustomerAsync(string id);
-        Task<DataResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO);
+        Task<ActionResult> GetCustomersAsync (Pagination pagination, SearchCustomer search);
+        Task<ActionResult> GetCustomerAsync(string id);
+        Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO);
     }
 }
