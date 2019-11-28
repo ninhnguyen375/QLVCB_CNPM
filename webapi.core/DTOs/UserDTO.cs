@@ -11,7 +11,7 @@ namespace webapi.core.DTOs {
         public string Email { get; set; }
 
         // 1: active, 2: banned, 3: deleted
-        public int Status { get; set; }
+        public int? Status { get; set; }
 
         // 1: ADMIN, 2: STAFF
         public string Role { get; set; }

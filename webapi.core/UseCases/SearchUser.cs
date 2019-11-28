@@ -1,14 +1,10 @@
+using webapi.core.DTOs;
+
 namespace webapi.core.UseCases
 {
-    public class SearchUser
+    public class SearchUser : UserDTO
     {
-        public string fullname { get; set; } = "";
-        public string identifier { get; set; } = "";
-        public string phone { get; set; } = "";
-        public string email { get; set; } = "";
-        public int? gender { get; set; }
-
-        public string sortAsc { get; set; } = "";
-        public string sortDesc { get; set; } = "";
+        public string SortAsc { get; set; } = "";
+        public string SortDesc { get; set; } = "";
     }
 }
