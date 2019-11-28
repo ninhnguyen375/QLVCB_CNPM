@@ -65,7 +65,7 @@ namespace webapi.Controllers {
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> PostOrderAsync (AddOrder values) {
-      var res = await _service.PostOrderAsync(values);
+      var res = await _service.AddOrderAsync(values);
         
       return res;
     }

@@ -47,7 +47,7 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public async Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
-          var customer = await _service.PutCustomerAsync(id, saveCustomerDTO);
+          var customer = await _service.UpdateCustomerAsync(id, saveCustomerDTO);
           
           return customer;
         }

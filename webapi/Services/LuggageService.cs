@@ -72,7 +72,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = luggage });
         }
 
-        public async Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
+        public async Task<ActionResult> UpdateLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
           var luggage = await _unitOfWork.Luggages.GetByAsync(id);
 
           // Check luggage exists
@@ -97,7 +97,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = luggage, message = "Sửa thành công." });
         }
 
-        public async Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
+        public async Task<ActionResult> AddLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
           var luggage = _mapper.Map<SaveLuggageDTO, Luggage>(saveLuggageDTO);
 

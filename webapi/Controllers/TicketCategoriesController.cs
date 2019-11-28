@@ -46,7 +46,7 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public async Task<ActionResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
-          var ticketCategory = await _service.PutTicketCategoryAsync(id, saveTicketCategoryDTO);
+          var ticketCategory = await _service.UpdateTicketCategoryAsync(id, saveTicketCategoryDTO);
 
           return ticketCategory;
         }
@@ -55,7 +55,7 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPost]
         public async Task<ActionResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
-          var res = await _service.PostTicketCategoryAsync(saveTicketCategoryDTO);
+          var res = await _service.AddTicketCategoryAsync(saveTicketCategoryDTO);
           
           return res;
         }

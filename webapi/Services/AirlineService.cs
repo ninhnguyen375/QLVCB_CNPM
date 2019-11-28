@@ -67,7 +67,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = airline });
         }
 
-        public async Task<ActionResult> PutAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
+        public async Task<ActionResult> UpdateAirlineAsync(string id, SaveAirlineDTO saveAirlineDTO) {
           var airlineAsync = await _unitOfWork.Airlines.FindAsync(a =>
             a.Id.ToLower().Equals(id.ToLower()));
 
@@ -95,7 +95,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = airline, message = "Sửa thành công." });
         }
 
-        public async Task<ActionResult> PostAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
+        public async Task<ActionResult> AddAirlineAsync(SaveAirlineDTO saveAirlineDTO) {
           // Mapping: SaveAirline
           var airline = _mapper.Map<SaveAirlineDTO, Airline>(saveAirlineDTO);
 

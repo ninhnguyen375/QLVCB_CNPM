@@ -10,8 +10,8 @@ namespace webapi.Interfaces
     {
         Task<ActionResult> GetLuggagesAsync(Pagination pagination, SearchLuggage search);
         Task<ActionResult> GetLuggageAsync(int id);
-        Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO);
-        Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO);
+        Task<ActionResult> UpdateLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO);
+        Task<ActionResult> AddLuggageAsync(SaveLuggageDTO saveLuggageDTO);
         Task<ActionResult> DeleteLuggageAsync(int id);
     }
 }

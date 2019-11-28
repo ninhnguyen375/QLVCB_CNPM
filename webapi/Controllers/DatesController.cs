@@ -48,7 +48,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
       public async Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
-        var date = await _service.PutDateAsync(id, saveDateDTO);
+        var date = await _service.UpdateDateAsync(id, saveDateDTO);
 
         return date;
       }
@@ -57,7 +57,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public async Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO) {
-        var res = await _service.PostDateAsync(saveDateDTO);
+        var res = await _service.AddDateAsync(saveDateDTO);
 
         return res;
       }
@@ -75,7 +75,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflights")]
       public async Task<ActionResult> PostFlightAsync(int id, AddDateFlight values) {
-        var res = await _service.PostFlightAsync(id, values);
+        var res = await _service.AddDateFlightAsync(id, values);
 
         return res;
       }

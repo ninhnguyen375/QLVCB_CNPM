@@ -12,6 +12,6 @@ namespace webapi.Interfaces
       Task<ActionResult> GetOrderAsync (string id);
       Task<ActionResult> AcceptOrderAsync (string id, int UserId);
       Task<ActionResult> RefuseOrderAsync (string id, int UserId);
-      Task<ActionResult> PostOrderAsync (AddOrder values);
+      Task<ActionResult> AddOrderAsync (AddOrder values);
     }
 }

@@ -49,7 +49,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPut ("{id}")]
       public async Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values) {
-        var flight = await _service.PutFlightAsync(id, values);
+        var flight = await _service.UpdateFlightAsync(id, values);
 
         return flight;
       }
@@ -58,7 +58,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost]
       public async Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
-        var res = await _service.PostFlightAsync(saveFlightDTO);
+        var res = await _service.AddFlightAsync(saveFlightDTO);
 
         return res;
       }
@@ -76,7 +76,7 @@ namespace webapi.Controllers
       [Authorize (Roles = "STAFF, ADMIN")]
       [HttpPost ("{id}/addflightticketcategory")]
       public async Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
-        var res = await _service.PostFlightTicketCategoriesAsync(id, values);
+        var res = await _service.AddFlightTicketCategoriesAsync(id, values);
         
         return res;
       }
