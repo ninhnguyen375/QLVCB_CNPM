@@ -29,26 +29,32 @@ namespace webapi.Services {
       var mapped = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>> (users);
 
       // Searching
-      if (search.email != "") {
-        mapped = mapped.Where (u => u.Email.Contains (search.email));
+      if (!String.IsNullOrEmpty(search.Email)) {
+        mapped = mapped.Where (u => u.Email.Contains (search.Email));
       }
-      if (search.fullname != "") {
-        mapped = mapped.Where (u => u.FullName.Contains (search.fullname));
+      if (!String.IsNullOrEmpty(search.FullName)) {
+        mapped = mapped.Where (u => u.FullName.Contains (search.FullName));
       }
-      if (search.identifier != "") {
-        mapped = mapped.Where (u => u.Identifier.Equals (search.identifier));
+      if (!String.IsNullOrEmpty(search.Identifier)) {
+        mapped = mapped.Where (u => u.Identifier.Equals (search.Identifier));
       }
-      if (search.phone != "") {
-        mapped = mapped.Where (u => u.Phone.Equals (search.phone));
+      if (!String.IsNullOrEmpty(search.Phone)) {
+        mapped = mapped.Where (u => u.Phone.Equals (search.Phone));
       }
+
+      if (search.Status != null) {
+        mapped = mapped.Where (u => u.Status.Equals (search.Status));
+      }
+
+
       // Sorting
-      if (search.sortAsc != "") {
-        Console.WriteLine (search.sortAsc);
-        mapped = mapped.OrderBy (u => u.GetType ().GetProperty (search.sortAsc).GetValue (u, null));
+      if (search.SortAsc != "") {
+        Console.WriteLine (search.SortAsc);
+        mapped = mapped.OrderBy (u => u.GetType ().GetProperty (search.SortAsc).GetValue (u, null));
       }
-      if (search.sortDesc != "") {
-        Console.WriteLine (search.sortDesc);
-        mapped = mapped.OrderByDescending (u => u.GetType ().GetProperty (search.sortDesc).GetValue (u, null));
+      if (search.SortDesc != "") {
+        Console.WriteLine (search.SortDesc);
+        mapped = mapped.OrderByDescending (u => u.GetType ().GetProperty (search.SortDesc).GetValue (u, null));
       }
 
       if (currentUser.IsInRole ("ADMIN"))
@@ -160,6 +166,15 @@ namespace webapi.Services {
 
       return Ok ();
     }
+
+    // public async Task<ActionResult> DeleteUserAsync (int id) {
+    //   var user = await _unitOfWork.Users.GetByAsync (id);
+
+    //   user.Status = 3; // deleted
+    //   await _unitOfWork.CompleteAsync();
+
+    //   return Ok();
+    // }
 
     public async Task<ActionResult> DeleteUserAsync (int id) {
       var user = await _unitOfWork.Users.GetByAsync (id);
