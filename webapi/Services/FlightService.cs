@@ -108,7 +108,7 @@ namespace webapi.Services
         return Ok (new { success = true, data = flight });
       }
 
-      public async Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values) {
+      public async Task<ActionResult> UpdateFlightAsync(string id, SaveFlightDTO values) {
         var flight = await _unitOfWork.Flights.GetByAsync(id);
 
         // Check flight exists
@@ -157,7 +157,7 @@ namespace webapi.Services
         return Ok (new { success = true, message = "Sửa thành công" });
       }
 
-      public async Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO) {
+      public async Task<ActionResult> AddFlightAsync(SaveFlightDTO saveFlightDTO) {
         // Mapping: SaveFlightDTO
         var flight = _mapper.Map<SaveFlightDTO, Flight>(saveFlightDTO);
 
@@ -194,7 +194,7 @@ namespace webapi.Services
         return Ok (new { success = true, message = "Xóa thành công." });
       }
 
-      public async Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
+      public async Task<ActionResult> AddFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
         var flightAsync = await _unitOfWork.Flights.FindAsync(f =>
           f.Id.ToLower().Equals(id.ToLower()));
         

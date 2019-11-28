@@ -80,7 +80,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = customer });
         }
 
-        public async Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
+        public async Task<ActionResult> UpdateCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO) {
           var customerAsync = await _unitOfWork.Customers.FindAsync(c =>
             c.Id.Equals(id));
 

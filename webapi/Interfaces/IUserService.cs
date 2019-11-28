@@ -14,10 +14,10 @@ namespace webapi.Interfaces
     {
         Task<ActionResult> GetUsersAsync(Pagination pagination, SearchUser search, ClaimsPrincipal currentUser);
         Task<ActionResult> GetUserAsync(int id);
-        Task<ActionResult> PutUserAsync(int id, SaveUserDTO saveUserDTO);
+        Task<ActionResult> UpdateUserAsync(int id, SaveUserDTO saveUserDTO);
         Task<ActionResult> BlockUserAsync(int id);
         Task<ActionResult> UnBlockUserAsync(int id);
-        Task<ActionResult> PostUserAsync(SaveUserDTO saveUserDTO); 
+        Task<ActionResult> AddUserAsync(SaveUserDTO saveUserDTO); 
         Task<ActionResult> DeleteUserAsync(int id);
     }
 }

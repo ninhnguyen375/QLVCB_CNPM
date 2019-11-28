@@ -56,7 +56,7 @@ namespace webapi.Controllers {
         [HttpPut ("{id}")]
         [Authorize (Roles = "ADMIN, STAFF")]
         public async Task<ActionResult> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
-            var res = await _service.PutUserAsync (id, saveUserDTO);
+            var res = await _service.UpdateUserAsync (id, saveUserDTO);
 
             return res;
         }
@@ -65,7 +65,7 @@ namespace webapi.Controllers {
         [HttpPost]
         [Authorize (Roles = "ADMIN")]
         public async Task<ActionResult> PostUserAsync ([FromBody] SaveUserDTO saveUserDTO) {
-            var res = await _service.PostUserAsync (saveUserDTO);
+            var res = await _service.AddUserAsync (saveUserDTO);
 
             return res;
         }

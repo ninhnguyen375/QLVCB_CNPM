@@ -11,6 +11,6 @@ namespace webapi.Interfaces
     {
         Task<ActionResult> GetCustomersAsync (Pagination pagination, SearchCustomer search);
         Task<ActionResult> GetCustomerAsync(string id);
-        Task<ActionResult> PutCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO);
+        Task<ActionResult> UpdateCustomerAsync(string id, SaveCustomerDTO saveCustomerDTO);
     }
 }

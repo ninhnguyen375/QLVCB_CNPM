@@ -47,7 +47,7 @@ namespace webapi.Controllers
         [Authorize (Roles = "STAFF, ADMIN")]
         [HttpPut ("{id}")]
         public async Task<ActionResult> PutLuggageAsync(int id, SaveLuggageDTO saveLuggageDTO) {
-          var luggage = await _service.PutLuggageAsync(id, saveLuggageDTO);
+          var luggage = await _service.UpdateLuggageAsync(id, saveLuggageDTO);
 
           return luggage;
         }
@@ -57,7 +57,7 @@ namespace webapi.Controllers
         [HttpPost]
         public async Task<ActionResult> PostLuggageAsync(SaveLuggageDTO saveLuggageDTO) {
           // Mapping: SaveLuggage
-          var res = await _service.PostLuggageAsync(saveLuggageDTO);
+          var res = await _service.AddLuggageAsync(saveLuggageDTO);
 
           return res;
         }

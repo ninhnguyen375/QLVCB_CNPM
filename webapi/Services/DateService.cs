@@ -67,7 +67,7 @@ namespace webapi.Services
 
           return Ok (new { success = true, data = date });
         }
-        public async Task<ActionResult> PutDateAsync(int id, SaveDateDTO saveDateDTO) {
+        public async Task<ActionResult> UpdateDateAsync(int id, SaveDateDTO saveDateDTO) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists
@@ -92,7 +92,7 @@ namespace webapi.Services
           return Ok (new { success = true, data = date, message = "Sửa thành công" });
         }
 
-        public async Task<ActionResult> PostDateAsync(SaveDateDTO saveDateDTO) {
+        public async Task<ActionResult> AddDateAsync(SaveDateDTO saveDateDTO) {
           // Mapping: SaveDate
           var date = _mapper.Map<SaveDateDTO, Date>(saveDateDTO);
           
@@ -148,7 +148,7 @@ namespace webapi.Services
           return Ok (new { success = true, message = "Xóa thành công" });
         }
 
-        public async Task<ActionResult> PostFlightAsync(int id, AddDateFlight values) {
+        public async Task<ActionResult> AddDateFlightAsync(int id, AddDateFlight values) {
           var date = await _unitOfWork.Dates.GetByAsync(id);
 
           // Check date exists

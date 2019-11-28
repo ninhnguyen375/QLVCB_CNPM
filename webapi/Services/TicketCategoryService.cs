@@ -59,7 +59,7 @@ namespace webapi.Services
         return Ok (new { success = true, data = ticketCategory });
       }
 
-      public async Task<ActionResult> PutTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
+      public async Task<ActionResult> UpdateTicketCategoryAsync(int id, SaveTicketCategoryDTO saveTicketCategoryDTO) {
         // Check ticketCategory exists
         var ticketCategory = await _unitOfWork.TicketCategories.GetByAsync(id);
 
@@ -84,7 +84,7 @@ namespace webapi.Services
         return Ok (new { success = true, data = ticketCategory, message = "Sửa thành công." });
       }
 
-      public async Task<ActionResult> PostTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
+      public async Task<ActionResult> AddTicketCategoryAsync(SaveTicketCategoryDTO saveTicketCategoryDTO) {
         // Check ticketCategory exists
         var ticketCategoryExist = await _unitOfWork.TicketCategories.FindAsync(tc => 
               tc.Name.ToLower().Equals(saveTicketCategoryDTO.Name.ToLower()));

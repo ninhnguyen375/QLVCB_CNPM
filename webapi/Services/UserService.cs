@@ -79,7 +79,7 @@ namespace webapi.Services {
       return Ok (new { data });
     }
 
-    public async Task<ActionResult> PutUserAsync (int id, SaveUserDTO saveUserDTO) {
+    public async Task<ActionResult> UpdateUserAsync (int id, SaveUserDTO saveUserDTO) {
       var user = await _unitOfWork.Users.GetByAsync (id);
 
       // Check exists
@@ -137,7 +137,7 @@ namespace webapi.Services {
       return Ok ();
     }
 
-    public async Task<ActionResult> PostUserAsync (SaveUserDTO saveUserDTO) {
+    public async Task<ActionResult> AddUserAsync (SaveUserDTO saveUserDTO) {
       var userAsync = await _unitOfWork.Users.FindAsync (u =>
         u.Identifier.Equals (saveUserDTO.Identifier));
 

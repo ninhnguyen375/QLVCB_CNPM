@@ -199,7 +199,7 @@ namespace webapi.Services
       return Ok (new { success = true, data = order, message = "Từ chối hóa đơn thành công." });
       }
 
-      public async Task<ActionResult> PostOrderAsync (AddOrder values) {
+      public async Task<ActionResult> AddOrderAsync (AddOrder values) {
         // Check Customer existence
         var customer = await _unitOfWork.Customers.GetByAsync (values.CustomerId);
 

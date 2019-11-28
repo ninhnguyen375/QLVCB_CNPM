@@ -10,10 +10,10 @@ namespace webapi.Interfaces
     {
       Task<ActionResult> GetFlightsAsync(Pagination pagination, SearchFlight search);
       Task<ActionResult> GetFlightAsync(string id);
-      Task<ActionResult> PutFlightAsync(string id, SaveFlightDTO values);
-      Task<ActionResult> PostFlightAsync(SaveFlightDTO saveFlightDTO);
+      Task<ActionResult> UpdateFlightAsync(string id, SaveFlightDTO values);
+      Task<ActionResult> AddFlightAsync(SaveFlightDTO saveFlightDTO);
       Task<ActionResult> DeleteFlightAsync(string id);
-      Task<ActionResult> PostFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values);
+      Task<ActionResult> AddFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values);
       Task<ActionResult> DeleteFlightTicketCategoriesAsync(string id, RemoveFlightTicketCategory values);
     }
 }
