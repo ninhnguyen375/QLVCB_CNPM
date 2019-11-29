@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
-using webapi.Models.Response;
 
 namespace webapi.Interfaces {
     public interface IAuthService {

@@ -28,31 +28,37 @@ namespace webapi.Services
           var airports = _mapper.Map<IEnumerable<Airport>, IEnumerable<AirportDTO>>(airportsSource);
           
           // Search by Id:
-          if (search.Id != "") {
+          if (!string.IsNullOrEmpty(search.Id)) {
             airports = airports.Where(a =>
               a.Id.ToLower().Contains(search.Id.ToLower()));
           }
 
           // Search by Name:
-          if (search.Name != "") {
+          if (!string.IsNullOrEmpty(search.Name)) {
             airports = airports.Where(a =>
               a.Name.ToLower().Contains(search.Name.ToLower()));
           }
 
           // Search by Location:
-          if (search.Location != "") {
+          if (!string.IsNullOrEmpty(search.Location)) {
             airports = airports.Where(a =>
               a.Location.ToLower().Contains(search.Location.ToLower()));
           }
 
+          // Search by Id:
+          if (!string.IsNullOrEmpty(search.Id)) {
+            airports = airports.Where(a =>
+              a.Id.ToLower().Contains(search.Id.ToLower()));
+          }
+
           // Sort Asc:
-          if (search.sortAsc != "") {
+          if (!string.IsNullOrEmpty(search.sortAsc)) {
             airports = airports.OrderBy(a =>
               a.GetType().GetProperty(search.sortAsc).GetValue(a));
           }
 
           // Sort Desc:
-          if (search.sortDesc != "") {
+          if (!string.IsNullOrEmpty(search.sortDesc)) {
             airports = airports.OrderByDescending(a =>
               a.GetType().GetProperty(search.sortDesc).GetValue(a));
           }

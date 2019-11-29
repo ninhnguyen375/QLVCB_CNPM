@@ -35,7 +35,7 @@ namespace webapi.Controllers
         }
 
         // GET: api/customers/id
-        [Authorize (Roles = "STAFF, ADMIN")]
+        [AllowAnonymous]
         [HttpGet ("{id}")]
         public async Task<ActionResult> GetCustomerAsync(string id) {
           var customer = await _service.GetCustomerAsync(id);
