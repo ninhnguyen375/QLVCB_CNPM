@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using webapi.core.UseCases;
 using webapi.Interfaces;
+using webapi.Services;
 
 namespace webapi.Controllers {
   [Authorize]
@@ -41,6 +42,20 @@ namespace webapi.Controllers {
         currentUserId,
         passwords.oldPassword,
         passwords.newPassword);
+    }
+
+    // POST: api/auth/changepassword
+    [Route ("/api/auth/forgotpassword")]
+    [HttpPost]
+    [AllowAnonymous]
+    public ActionResult ForgotUserPassoword () {
+      SendMailService.SendMail(new Models.Email {
+        Message = "Ninh dep trai",
+        Subject = "this is subject",
+        ToEmail = "ninhnguyen375@gmail.com",
+        ToName = "Ninh"
+      });
+      return Ok();
     }
   }
 }
