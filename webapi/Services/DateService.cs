@@ -295,5 +295,12 @@ namespace webapi.Services
 
           return Ok (new { success = true, DepartureFlights = departureFlights, ReturnFlights = returnFlights });
         }
+
+        public async Task<ActionResult> GetPassengersAsync(PassengersList values) {
+          var passengers = _mapper.Map<IEnumerable<PassengerDF>, IEnumerable<PassengerDTO>>(
+            await _unitOfWork.Orders.GetTicketsByDateFlightAsync(values.DateId, values.FlightId));
+
+          return Ok (new { success = true, Passengers = passengers });
+        }
     }
 }
