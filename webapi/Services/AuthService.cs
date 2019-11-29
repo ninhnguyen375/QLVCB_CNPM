@@ -15,7 +15,6 @@ using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Helpers;
 using webapi.Interfaces;
-using webapi.Models.Response;
 
 namespace webapi.Services {
   public class AuthService : ControllerBase, IAuthService {

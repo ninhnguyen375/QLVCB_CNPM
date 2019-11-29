@@ -78,5 +78,14 @@ namespace webapi.Controllers {
 
             return res;
         }
+
+        // PUT: api/users/5/resetpassword
+        [HttpPut ("{id}/resetpassword")]
+        [Authorize (Roles = "ADMIN")]
+        public async Task<ActionResult> ResetUserPassword (int id) {
+            var res = await _service.ResetUserPassword (id);
+
+            return res;
+        }
     }
 }

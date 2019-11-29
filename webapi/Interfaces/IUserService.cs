@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.UseCases;
-using webapi.Models.Response;
 using System.Threading.Tasks;
 
 namespace webapi.Interfaces
@@ -19,5 +18,6 @@ namespace webapi.Interfaces
         Task<ActionResult> UnBlockUserAsync(int id);
         Task<ActionResult> AddUserAsync(SaveUserDTO saveUserDTO); 
         Task<ActionResult> DeleteUserAsync(int id);
+        Task<ActionResult> ResetUserPassword (int id);
     }
 }

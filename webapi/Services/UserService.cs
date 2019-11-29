@@ -5,21 +5,24 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using webapi.core.Domain.Entities;
 using webapi.core.DTOs;
 using webapi.core.Interfaces;
+using webapi.Helpers;
 using webapi.core.UseCases;
 using webapi.Interfaces;
-using webapi.Models.Response;
 
 namespace webapi.Services {
   public class UserService : ControllerBase, IUserService {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly AppSettings _appSettings;
     private readonly IMapper _mapper;
 
-    public UserService (IUnitOfWork unitOfWork, IMapper mapper) {
+    public UserService (IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSettings> appSettings) {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
+      _appSettings = appSettings.Value;
     }
 
     public async Task<ActionResult> GetUsersAsync (Pagination pagination, SearchUser search, ClaimsPrincipal currentUser) {
@@ -156,9 +159,7 @@ namespace webapi.Services {
         });
       }
 
-      string defaultPassword = "12345678";
-
-      saveUserDTO.Password = BCrypt.Net.BCrypt.HashPassword (defaultPassword);
+      saveUserDTO.Password = BCrypt.Net.BCrypt.HashPassword (_appSettings.DefaultPassword);
 
       var user = _mapper.Map<SaveUserDTO, User> (saveUserDTO);
       await _unitOfWork.Users.AddAsync (user);
@@ -193,6 +194,20 @@ namespace webapi.Services {
 
         throw;
       }
+    }
+
+    public async Task<ActionResult> ResetUserPassword (int id) {
+      var user = await _unitOfWork.Users.GetByAsync (id);
+
+      if (user == null) {
+        return NotFound ("Nhân viên không tồn tại.");
+      }
+
+      user.Password = BCrypt.Net.BCrypt.HashPassword (_appSettings.DefaultPassword);
+
+      await _unitOfWork.CompleteAsync ();
+
+      return Ok();
     }
   }
 }
