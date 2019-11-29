@@ -30,9 +30,9 @@ namespace webapi.Controllers {
       return await _service.GetMeAsync (currentUserId);
     }
 
-    // POST: api/auth/changepassword
+    // PUT: api/auth/changepassword
     [Route ("/api/auth/changepassword")]
-    [HttpPost]
+    [HttpPut]
     public async Task<ActionResult> ChangeUserPasswordAsync (
       [FromBody] ChangePassword passwords
     ) {
