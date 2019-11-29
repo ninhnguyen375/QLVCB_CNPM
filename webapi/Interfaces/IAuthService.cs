@@ -14,5 +14,6 @@ namespace webapi.Interfaces {
         Task<ActionResult> ChangeUserPasswordAsync (
             int currentUserId, string oldPassword, string newPassword
         );
+        ActionResult ForgotUserPassword(int id);
     }
 }
