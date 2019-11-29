@@ -23,7 +23,7 @@ namespace webapi.core.Domain.Entities {
 
         // 1: active, 2: banned, 3: deleted, 4: new
         [Required]
-        public int Status { get; set; } = 1;
+        public int Status { get; set; } = 4;
 
         // 1: ADMIN, 2: STAFF
         [Required]

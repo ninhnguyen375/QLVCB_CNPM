@@ -83,6 +83,10 @@ namespace webapi.Services {
 
       user.Password = BCrypt.Net.BCrypt.HashPassword (newPassword);
 
+      if (user.Status == 4) {
+        user.Status = 1; // active
+      }
+
       await _unitOfWork.CompleteAsync();
 
       return Ok ();
