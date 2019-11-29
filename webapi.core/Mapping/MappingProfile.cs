@@ -1,6 +1,7 @@
 using AutoMapper;
 using webapi.core.DTOs;
 using webapi.core.Domain.Entities;
+using webapi.core.UseCases;
 
 namespace webapi.core.Mapping
 {
@@ -54,6 +55,9 @@ namespace webapi.core.Mapping
             // 12. User
             CreateMap<User, UserDTO>();
             CreateMap<SaveUserDTO, User>();
+
+            // 13. UseCase: Passenger
+            CreateMap<PassengerDF, PassengerDTO>(); 
         }
     }
 }

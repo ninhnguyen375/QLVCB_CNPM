@@ -97,5 +97,14 @@ namespace webapi.Controllers
         
         return flights;
       }
+
+      // GET: api/dates/passengerslist
+      [Authorize (Roles = "STAFF, ADMIN")]
+      [HttpGet ("passengerslist")]
+      public async Task<ActionResult> GetPassengersAsync([FromQuery] PassengersList values) {
+        var passengers = await _service.GetPassengersAsync(values);
+
+        return passengers;
+      }
     }
 }

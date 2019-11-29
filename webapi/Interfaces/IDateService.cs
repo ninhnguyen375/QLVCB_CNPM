@@ -16,5 +16,6 @@ namespace webapi.Interfaces
       Task<ActionResult> AddDateFlightAsync(int id, AddDateFlight values);
       Task<ActionResult> DeleteFlightAsync(int id, RemoveFlight values);
       Task<ActionResult> SearchFlightsAsync(SearchFlightFE values);
+      Task<ActionResult> GetPassengersAsync(PassengersList values);
     }
 }
