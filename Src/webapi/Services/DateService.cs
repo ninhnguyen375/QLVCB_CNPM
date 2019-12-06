@@ -9,7 +9,6 @@ using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Interfaces;
-using webapi.core.Domain.Entities;
 
 namespace webapi.Services
 {
