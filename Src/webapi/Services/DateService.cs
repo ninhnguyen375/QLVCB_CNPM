@@ -9,6 +9,7 @@ using webapi.core.DTOs;
 using webapi.core.Interfaces;
 using webapi.core.UseCases;
 using webapi.Interfaces;
+using webapi.core.Domain.Entities;
 
 namespace webapi.Services
 {
@@ -257,37 +258,49 @@ namespace webapi.Services
             }   
           }
 
-          // Search Departure Flights:
+          // Get flights in date
+          var currentDepartureDate = dates.Where(d => d.DepartureDate == departureDate).SingleOrDefault();
+          if(currentDepartureDate == null) {
+            return BadRequest("date not found");
+          }
+          var departureDateFlight = dateFlights.Where(df => df.DateId.Equals(currentDepartureDate.Id));
           var departureFlights = (
-            from f in flights 
-            from df in dateFlights
-            from d in dates
+            from f in flights
+            from df in departureDateFlight
             where f.Id.Equals(df.FlightId) &&
-                  d.Id.Equals(df.DateId) &&
-                  d.DepartureDate == departureDate &&
-                  f.AirportFrom.Equals(values.AirportFrom) &&
-                  f.AirportTo.Equals(values.AirportTo) &&
-                  f.Status == 1 && // 1 => Chuyến bay đang hoạt động
                   df.SeatsLeft >= totalSeats // Số ghế trống phải >= Số hành khách đăng ký
             select f
+          );
+
+          // Search Departure Flights:
+          departureFlights = departureFlights.Where(f => 
+            f.AirportFrom.Equals(values.AirportFrom) &&
+            f.AirportTo.Equals(values.AirportTo) &&
+            f.Status == 1 // active
           );
 
           // Search Return Flights:
           IEnumerable<FlightDTO> returnFlights = null;
           if (values.ReturnDate != "") {
             var returnDate = Convert.ToDateTime(values.ReturnDate);
+            // Get flights in date
+            var currentReturnDate = dates.Where(d => d.DepartureDate == returnDate).SingleOrDefault();
+            if(currentReturnDate == null) {
+              return BadRequest("date not found");
+            }
+            var returnDateFlight = dateFlights.Where(df => df.DateId.Equals(currentReturnDate.Id));
+
             returnFlights = (
               from f in flights 
-              from df in dateFlights
-              from d in dates
+              from df in returnDateFlight
               where f.Id.Equals(df.FlightId) &&
-                    d.Id.Equals(df.DateId) &&
-                    d.DepartureDate == returnDate &&
-                    f.AirportFrom.Equals(values.AirportTo) && // Đổi vị trí From và To cho chiều về
-                    f.AirportTo.Equals(values.AirportFrom) &&
                     f.Status == 1 && // 1 => Chuyến bay đang hoạt động
                     df.SeatsLeft >= totalSeats
               select f
+            );
+            returnFlights = returnFlights.Where(f => 
+              f.AirportFrom.Equals(values.AirportTo) &&
+              f.AirportTo.Equals(values.AirportFrom)
             );
           } else {
             return Ok (new { success = true, departureFlights = departureFlights });
