@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "cd webapi && dotnet watch run",
-    "resetdb": "cd webapi.infrastructure && rm -rf Migrations App.db && dotnet ef migrations add Init && dotnet ef database update"
+    "start": "cd Src/webapi && dotnet watch run",
+    "resetdb": "cd Src/webapi.infrastructure && rm -rf Migrations App.db && dotnet ef migrations add Init && dotnet ef database update"
   }
 }
