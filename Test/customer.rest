@@ -1,0 +1,19 @@
+### GET: List customers (/api/customers)
+GET http://localhost:5000/api/customers HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+
+
+### GET: List by customer id (/api/customers/{id})
+GET http://localhost:5000/api/customers/123456789 HTTP/1.1
+
+
+### PUT: Update customer by id (/api/customers/{id})
+PUT http://localhost:5000/api/customers/123456789 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
+
+{
+  "id": "123456789",
+  "fullname": "Sang",
+  "phone": "0123456789"
+}

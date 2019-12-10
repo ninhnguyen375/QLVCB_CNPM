@@ -1,17 +1,19 @@
+### GET: List flights (/api/flights)
 GET http://localhost:5000/api/flights HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 
-### get by id
-GET http://localhost:5000/api/flights/VJ101 HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
 
-### PUT Flight + FlightTicketCategories
-PUT http://localhost:5000/api/flights/VJ103 HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+### GET: List by flight id (/api/flights/{id})
+GET http://localhost:5000/api/flights/VJ100 HTTP/1.1
+
+
+### PUT: Update Flight + FlightTicketCategories by flight id (/api/flights/{id})
+PUT http://localhost:5000/api/flights/VJ100 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-	"id": "VJ103",
+	"id": "VJ100",
 	"starttime": 1000,
 	"flighttime": 100,
 	"seatscount": 100,
@@ -34,24 +36,61 @@ Content-Type: application/json
 	]
 }
 
-### POST: Add FlightTicketCategory
-POST http://localhost:5000/api/flights/VJ103/addflightticketcategory HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+
+### POST: Create new Flight + FlightTicketCategories (/api/flights)
+POST http://localhost:5000/api/flights HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-	"flightid": "VJ103",
-  "ticketcategoryid": 2,
-  "price": 400000
+  "id": "VJ200",
+	"starttime": 1000,
+	"flighttime": 100,
+	"seatscount": 100,
+	"airportfrom": "HAN",
+	"airportto": "SGN",
+	"airlineid": "VJ",
+  "flightticketcategories": [
+		{
+			"ticketcategoryid": 1,
+			"price": 600000
+		},
+		{
+			"ticketcategoryid": 2,
+			"price": 400000
+		},
+    {
+			"ticketcategoryid": 3,
+			"price": 200000
+		}
+	]
 }
 
-### Remove Flight + FlightTicketCategories
-DELETE http://localhost:5000/api/flights/VJ103/removeflightticketcategory HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczNzAzMDc2LCJleHAiOjE1NzQzMDc4NzYsImlhdCI6MTU3MzcwMzA3Nn0.LFWzReHPfDqjy0aXjcn6S_AQOwzJ2SdwYML-l4L5WVs
+
+### DELETE: Remove flight by id (/api/flights/{id})
+DELETE http://localhost:5000/api/flights/VJ200 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+
+
+### POST: Create new FlightTicketCategory (/api/flights/{id}/addflightticketcategory)
+POST http://localhost:5000/api/flights/VJ200/addflightticketcategory HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-	"ticketcategoryid": 3
+	"flightid": "VJ200",
+  "ticketcategoryid": 1,
+  "price": 600000
+}
+
+
+### DELETE: Remove Flight + FlightTicketCategories by flight id (/api/flights/{id}/removeflightticketcategory)
+DELETE http://localhost:5000/api/flights/VJ200/removeflightticketcategory HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
+
+{
+	"ticketcategoryid": 1
 }
 
 

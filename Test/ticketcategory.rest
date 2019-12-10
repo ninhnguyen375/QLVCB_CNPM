@@ -1,35 +1,31 @@
-### GET: List airports (/api/airports)
-GET http://localhost:5000/api/airports HTTP/1.1
+### GET: List TicketCategories (/api/ticketcategories)
+GET http://localhost:5000/api/ticketCategories
 
 
-### GET: List by airport id (/api/airports/{id})
-GET http://localhost:5000/api/airports/SGN HTTP/1.1
+### GET: List by TicketCategory id (/api/ticketcategories/{id})
+GET http://localhost:5000/api/ticketcategories/1
 
 
-### PUT: Update airport by id (/api/airports/{id})
-PUT http://localhost:5000/api/airports/SGN HTTP/1.1
+### PUT: Update TicketCategory by id (/api/ticketcategories/{id})
+PUT http://localhost:5000/api/ticketcategories/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-  "id": "SGN",
-  "name": "Thành phố Hồ Chí Minh",
-  "location": "Thành phố Hồ Chí Minh"
+  "name": "Người Lớn"
 }
 
 
-### POST: Create new airport (/api/airports)
-POST http://localhost:5000/api/airports HTTP/1.1
+### POST: Create new TicketCategory (/api/ticketcategories)
+POST http://localhost:5000/api/ticketcategories
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-  "id": "ABC",
-  "name": "Thành phố Hồ Chí Minh 123",
-  "location": "Thành phố Hồ Chí Minh 123"
+  "name": "test 123"
 }
 
 
-### DELETE: Remove airport by id (/api/airports/{id})
-DELETE http://localhost:5000/api/airports/ABC HTTP/1.1
+### DELETE: Remove TicketCategory by id (/api/ticketcategories/{id})
+DELETE http://localhost:5000/api/ticketcategories/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
