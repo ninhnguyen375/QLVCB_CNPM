@@ -142,10 +142,14 @@ namespace webapi.Services
             }
           }
 
-          await _unitOfWork.Dates.RemoveAsync(date);
-          await _unitOfWork.CompleteAsync();
+          try {
+            await _unitOfWork.Dates.RemoveAsync(date);
+            await _unitOfWork.CompleteAsync();
 
-          return Ok (new { success = true, message = "Xóa thành công" });
+            return Ok (new { success = true, message = "Xóa thành công." });
+          } catch (Exception) {
+            return BadRequest (new { message = "Xóa không thành công." });
+          }
         }
 
         public async Task<ActionResult> AddDateFlightAsync(int id, AddDateFlight values) {
@@ -226,10 +230,14 @@ namespace webapi.Services
           
           var dateFlight = dateFlightAsync.SingleOrDefault();
 
-          await _unitOfWork.DateFlights.RemoveAsync(dateFlight);
-          await _unitOfWork.CompleteAsync();
+          try {
+            await _unitOfWork.DateFlights.RemoveAsync(dateFlight);
+            await _unitOfWork.CompleteAsync();
 
-          return Ok (new { success = true, message = "Xóa thành công" });
+            return Ok (new { success = true, message = "Xóa thành công." });
+          } catch (Exception) {
+            return BadRequest (new { message = "Xóa không thành công." });
+          }
         }
 
         public async Task<ActionResult> SearchFlightsAsync(SearchFlightFE values) {

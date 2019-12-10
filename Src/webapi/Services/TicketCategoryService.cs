@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -109,10 +110,14 @@ namespace webapi.Services
           return NotFound (new { Id = "Mã loại vé này không tồn tại." });
         }
 
-        await _unitOfWork.TicketCategories.RemoveAsync(ticketCategory);
-        await _unitOfWork.CompleteAsync();
+        try {
+          await _unitOfWork.TicketCategories.RemoveAsync(ticketCategory);
+          await _unitOfWork.CompleteAsync();
 
-        return Ok (new { success = true, message = "Xóa thành công" });
+          return Ok (new { success = true, message = "Xóa thành công." });
+        } catch (Exception) {
+          return BadRequest (new { message = "Xóa không thành công." });
+        }
       }
   }
 }

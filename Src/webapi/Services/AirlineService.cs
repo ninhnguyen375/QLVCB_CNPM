@@ -132,10 +132,14 @@ namespace webapi.Services
             return NotFound (new { Id = "Mã hãng hàng không này không tồn tại." });
           }
 
-          await _unitOfWork.Airlines.RemoveAsync(airline);
-          await _unitOfWork.CompleteAsync();
+          try {
+            await _unitOfWork.Airlines.RemoveAsync(airline);
+            await _unitOfWork.CompleteAsync();
 
-          return Ok (new { success = true, message = "Xóa thành công" });
+            return Ok (new { success = true, message = "Xóa thành công." });
+          } catch (Exception) {
+            return BadRequest (new { message = "Xóa không thành công." });
+          }
         }
     }
 }
