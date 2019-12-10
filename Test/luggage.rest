@@ -1,0 +1,34 @@
+### GET: List luggages (/api/luggages)
+GET http://localhost:5000/api/luggages HTTP/1.1
+
+
+### GET: List by luggage id (/api/luggages/{id})
+GET http://localhost:5000/api/luggages/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+
+
+### PUT: Update luggage by id (/api/luggages/{id})
+PUT http://localhost:5000/api/luggages/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
+
+{
+  "luggageweight": 0,
+  "price": 0
+}
+
+
+### POST: Create new luggage (/api/luggages)
+POST http://localhost:5000/api/luggages HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
+
+{
+  "luggageweight": 100,
+  "price": 100
+}
+
+
+### DELETE: Remove luggage by id (/api/luggages/{id})
+DELETE http://localhost:5000/api/luggages/8 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ

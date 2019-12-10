@@ -1,22 +1,65 @@
+### GET: List dates (/api/dates)
 GET http://localhost:5000/api/dates HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc0NjkzMjc1LCJleHAiOjE1NzUyOTgwNzUsImlhdCI6MTU3NDY5MzI3NX0.O3flu3dHGfwN89KPvJ03NsjKc3wkl5A2RwzmA8UFDzI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 
-###
-POST http://localhost:5000/api/dates HTTP/1.1
+
+### GET: List by date id (/api/dates/{id})
+GET http://localhost:5000/api/dates/40 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+
+### PUT: Update date by id (/api/dates/{id})
+PUT http://localhost:5000/api/dates/40 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
 
 {
-  "departuredate": "2019-07-30"
+  "departuredate": "2019-12-10"
 }
-### Add Flights To Date
-POST http://localhost:5000/api/dates/1/addflights HTTP/1.1
+
+
+### POST: Create new dates (/api/dates)
+POST http://localhost:5000/api/dates HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjI4Iiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTczMzA2OTM2LCJleHAiOjE1NzM5MTE3MzYsImlhdCI6MTU3MzMwNjkzNn0.MTvCSq1LDM16ZZLI5Jmodwg6S4Mcg88_-n34PLK1jKg
+
+{
+  "departuredate": "2020-01-01"
+}
+
+
+### DELETE: Remove date by id (/api/dates/{id})
+DELETE http://localhost:5000/api/dates/62 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+
+
+### POST: Create new flight for date (/api/dates/{id}/addflights)
+POST http://localhost:5000/api/dates/62/addflights HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
 
 {
   "dateflights": [
-    {"flightId": "VJ104"}
+    {
+      "flightid": "VJ100",
+    },
+    {
+      "flightid": "VN100",
+    },
+    {
+      "flightid": "QH030",
+    },
+    {
+      "flightid": "BL030"
+    }
   ]
+}
+
+
+### DELETE: Remove flight in date (/api/dates/{id}/removeflight)
+DELETE http://localhost:5000/api/dates/62/removeflight
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
+Content-Type: application/json
+
+{
+  "flightid": "VJ100"
 }

@@ -37,7 +37,7 @@ Content-Type: application/json
 
 {
     "email": "ninh2@ninh.com",
-    "password": "88888888"
+    "password": "12345678"
 }
 ### 
 POST http://localhost:5000/api/auth/me HTTP/1.1

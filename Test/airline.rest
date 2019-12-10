@@ -1,35 +1,33 @@
-### GET: List airports (/api/airports)
-GET http://localhost:5000/api/airports HTTP/1.1
+### GET: List airlines (/api/airlines)
+GET http://localhost:5000/api/airlines HTTP/1.1
 
 
-### GET: List by airport id (/api/airports/{id})
-GET http://localhost:5000/api/airports/SGN HTTP/1.1
+### GET: List by airline id (/api/airlines/{id})
+GET http://localhost:5000/api/airlines/VN HTTP/1.1
 
 
-### PUT: Update airport by id (/api/airports/{id})
-PUT http://localhost:5000/api/airports/SGN HTTP/1.1
+### PUT: Update airline by id (/api/airlines/{id})
+PUT http://localhost:5000/api/airlines/VN HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-  "id": "SGN",
-  "name": "Thành phố Hồ Chí Minh",
-  "location": "Thành phố Hồ Chí Minh"
+  "id": "VN",
+  "name": "Vietnam Airlines"
 }
 
 
-### POST: Create new airport (/api/airports)
-POST http://localhost:5000/api/airports HTTP/1.1
+### POST: Create new airline (/api/airlines)
+POST http://localhost:5000/api/airlines HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
 Content-Type: application/json
 
 {
-  "id": "ABC",
-  "name": "Thành phố Hồ Chí Minh 123",
-  "location": "Thành phố Hồ Chí Minh 123"
+  "id": "VA",
+  "name": "Vietnam Airlines 123"
 }
 
 
-### DELETE: Remove airport by id (/api/airports/{id})
-DELETE http://localhost:5000/api/airports/ABC HTTP/1.1
+### DELETE: Remove airline by id (/api/airlines/{id})
+DELETE http://localhost:5000/api/airlines/VA HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjMwIiwicm9sZSI6IlNUQUZGIiwibmJmIjoxNTc1OTQ4NzkwLCJleHAiOjE1NzY1NTM1OTAsImlhdCI6MTU3NTk0ODc5MH0.5SAMtF9jogQU9lP37NrqDpwMbTyIr803Gwxh13HOCvQ
