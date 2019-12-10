@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -144,10 +145,14 @@ namespace webapi.Services
             return NotFound (new { Id = "Mã sân bay này không tồn tại." });
           }
 
-          await _unitOfWork.Airports.RemoveAsync(airport);
-          await _unitOfWork.CompleteAsync();
+          try {
+            await _unitOfWork.Airports.RemoveAsync(airport);
+            await _unitOfWork.CompleteAsync();
 
-          return Ok (new { success = true, message = "Xóa thành công" });
+            return Ok (new { success = true, message = "Xóa thành công." });
+          } catch (Exception) {
+            return BadRequest (new { message = "Xóa không thành công." });
+          }
         }
     }
 }

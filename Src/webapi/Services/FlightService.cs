@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -188,10 +189,14 @@ namespace webapi.Services
           return NotFound (new { Id = "Mã chuyến bay này không tồn tại." });
         }
 
-        await _unitOfWork.Flights.RemoveAsync(flight);
-        await _unitOfWork.CompleteAsync();
+        try {
+          await _unitOfWork.Flights.RemoveAsync(flight);
+          await _unitOfWork.CompleteAsync();
 
-        return Ok (new { success = true, message = "Xóa thành công." });
+          return Ok (new { success = true, message = "Xóa thành công." });
+        } catch (Exception) {
+          return BadRequest (new { message = "Xóa không thành công." });
+        }
       }
 
       public async Task<ActionResult> AddFlightTicketCategoriesAsync(string id, SaveFlightTicketCategoryDTO values) {
@@ -247,10 +252,14 @@ namespace webapi.Services
           return BadRequest (new { Id = "Loại vé của chuyến bay này không tồn tại." });
         }
 
-        await _unitOfWork.FlightTicketCategories.RemoveAsync(flightTicketCategory);
-        await _unitOfWork.CompleteAsync();
+        try {
+          await _unitOfWork.FlightTicketCategories.RemoveAsync(flightTicketCategory);
+          await _unitOfWork.CompleteAsync();
 
-        return Ok (new { success = true, message = "Xóa thành công." });
+          return Ok (new { success = true, message = "Xóa thành công." });
+        } catch (Exception) {
+          return BadRequest (new { message = "Xóa không thành công." });
+        }
       }
     }
 }
