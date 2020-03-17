@@ -30,8 +30,9 @@ namespace webapi.infrastructure.Persistance {
 
                 var config = builder.Build ();
 
-                // var connstr = config.GetConnectionString ("Default");
+                // var connstr = config.GetConnectionString ("DefaultConnection");
                 var connstr = "Data Source=App.db";
+                // var connstr = "Server=localhost; Database=cnpm;User=root;Password=123456;";
 
                 if (string.IsNullOrWhiteSpace (connstr)) {
                     throw new InvalidOperationException (
@@ -51,6 +52,7 @@ namespace webapi.infrastructure.Persistance {
                 Console.WriteLine ("DesignTimeDbContextFactory.Create(string): Connection string: {0}", connectionString);
 
                 optionsBuilder.UseSqlite (connectionString);
+                // optionsBuilder.UseMySql (connectionString);
 
                 var options = optionsBuilder.Options;
                 return CreateNewInstance (options);
